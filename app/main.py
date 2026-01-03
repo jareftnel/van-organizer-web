@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import threading
 import time
 from pathlib import Path
@@ -95,7 +96,7 @@ async def upload(file: UploadFile = File(...)):
 
 
 # ---------------------------
-# NEW: status endpoint for polling (no refresh needed)
+# Status endpoint for polling (no refresh needed)
 # ---------------------------
 @app.get("/job/{jid}/status")
 def job_status(jid: str):
@@ -125,55 +126,57 @@ def job_status(jid: str):
 
 @app.get("/job/{jid}", response_class=HTMLResponse)
 def job_page(jid: str):
+    """
+    IMPORTANT: This page contains lots of JS { } braces, so we avoid Python f-strings here.
+    We use a plain template string + .replace() so JS doesn't break Python formatting.
+    """
     j = store.get(jid)
     if j.get("status") == "missing":
         return HTMLResponse("<h3>Job not found</h3>", status_code=404)
 
     status = j.get("status", "")
-    err = j.get("error")
     prog = j.get("progress") or {}
 
     pct = int(prog.get("pct", 0) or 0)
     pct = max(0, min(100, pct))
 
-    # We render a page immediately, then JS polls /job/{jid}/status to update live
-    return HTMLResponse(f"""
-<!doctype html><html>
+    prog_pretty = json.dumps(prog, indent=2)
+
+    html = """<!doctype html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Job {jid}</title>
+<title>Job __JID__</title>
 <style>
-body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}}
-.card{{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}}
-.muted{{color:#97a7bd}}
-.bar{{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}}
-.fill{{height:100%;width:{pct}%;background:#3fa7ff;transition:width .25s ease}}
-.grid{{display:grid;gap:10px;margin-top:14px}}
-.btnA{{padding:14px;border-radius:12px;background:#3fa7ff;color:#001018;font-weight:900;text-decoration:none;text-align:center}}
-.btnB{{padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center}}
-.btnDisabled{{opacity:.45;pointer-events:none}}
-pre{{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px}}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}
+.card{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}
+.muted{color:#97a7bd}
+.bar{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
+.fill{height:100%;background:#3fa7ff;transition:width .25s ease}
+.grid{display:grid;gap:10px;margin-top:14px}
+.btnA{padding:14px;border-radius:12px;background:#3fa7ff;color:#001018;font-weight:900;text-decoration:none;text-align:center}
+.btnB{padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center}
+pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px}
 </style>
 </head>
 <body>
   <div class="card">
-    <div style="font-weight:900">Job {jid}</div>
+    <div style="font-weight:900">Job __JID__</div>
 
     <div class="muted" style="margin-top:6px">
-      Status: <b id="st">{status}</b>
+      Status: <b id="st">__STATUS__</b>
     </div>
 
     <div style="margin-top:12px" class="bar">
-      <div class="fill" id="fill"></div>
+      <div class="fill" id="fill" style="width: __PCT__%"></div>
     </div>
 
     <div class="muted" style="margin-top:10px">Progress:</div>
-    <pre id="prog">{prog}</pre>
+    <pre id="prog">__PROG__</pre>
 
     <div class="grid" id="links" style="display:none">
-      <a id="aOrg" class="btnA" href="/job/{jid}/organizer">Open Van Organizer</a>
-      <a id="aPdf" class="btnB" href="/job/{jid}/download/STACKED.pdf">Download STACKED.pdf</a>
-      <a id="aXlsx" class="btnB" href="/job/{jid}/download/Bags_with_Overflow.xlsx">Download Excel</a>
+      <a id="aOrg" class="btnA" href="/job/__JID__/organizer">Open Van Organizer</a>
+      <a id="aPdf" class="btnB" href="/job/__JID__/download/STACKED.pdf">Download STACKED.pdf</a>
+      <a id="aXlsx" class="btnB" href="/job/__JID__/download/Bags_with_Overflow.xlsx">Download Excel</a>
     </div>
 
     <pre id="err" style="display:none"></pre>
@@ -185,7 +188,7 @@ pre{{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12
 
 <script>
 (function(){
-  var jid = "{jid}";
+  var jid = "__JID__";
   var stEl = document.getElementById("st");
   var fill = document.getElementById("fill");
   var prog = document.getElementById("prog");
@@ -243,14 +246,21 @@ pre{{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12
     }
   }
 
-  // Start polling immediately
   tick();
   var timer = setInterval(tick, 1000);
 })();
 </script>
 </body>
 </html>
-""")
+"""
+
+    html = (
+        html.replace("__JID__", jid)
+            .replace("__STATUS__", str(status))
+            .replace("__PCT__", str(pct))
+            .replace("__PROG__", prog_pretty)
+    )
+    return HTMLResponse(html)
 
 
 @app.get("/job/{jid}/organizer_raw", response_class=HTMLResponse)
@@ -263,6 +273,8 @@ def organizer_raw(jid: str):
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html_path.read_text(encoding="utf-8"))
     resp.headers["Cache-Control"] = "no-store"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
     return resp
 
 
