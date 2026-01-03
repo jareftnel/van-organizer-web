@@ -140,11 +140,12 @@ def organizer_raw(jid: str):
 @app.get("/job/{jid}/organizer", response_class=HTMLResponse)
 def organizer_wrapper(jid: str):
     """
-    Wrapper page that:
+    Wrapper that:
     - loads organizer_raw in an iframe
-    - scales it to fit the phone width
-    - resizes iframe height to match content
-    - allows normal scrolling in the parent page
+    - measures true content span (minLeft..maxRight) inside the iframe
+    - shifts content into view (fixes left cutoff)
+    - scales to fit phone width
+    - parent page scrolls normally
     """
     return HTMLResponse(f"""
 <!doctype html>
@@ -157,10 +158,9 @@ html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:syste
 .topbar{{position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
 .topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
 .wrap{{padding:10px}}
-/* This is the scaling container */
 .scale-shell{{width:100%; overflow:visible}}
-.scale-inner{{transform-origin: top left;}}
-iframe{{border:0;width:100%;}}
+.scale-inner{{transform-origin: top left; will-change: transform}}
+iframe{{border:0; display:block}}
 .hint{{color:#97a7bd;font-size:12px;padding:6px 0 0}}
 </style>
 </head>
@@ -170,67 +170,89 @@ iframe{{border:0;width:100%;}}
   </div>
 
   <div class="wrap">
-    <div class="scale-shell">
-      <div class="scale-inner" id="scaleInner">
+    <div class="scale-shell" id="shell">
+      <div class="scale-inner" id="inner">
         <iframe id="orgFrame" src="/job/{jid}/organizer_raw" scrolling="no"></iframe>
       </div>
     </div>
-    <div class="hint">Auto-fit to width. Scroll this page to see everything.</div>
+    <div class="hint">Auto-fit width + shift into view. Scroll this page.</div>
   </div>
 
 <script>
 (function() {{
   const frame = document.getElementById("orgFrame");
-  const inner = document.getElementById("scaleInner");
+  const inner = document.getElementById("inner");
+  const shell = document.getElementById("shell");
+
+  function measureSpan(doc) {{
+    const els = Array.from(doc.querySelectorAll("body *"));
+    let minLeft = Infinity;
+    let maxRight = -Infinity;
+    let maxBottom = 0;
+
+    for (const el of els) {{
+      if (!el.getBoundingClientRect) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 40 || r.height < 40) continue; // skip tiny stuff
+      minLeft = Math.min(minLeft, r.left);
+      maxRight = Math.max(maxRight, r.right);
+      maxBottom = Math.max(maxBottom, r.bottom);
+    }}
+
+    // Fallbacks if nothing matched
+    if (!isFinite(minLeft) || !isFinite(maxRight)) {{
+      const b = doc.body;
+      const h = doc.documentElement;
+      minLeft = 0;
+      maxRight = Math.max(b.scrollWidth, h.scrollWidth, b.offsetWidth, h.offsetWidth, b.clientWidth, h.clientWidth);
+      maxBottom = Math.max(b.scrollHeight, h.scrollHeight, b.offsetHeight, h.offsetHeight, b.clientHeight, h.clientHeight);
+    }}
+
+    const width = (maxRight - minLeft) + 20;
+    const height = maxBottom + 20;
+    return {{ minLeft, width, height }};
+  }}
 
   function sizeAndScale() {{
     try {{
       const doc = frame.contentDocument || frame.contentWindow.document;
       if (!doc) return;
 
-      const body = doc.body;
-      const html = doc.documentElement;
+      const span = measureSpan(doc);
 
-      // True content size
-      const contentWidth = Math.max(
-        body.scrollWidth, html.scrollWidth, body.offsetWidth, html.offsetWidth, body.clientWidth, html.clientWidth
-      );
-      const contentHeight = Math.max(
-        body.scrollHeight, html.scrollHeight, body.offsetHeight, html.offsetHeight, body.clientHeight, html.clientHeight
-      );
+      // Available width in wrapper (account for padding)
+      const available = document.documentElement.clientWidth - 20;
 
-      // Scale to fit phone width
-      const available = document.documentElement.clientWidth - 20; // padding
+      // Scale down to fit (slightly under 1 to avoid 1px crop)
       let scale = 1;
-      if (contentWidth > 0) {{
-        scale = Math.min(1, available / contentWidth);
+      if (span.width > 0) {{
+        scale = Math.min(0.985, available / span.width);
       }}
 
-      inner.style.transform = "scale(" + scale.toFixed(4) + ")";
-      inner.style.width = contentWidth + "px";
+      // SHIFT: if content starts left of 0, bring it into view
+      const shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
 
-      // Height must be scaled too so parent scroll works
-      frame.style.width = contentWidth + "px";
-      frame.style.height = contentHeight + "px";
+      inner.style.transform = `translateX(${shiftX}px) scale(${scale.toFixed(4)})`;
+      inner.style.width = span.width + "px";
 
-      // Give the scaled container a correct layout height
-      inner.parentElement.style.height = (contentHeight * scale) + "px";
-    }} catch(e) {{
-      // ignore cross origin or timing issues
-    }}
+      // Unscaled iframe size
+      frame.style.width = span.width + "px";
+      frame.style.height = span.height + "px";
+
+      // Scaled shell height so parent scroll works
+      shell.style.height = (span.height * scale) + "px";
+    }} catch(e) {{}}
   }}
 
   frame.addEventListener("load", function() {{
     sizeAndScale();
-    // Run again a few times in case fonts/layout load late
-    setTimeout(sizeAndScale, 200);
-    setTimeout(sizeAndScale, 800);
-    setTimeout(sizeAndScale, 2000);
+    setTimeout(sizeAndScale, 150);
+    setTimeout(sizeAndScale, 700);
+    setTimeout(sizeAndScale, 1600);
+    setTimeout(sizeAndScale, 3000);
   }});
 
-  window.addEventListener("resize", function() {{
-    sizeAndScale();
-  }});
+  window.addEventListener("resize", sizeAndScale);
 }})();
 </script>
 </body>
