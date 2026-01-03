@@ -146,6 +146,8 @@ def organizer_wrapper(jid: str):
     - shifts content into view (fixes left cutoff)
     - scales to fit phone width
     - parent page scrolls normally
+
+    IMPORTANT: do NOT use JS template literals (`...${}...`) inside this Python f-string.
     """
     return HTMLResponse(f"""
 <!doctype html>
@@ -179,72 +181,67 @@ iframe{{border:0; display:block}}
   </div>
 
 <script>
-(function() {{
-  const frame = document.getElementById("orgFrame");
-  const inner = document.getElementById("inner");
-  const shell = document.getElementById("shell");
+(function () {{
+  var frame = document.getElementById("orgFrame");
+  var inner = document.getElementById("inner");
+  var shell = document.getElementById("shell");
 
   function measureSpan(doc) {{
-    const els = Array.from(doc.querySelectorAll("body *"));
-    let minLeft = Infinity;
-    let maxRight = -Infinity;
-    let maxBottom = 0;
+    var els = Array.from(doc.querySelectorAll("body *"));
+    var minLeft = Infinity;
+    var maxRight = -Infinity;
+    var maxBottom = 0;
 
-    for (const el of els) {{
+    for (var i = 0; i < els.length; i++) {{
+      var el = els[i];
       if (!el.getBoundingClientRect) continue;
-      const r = el.getBoundingClientRect();
-      if (r.width < 40 || r.height < 40) continue; // skip tiny stuff
-      minLeft = Math.min(minLeft, r.left);
-      maxRight = Math.max(maxRight, r.right);
-      maxBottom = Math.max(maxBottom, r.bottom);
+      var r = el.getBoundingClientRect();
+      if (r.width < 40 || r.height < 40) continue;
+      if (r.left < minLeft) minLeft = r.left;
+      if (r.right > maxRight) maxRight = r.right;
+      if (r.bottom > maxBottom) maxBottom = r.bottom;
     }}
 
-    // Fallbacks if nothing matched
     if (!isFinite(minLeft) || !isFinite(maxRight)) {{
-      const b = doc.body;
-      const h = doc.documentElement;
+      var b = doc.body;
+      var h = doc.documentElement;
       minLeft = 0;
       maxRight = Math.max(b.scrollWidth, h.scrollWidth, b.offsetWidth, h.offsetWidth, b.clientWidth, h.clientWidth);
       maxBottom = Math.max(b.scrollHeight, h.scrollHeight, b.offsetHeight, h.offsetHeight, b.clientHeight, h.clientHeight);
     }}
 
-    const width = (maxRight - minLeft) + 20;
-    const height = maxBottom + 20;
-    return {{ minLeft, width, height }};
+    var width = (maxRight - minLeft) + 20;
+    var height = maxBottom + 20;
+    return {{ minLeft: minLeft, width: width, height: height }};
   }}
 
   function sizeAndScale() {{
     try {{
-      const doc = frame.contentDocument || frame.contentWindow.document;
+      var doc = frame.contentDocument || frame.contentWindow.document;
       if (!doc) return;
 
-      const span = measureSpan(doc);
+      var span = measureSpan(doc);
+      var available = document.documentElement.clientWidth - 20;
 
-      // Available width in wrapper (account for padding)
-      const available = document.documentElement.clientWidth - 20;
-
-      // Scale down to fit (slightly under 1 to avoid 1px crop)
-      let scale = 1;
+      var scale = 1;
       if (span.width > 0) {{
         scale = Math.min(0.985, available / span.width);
       }}
 
-      // SHIFT: if content starts left of 0, bring it into view
-      const shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
+      var shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
 
-      inner.style.transform = `translateX(${shiftX}px) scale(${scale.toFixed(4)})`;
+      // NO template literals here (avoid Python f-string conflicts)
+      inner.style.transform = "translateX(" + shiftX + "px) scale(" + scale.toFixed(4) + ")";
       inner.style.width = span.width + "px";
 
-      // Unscaled iframe size
       frame.style.width = span.width + "px";
       frame.style.height = span.height + "px";
 
-      // Scaled shell height so parent scroll works
       shell.style.height = (span.height * scale) + "px";
-    }} catch(e) {{}}
+    }} catch (e) {{}}
   }}
 
-  frame.addEventListener("load", function() {{
+  frame.addEventListener("load", function () {{
     sizeAndScale();
     setTimeout(sizeAndScale, 150);
     setTimeout(sizeAndScale, 700);
