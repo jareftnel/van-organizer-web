@@ -1199,20 +1199,41 @@ def render_toc_page(date_label: str, route_entries):
 
 
 # =========================
-# PDF LINK INSERTION (PyMuPDF)
+# PDF LINK INSERTION (PyMuPDF) - ROBUST (full save, no saveIncr)
 # =========================
-def _try_add_links(pdf_path: str, link_specs, *, dpi: int, default_from_page: int = 1):
+def _try_add_all_links(
+    pdf_path: str,
+    toc_link_specs,
+    *,
+    dpi: int,
+    default_from_page: int = 1,
+    summary_start_page: int | None = None,
+    summary_link_specs_pages=None,
+):
+    """
+    Adds TOC + Summary internal GOTO links to an already-written PDF.
+    Saves to a temp file then replaces the original (more reliable than saveIncr()).
+    """
     try:
         import fitz  # PyMuPDF
-    except Exception:
-        return
+    except Exception as e:
+        print("[WARN] PyMuPDF not available; links will NOT be added:", repr(e), flush=True)
+        return False
+
+    import os
+
+    pdf_path = str(pdf_path)
+    tmp_path = str(Path(pdf_path).with_suffix(".linked.pdf"))
 
     doc = None
     try:
         doc = fitz.open(pdf_path)
         scale = 72.0 / float(dpi)
 
-        for spec in (link_specs or []):
+        added = 0
+
+        # --- TOC links
+        for spec in (toc_link_specs or []):
             from_page_1 = int(spec.get("page_num", default_from_page))
             to_page_1 = int(spec.get("page", 0))
             if to_page_1 <= 0:
@@ -1228,49 +1249,52 @@ def _try_add_links(pdf_path: str, link_specs, *, dpi: int, default_from_page: in
             x0, y0, x1, y1 = spec["rect"]
             rect = fitz.Rect(float(x0) * scale, float(y0) * scale, float(x1) * scale, float(y1) * scale)
             doc[fp].insert_link({"kind": fitz.LINK_GOTO, "from": rect, "page": tp})
+            added += 1
 
-        doc.saveIncr()
-    except Exception:
-        pass
-    finally:
+        # --- Summary links
+        if summary_start_page is not None and summary_link_specs_pages:
+            for idx, specs in enumerate(summary_link_specs_pages):
+                sp = int(summary_start_page) - 1 + int(idx)
+                if sp < 0 or sp >= doc.page_count:
+                    continue
+
+                page = doc[sp]
+                for spec in (specs or []):
+                    to_page_1 = int(spec.get("page", 0))
+                    if to_page_1 <= 0:
+                        continue
+                    tp = to_page_1 - 1
+                    if tp < 0 or tp >= doc.page_count:
+                        continue
+
+                    x0, y0, x1, y1 = spec["rect"]
+                    rect = fitz.Rect(float(x0) * scale, float(y0) * scale, float(x1) * scale, float(y1) * scale)
+                    page.insert_link({"kind": fitz.LINK_GOTO, "from": rect, "page": tp})
+                    added += 1
+
+        # Full save to temp then replace original
+        doc.save(tmp_path, garbage=4, deflate=True)
+        doc.close()
+        doc = None
+
+        os.replace(tmp_path, pdf_path)
+
+        print(f"[LINKS] Added {added} internal links", flush=True)
+        return added > 0
+
+    except Exception as e:
+        print("[WARN] Link insertion failed:", repr(e), flush=True)
         try:
             if doc:
                 doc.close()
         except Exception:
             pass
-
-def _try_add_summary_links(pdf_path: str, summary_page_num: int, link_specs):
-    try:
-        import fitz  # PyMuPDF
-    except Exception:
-        return
-
-    doc = None
-    try:
-        doc = fitz.open(pdf_path)
-        sp = int(summary_page_num) - 1
-        if sp < 0 or sp >= doc.page_count:
-            return
-
-        page = doc[sp]
-        for spec in (link_specs or []):
-            to_page = int(spec.get("page", 0)) - 1
-            if to_page < 0 or to_page >= doc.page_count:
-                continue
-            x0, y0, x1, y1 = spec["rect"]
-            scale = 72.0 / float(DPI)
-            rect = fitz.Rect(float(x0) * scale, float(y0) * scale, float(x1) * scale, float(y1) * scale)
-            page.insert_link({"kind": fitz.LINK_GOTO, "from": rect, "page": to_page})
-
-        doc.saveIncr()
-    except Exception:
-        pass
-    finally:
         try:
-            if doc:
-                doc.close()
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
         except Exception:
             pass
+        return False
 
 
 # =========================
@@ -1497,10 +1521,14 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
     pages[0].save(output_pdf, save_all=True, append_images=pages[1:], resolution=DPI)
 
     _cb(total_routes, done_routes, done_routes, "Linking", "Adding TOC + summary links…")
-    _try_add_links(output_pdf, toc_link_specs, dpi=DPI, default_from_page=1)
-
-    for idx, specs in enumerate(summary_link_specs_pages):
-        _try_add_summary_links(output_pdf, summary_page_num=summary_start_page + idx, link_specs=specs)
+    _try_add_all_links(
+        output_pdf,
+        toc_link_specs,
+        dpi=DPI,
+        default_from_page=1,
+        summary_start_page=summary_start_page,
+        summary_link_specs_pages=summary_link_specs_pages,
+    )
 
     _cb(total_routes, done_routes, done_routes, "Done", "Complete.")
 
