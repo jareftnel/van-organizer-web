@@ -3,12 +3,12 @@ from __future__ import annotations
 import threading
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from .pipeline import JobStore, process_job
 
-JOBS_DIR = Path("/tmp/vanorg_jobs")
+JOBS_DIR = Path("/tmp/vanorg_jobs")  # Render-friendly ephemeral storage
 store = JobStore(str(JOBS_DIR))
 
 app = FastAPI()
@@ -19,9 +19,20 @@ def health():
     return {"ok": True}
 
 
+@app.head("/health")
+def head_health():
+    return Response(status_code=200)
+
+
+@app.head("/")
+def head_root():
+    return Response(status_code=200)
+
+
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return """<!doctype html>
+    return """
+<!doctype html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -39,15 +50,16 @@ button{width:100%;margin-top:12px;padding:14px;border-radius:12px;border:0;backg
 <body>
   <div class="card">
     <h1>Upload RouteSheets (ORIGINAL PDF)</h1>
-    <p>Generates: Van Organizer (mobile page) + STACKED PDF + Bags Excel.</p>
+    <p>This generates: Van Organizer (mobile page) + STACKED PDF + Bags Excel.</p>
     <form action="/upload" method="post" enctype="multipart/form-data">
       <input type="file" name="file" accept="application/pdf" required />
       <button type="submit">Build</button>
     </form>
-    <div class="small">Open this site in Safari for best results.</div>
+    <div class="small">Tip: open this link in Safari for best results.</div>
   </div>
 </body>
-</html>"""
+</html>
+"""
 
 
 @app.post("/upload")
@@ -74,6 +86,7 @@ def job_page(jid: str):
     status = j.get("status")
     err = j.get("error")
     prog = j.get("progress") or {}
+    outs = j.get("outputs") or {}
 
     links = ""
     if status == "done":
@@ -84,10 +97,15 @@ def job_page(jid: str):
           <a href="/job/{jid}/download/Bags_with_Overflow.xlsx" style="padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center;">Download Excel</a>
         </div>
         """
+
     if status == "error":
         links = f"<pre style='white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px'>{err}</pre>"
 
-    return f"""<!doctype html><html>
+    pct = int(prog.get("pct", 0) or 0)
+    pct = max(0, min(100, pct))
+
+    return f"""
+<!doctype html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Job {jid}</title>
@@ -96,7 +114,7 @@ body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margi
 .card{{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}}
 .muted{{color:#97a7bd}}
 .bar{{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}}
-.fill{{height:100%;width:{min(100,int(prog.get("pct",0) or 0))}%;background:#3fa7ff}}
+.fill{{height:100%;width:{pct}%;background:#3fa7ff}}
 </style>
 </head>
 <body>
@@ -109,7 +127,8 @@ body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margi
     <div class="muted" style="margin-top:14px;font-size:13px">Leave this page open; refresh if needed.</div>
   </div>
 </body>
-</html>"""
+</html>
+"""
 
 
 @app.get("/job/{jid}/organizer")
