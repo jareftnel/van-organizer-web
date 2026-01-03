@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 
 from .pipeline import JobStore, process_job
 
-JOBS_DIR = Path("/tmp/vanorg_jobs")  # Render-friendly ephemeral storage
+JOBS_DIR = Path("/tmp/vanorg_jobs")
 store = JobStore(str(JOBS_DIR))
 
 app = FastAPI()
@@ -67,9 +67,7 @@ async def upload(file: UploadFile = File(...)):
     jid = store.create()
     job_dir = store.path(jid)
     pdf_path = job_dir / "routesheets.pdf"
-
-    data = await file.read()
-    pdf_path.write_bytes(data)
+    pdf_path.write_bytes(await file.read())
 
     t = threading.Thread(target=process_job, args=(store, jid), daemon=True)
     t.start()
@@ -130,46 +128,114 @@ body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margi
 """
 
 
-@app.get("/job/{jid}/organizer")
-def organizer(jid: str):
+@app.get("/job/{jid}/organizer_raw", response_class=HTMLResponse)
+def organizer_raw(jid: str):
     job_dir = store.path(jid)
     html_path = job_dir / "van_organizer.html"
     if not html_path.exists():
         return HTMLResponse("Organizer not ready yet.", status_code=404)
+    return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
-    html = html_path.read_text(encoding="utf-8")
 
-    # Force scrolling on mobile Safari even if the organizer CSS locks it
-    scroll_fix = """
+@app.get("/job/{jid}/organizer", response_class=HTMLResponse)
+def organizer_wrapper(jid: str):
+    """
+    Wrapper page that:
+    - loads organizer_raw in an iframe
+    - scales it to fit the phone width
+    - resizes iframe height to match content
+    - allows normal scrolling in the parent page
+    """
+    return HTMLResponse(f"""
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Van Organizer</title>
 <style>
-html, body {
-  height: auto !important;
-  min-height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* common wrappers that often get set to 100vh/hidden */
-#app, .app, .page, .screen, .content, .container, main {
-  height: auto !important;
-  min-height: 100% !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* if anything is position: fixed and trapping scroll, loosen it */
-body { position: static !important; }
+html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}}
+.topbar{{position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
+.topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
+.wrap{{padding:10px}}
+/* This is the scaling container */
+.scale-shell{{width:100%; overflow:visible}}
+.scale-inner{{transform-origin: top left;}}
+iframe{{border:0;width:100%;}}
+.hint{{color:#97a7bd;font-size:12px;padding:6px 0 0}}
 </style>
-"""
+</head>
+<body>
+  <div class="topbar">
+    <a href="/job/{jid}">← Back</a>
+  </div>
 
-    # Inject right after <head> (or at top if not found)
-    if "<head>" in html:
-        html = html.replace("<head>", "<head>" + scroll_fix, 1)
-    else:
-        html = scroll_fix + html
+  <div class="wrap">
+    <div class="scale-shell">
+      <div class="scale-inner" id="scaleInner">
+        <iframe id="orgFrame" src="/job/{jid}/organizer_raw" scrolling="no"></iframe>
+      </div>
+    </div>
+    <div class="hint">Auto-fit to width. Scroll this page to see everything.</div>
+  </div>
 
-    return HTMLResponse(html)
+<script>
+(function() {{
+  const frame = document.getElementById("orgFrame");
+  const inner = document.getElementById("scaleInner");
+
+  function sizeAndScale() {{
+    try {{
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      if (!doc) return;
+
+      const body = doc.body;
+      const html = doc.documentElement;
+
+      // True content size
+      const contentWidth = Math.max(
+        body.scrollWidth, html.scrollWidth, body.offsetWidth, html.offsetWidth, body.clientWidth, html.clientWidth
+      );
+      const contentHeight = Math.max(
+        body.scrollHeight, html.scrollHeight, body.offsetHeight, html.offsetHeight, body.clientHeight, html.clientHeight
+      );
+
+      // Scale to fit phone width
+      const available = document.documentElement.clientWidth - 20; // padding
+      let scale = 1;
+      if (contentWidth > 0) {{
+        scale = Math.min(1, available / contentWidth);
+      }}
+
+      inner.style.transform = "scale(" + scale.toFixed(4) + ")";
+      inner.style.width = contentWidth + "px";
+
+      // Height must be scaled too so parent scroll works
+      frame.style.width = contentWidth + "px";
+      frame.style.height = contentHeight + "px";
+
+      // Give the scaled container a correct layout height
+      inner.parentElement.style.height = (contentHeight * scale) + "px";
+    }} catch(e) {{
+      // ignore cross origin or timing issues
+    }}
+  }}
+
+  frame.addEventListener("load", function() {{
+    sizeAndScale();
+    // Run again a few times in case fonts/layout load late
+    setTimeout(sizeAndScale, 200);
+    setTimeout(sizeAndScale, 800);
+    setTimeout(sizeAndScale, 2000);
+  }});
+
+  window.addEventListener("resize", function() {{
+    sizeAndScale();
+  }});
+}})();
+</script>
+</body>
+</html>
+""")
 
 
 @app.get("/job/{jid}/download/{name}")
