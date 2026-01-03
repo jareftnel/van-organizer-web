@@ -5,7 +5,7 @@ import re
 import threading
 import uuid
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Callable
 
 import pdfplumber
 import pandas as pd
@@ -23,6 +23,14 @@ from route_stacker import (
 
 DATE_RE = re.compile(r"\b(?:MON|TUE|WED|THU|FRI|SAT|SUN),\s+[A-Z]{3}\s+\d{1,2},\s+\d{4}\b")
 
+# Pipeline progress allocation (overall bar)
+# Excel:   0% -> 20%
+# HTML:   20% -> 30%
+# Stacker:30% -> 100%
+P_EXCEL_START, P_EXCEL_END = 0, 20
+P_HTML_START, P_HTML_END = 20, 30
+P_STACK_START, P_STACK_END = 30, 100
+
 
 def auto_detect_date_label(pdf_path: str) -> str:
     try:
@@ -37,7 +45,27 @@ def auto_detect_date_label(pdf_path: str) -> str:
     return "DATE UNKNOWN"
 
 
-def generate_bags_xlsx_from_routesheets(pdf_path: str, out_xlsx: str) -> Dict[str, Any]:
+def _clamp_pct(x: int) -> int:
+    try:
+        x = int(x)
+    except Exception:
+        x = 0
+    return max(0, min(100, x))
+
+
+def _map_stage_pct(stage_pct: int, a: int, b: int) -> int:
+    """
+    Map stage_pct (0..100) into overall [a..b]
+    """
+    stage_pct = _clamp_pct(stage_pct)
+    return int(a + (b - a) * (stage_pct / 100.0))
+
+
+def generate_bags_xlsx_from_routesheets(
+    pdf_path: str,
+    out_xlsx: str,
+    progress_cb: Optional[Callable[..., None]] = None,
+) -> Dict[str, Any]:
     """
     Creates multi-sheet xlsx where each sheet name matches builder expectation:
       <RS>_<CX>  e.g. H.7_CX92
@@ -49,8 +77,28 @@ def generate_bags_xlsx_from_routesheets(pdf_path: str, out_xlsx: str) -> Dict[st
 
     wb_routes = []
 
+    def report(stage_pct: int, msg: str, extra: Optional[dict] = None):
+        if not progress_cb:
+            return
+        payload = {
+            "stage": "excel",
+            "msg": msg,
+            "pct": _map_stage_pct(stage_pct, P_EXCEL_START, P_EXCEL_END),
+        }
+        if extra:
+            payload.update(extra)
+        progress_cb(**payload)
+
+    report(0, "Reading PDF pages for bags/overflow…")
+
     with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
+        total_pages = len(pdf.pages) or 1
+
+        for i, page in enumerate(pdf.pages, start=1):
+            # progress update
+            stage_pct = int((i / total_pages) * 100)
+            report(stage_pct, f"Parsing routesheets… ({i}/{total_pages})", {"page": i, "pages": total_pages})
+
             text = page.extract_text() or ""
             parsed = parse_route_page(text)
             if not parsed:
@@ -73,6 +121,8 @@ def generate_bags_xlsx_from_routesheets(pdf_path: str, out_xlsx: str) -> Dict[st
     if out["routes"] == 0:
         raise RuntimeError("No routes were parsed from the uploaded PDF.")
 
+    report(95, f"Writing Excel… ({out['routes']} routes)")
+
     Path(out_xlsx).parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
         for sheet_name, df in wb_routes:
@@ -82,14 +132,35 @@ def generate_bags_xlsx_from_routesheets(pdf_path: str, out_xlsx: str) -> Dict[st
         idx = pd.DataFrame([[name] for name, _df in wb_routes], columns=["Sheets"])
         idx.to_excel(writer, sheet_name="INDEX", index=False)
 
+    report(100, "Excel ready.")
     return out
 
 
-def run_builder_html(pdf_path: str, xlsx_path: str, out_html: str) -> None:
+def run_builder_html(
+    pdf_path: str,
+    xlsx_path: str,
+    out_html: str,
+    progress_cb: Optional[Callable[..., None]] = None,
+) -> None:
     """
     Calls your v21 builder script.
     """
     import subprocess
+
+    def report(stage_pct: int, msg: str, extra: Optional[dict] = None):
+        if not progress_cb:
+            return
+        payload = {
+            "stage": "html",
+            "msg": msg,
+            "pct": _map_stage_pct(stage_pct, P_HTML_START, P_HTML_END),
+        }
+        if extra:
+            payload.update(extra)
+        progress_cb(**payload)
+
+    report(0, "Building Van Organizer HTML…")
+
     builder = Path(__file__).resolve().parents[1] / "tools" / "build_van_organizer_v21_hide_combined_ORIGPDF.py"
     cmd = [
         "python",
@@ -99,10 +170,19 @@ def run_builder_html(pdf_path: str, xlsx_path: str, out_html: str) -> None:
         "--out", str(out_html),
         "--no-cache",
     ]
+
+    # quick mid-progress marker (this step is usually short)
+    report(40, "Running builder…")
     subprocess.check_call(cmd)
+    report(100, "HTML ready.")
 
 
-def run_stacker(pdf_path: str, out_pdf: str, date_label: str, progress_cb=None) -> Dict[str, Any]:
+def run_stacker(
+    pdf_path: str,
+    out_pdf: str,
+    date_label: str,
+    progress_cb: Optional[Callable[..., None]] = None,
+) -> Dict[str, Any]:
     return build_stacked_pdf_with_summary_grouped(
         str(pdf_path),
         str(out_pdf),
@@ -132,7 +212,7 @@ class JobStore:
         jid = uuid.uuid4().hex[:10]
         d = self._job_dir(jid)
         d.mkdir(parents=True, exist_ok=True)
-        payload = {"status": "queued", "progress": {}, "error": None, "outputs": None}
+        payload = {"status": "queued", "progress": {"pct": 0, "stage": "queued", "msg": "Queued"}, "error": None, "outputs": None}
         self._job_json(jid).write_text(json.dumps(payload), encoding="utf-8")
         with self._lock:
             self._jobs[jid] = payload
@@ -180,12 +260,15 @@ class JobStore:
             self._jobs[jid] = payload
 
     def set_progress(self, jid: str, payload: Dict[str, Any]):
+        # Ensure pct exists and stays 0..100
+        if "pct" in payload:
+            payload["pct"] = _clamp_pct(payload["pct"])
         self.set(jid, progress=payload)
 
 
 def process_job(store: JobStore, jid: str) -> None:
     try:
-        store.set(jid, status="running")
+        store.set(jid, status="running", progress={"pct": 1, "stage": "start", "msg": "Starting…"})
 
         job_dir = store.path(jid)
         pdf_path = job_dir / "routesheets.pdf"
@@ -193,23 +276,34 @@ def process_job(store: JobStore, jid: str) -> None:
         html_path = job_dir / "van_organizer.html"
         stacked_pdf = job_dir / "STACKED.pdf"
 
-        # 1) Excel
-        generate_bags_xlsx_from_routesheets(str(pdf_path), str(xlsx_path))
-
-        # 2) HTML
-        run_builder_html(str(pdf_path), str(xlsx_path), str(html_path))
-
-        # 3) Stacked PDF (with progress callback)
-        date_label = auto_detect_date_label(str(pdf_path))
-
+        # unified progress writer
         def cb(**payload):
             store.set_progress(jid, payload)
 
-        run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=cb)
+        # 1) Excel
+        generate_bags_xlsx_from_routesheets(str(pdf_path), str(xlsx_path), progress_cb=cb)
+
+        # 2) HTML
+        run_builder_html(str(pdf_path), str(xlsx_path), str(html_path), progress_cb=cb)
+
+        # 3) Stacked PDF (with progress callback)
+        cb(stage="stacked", msg="Detecting date label…", pct=_map_stage_pct(0, P_STACK_START, P_STACK_END))
+        date_label = auto_detect_date_label(str(pdf_path))
+
+        def stack_cb(**payload):
+            # route_stacker likely sends pct 0..100 — map into 30..100
+            sp = payload.get("pct", 0)
+            mapped = _map_stage_pct(sp, P_STACK_START, P_STACK_END)
+            payload["stage"] = payload.get("stage") or "stacked"
+            payload["pct"] = mapped
+            store.set_progress(jid, payload)
+
+        run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
 
         store.set(
             jid,
             status="done",
+            progress={"pct": 100, "stage": "done", "msg": "Done"},
             outputs={
                 "xlsx": "Bags_with_Overflow.xlsx",
                 "html": "van_organizer.html",
@@ -217,4 +311,4 @@ def process_job(store: JobStore, jid: str) -> None:
             }
         )
     except Exception as e:
-        store.set(jid, status="error", error=str(e))
+        store.set(jid, status="error", error=str(e), progress={"pct": 100, "stage": "error", "msg": "Error"})
