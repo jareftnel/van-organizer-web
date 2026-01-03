@@ -86,7 +86,6 @@ def job_page(jid: str):
     status = j.get("status")
     err = j.get("error")
     prog = j.get("progress") or {}
-    outs = j.get("outputs") or {}
 
     links = ""
     if status == "done":
@@ -137,7 +136,40 @@ def organizer(jid: str):
     html_path = job_dir / "van_organizer.html"
     if not html_path.exists():
         return HTMLResponse("Organizer not ready yet.", status_code=404)
-    return HTMLResponse(html_path.read_text(encoding="utf-8"))
+
+    html = html_path.read_text(encoding="utf-8")
+
+    # Force scrolling on mobile Safari even if the organizer CSS locks it
+    scroll_fix = """
+<style>
+html, body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* common wrappers that often get set to 100vh/hidden */
+#app, .app, .page, .screen, .content, .container, main {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* if anything is position: fixed and trapping scroll, loosen it */
+body { position: static !important; }
+</style>
+"""
+
+    # Inject right after <head> (or at top if not found)
+    if "<head>" in html:
+        html = html.replace("<head>", "<head>" + scroll_fix, 1)
+    else:
+        html = scroll_fix + html
+
+    return HTMLResponse(html)
 
 
 @app.get("/job/{jid}/download/{name}")
