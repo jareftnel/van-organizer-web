@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import threading
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Response
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from fastapi.responses import (
+    HTMLResponse,
+    FileResponse,
+    RedirectResponse,
+    JSONResponse,
+)
 
 from .pipeline import JobStore, process_job
 
@@ -12,6 +18,19 @@ JOBS_DIR = Path("/tmp/vanorg_jobs")
 store = JobStore(str(JOBS_DIR))
 
 app = FastAPI()
+
+
+# ---------------------------
+# No-cache middleware (important on Render + phones)
+# ---------------------------
+@app.middleware("http")
+async def no_cache_mw(request, call_next):
+    resp = await call_next(request)
+    # Avoid stale status/progress + stale PDFs/HTML behind mobile caches
+    resp.headers["Cache-Control"] = "no-store"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 @app.get("/health")
@@ -75,33 +94,50 @@ async def upload(file: UploadFile = File(...)):
     return RedirectResponse(url=f"/job/{jid}", status_code=303)
 
 
+# ---------------------------
+# NEW: status endpoint for polling (no refresh needed)
+# ---------------------------
+@app.get("/job/{jid}/status")
+def job_status(jid: str):
+    j = store.get(jid)
+    if j.get("status") == "missing":
+        return JSONResponse({"status": "missing"}, status_code=404)
+
+    job_dir = store.path(jid)
+    out_pdf = job_dir / "STACKED.pdf"
+    out_xlsx = job_dir / "Bags_with_Overflow.xlsx"
+    out_html = job_dir / "van_organizer.html"
+
+    return {
+        "status": j.get("status", ""),
+        "error": j.get("error"),
+        "progress": j.get("progress") or {},
+        "has_pdf": out_pdf.exists(),
+        "has_xlsx": out_xlsx.exists(),
+        "has_html": out_html.exists(),
+        # stable URLs (client will cache-bust with ?v=)
+        "organizer_url": f"/job/{jid}/organizer",
+        "pdf_url": f"/job/{jid}/download/STACKED.pdf",
+        "xlsx_url": f"/job/{jid}/download/Bags_with_Overflow.xlsx",
+        "ts": int(time.time()),
+    }
+
+
 @app.get("/job/{jid}", response_class=HTMLResponse)
 def job_page(jid: str):
     j = store.get(jid)
     if j.get("status") == "missing":
         return HTMLResponse("<h3>Job not found</h3>", status_code=404)
 
-    status = j.get("status")
+    status = j.get("status", "")
     err = j.get("error")
     prog = j.get("progress") or {}
-
-    links = ""
-    if status == "done":
-        links = f"""
-        <div style="display:grid;gap:10px;margin-top:14px">
-          <a href="/job/{jid}/organizer" style="padding:14px;border-radius:12px;background:#3fa7ff;color:#001018;font-weight:900;text-decoration:none;text-align:center;">Open Van Organizer</a>
-          <a href="/job/{jid}/download/STACKED.pdf" style="padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center;">Download STACKED.pdf</a>
-          <a href="/job/{jid}/download/Bags_with_Overflow.xlsx" style="padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center;">Download Excel</a>
-        </div>
-        """
-
-    if status == "error":
-        links = f"<pre style='white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px'>{err}</pre>"
 
     pct = int(prog.get("pct", 0) or 0)
     pct = max(0, min(100, pct))
 
-    return f"""
+    # We render a page immediately, then JS polls /job/{jid}/status to update live
+    return HTMLResponse(f"""
 <!doctype html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -111,21 +147,110 @@ body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margi
 .card{{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}}
 .muted{{color:#97a7bd}}
 .bar{{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}}
-.fill{{height:100%;width:{pct}%;background:#3fa7ff}}
+.fill{{height:100%;width:{pct}%;background:#3fa7ff;transition:width .25s ease}}
+.grid{{display:grid;gap:10px;margin-top:14px}}
+.btnA{{padding:14px;border-radius:12px;background:#3fa7ff;color:#001018;font-weight:900;text-decoration:none;text-align:center}}
+.btnB{{padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center}}
+.btnDisabled{{opacity:.45;pointer-events:none}}
+pre{{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px}}
 </style>
 </head>
 <body>
   <div class="card">
     <div style="font-weight:900">Job {jid}</div>
-    <div class="muted" style="margin-top:6px">Status: <b>{status}</b></div>
-    <div style="margin-top:12px" class="bar"><div class="fill"></div></div>
-    <div class="muted" style="margin-top:10px">Progress: {prog}</div>
-    {links}
-    <div class="muted" style="margin-top:14px;font-size:13px">Leave this page open; refresh if needed.</div>
+
+    <div class="muted" style="margin-top:6px">
+      Status: <b id="st">{status}</b>
+    </div>
+
+    <div style="margin-top:12px" class="bar">
+      <div class="fill" id="fill"></div>
+    </div>
+
+    <div class="muted" style="margin-top:10px">Progress:</div>
+    <pre id="prog">{prog}</pre>
+
+    <div class="grid" id="links" style="display:none">
+      <a id="aOrg" class="btnA" href="/job/{jid}/organizer">Open Van Organizer</a>
+      <a id="aPdf" class="btnB" href="/job/{jid}/download/STACKED.pdf">Download STACKED.pdf</a>
+      <a id="aXlsx" class="btnB" href="/job/{jid}/download/Bags_with_Overflow.xlsx">Download Excel</a>
+    </div>
+
+    <pre id="err" style="display:none"></pre>
+
+    <div class="muted" style="margin-top:14px;font-size:13px">
+      Leave this page open — it will update automatically.
+    </div>
   </div>
+
+<script>
+(function(){
+  var jid = "{jid}";
+  var stEl = document.getElementById("st");
+  var fill = document.getElementById("fill");
+  var prog = document.getElementById("prog");
+  var links = document.getElementById("links");
+  var err = document.getElementById("err");
+
+  var aOrg = document.getElementById("aOrg");
+  var aPdf = document.getElementById("aPdf");
+  var aXlsx = document.getElementById("aXlsx");
+
+  function setPct(p){
+    p = Math.max(0, Math.min(100, p|0));
+    fill.style.width = p + "%";
+  }
+
+  function showDone(s){
+    // Cache-bust so mobile browsers don't show old files
+    var bust = "v=" + Date.now();
+    aOrg.href  = s.organizer_url + "?" + bust;
+    aPdf.href  = s.pdf_url + "?" + bust;
+    aXlsx.href = s.xlsx_url + "?" + bust;
+
+    links.style.display = "grid";
+    err.style.display = "none";
+  }
+
+  function showErr(msg){
+    err.textContent = msg || "Unknown error";
+    err.style.display = "block";
+    links.style.display = "none";
+  }
+
+  async function tick(){
+    try{
+      var r = await fetch("/job/" + jid + "/status", { cache: "no-store" });
+      if(!r.ok) return;
+      var s = await r.json();
+
+      stEl.textContent = s.status || "";
+      prog.textContent = JSON.stringify(s.progress || {}, null, 2);
+
+      var pct = 0;
+      if(s.progress && typeof s.progress.pct !== "undefined") pct = parseInt(s.progress.pct, 10) || 0;
+      setPct(pct);
+
+      if(s.status === "done"){
+        showDone(s);
+        clearInterval(timer);
+      } else if(s.status === "error"){
+        showErr(s.error);
+        clearInterval(timer);
+      }
+    }catch(e){
+      // Ignore transient network errors; next poll will recover.
+    }
+  }
+
+  // Start polling immediately
+  tick();
+  var timer = setInterval(tick, 1000);
+})();
+</script>
 </body>
 </html>
-"""
+""")
 
 
 @app.get("/job/{jid}/organizer_raw", response_class=HTMLResponse)
@@ -134,7 +259,11 @@ def organizer_raw(jid: str):
     html_path = job_dir / "van_organizer.html"
     if not html_path.exists():
         return HTMLResponse("Organizer not ready yet.", status_code=404)
-    return HTMLResponse(html_path.read_text(encoding="utf-8"))
+
+    # Explicit no-cache for embedded content too
+    resp = HTMLResponse(html_path.read_text(encoding="utf-8"))
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 @app.get("/job/{jid}/organizer", response_class=HTMLResponse)
@@ -174,7 +303,7 @@ iframe{{border:0; display:block}}
   <div class="wrap">
     <div class="scale-shell" id="shell">
       <div class="scale-inner" id="inner">
-        <iframe id="orgFrame" src="/job/{jid}/organizer_raw" scrolling="no"></iframe>
+        <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
       </div>
     </div>
     <div class="hint">Auto-fit width + shift into view. Scroll this page.</div>
@@ -185,6 +314,9 @@ iframe{{border:0; display:block}}
   var frame = document.getElementById("orgFrame");
   var inner = document.getElementById("inner");
   var shell = document.getElementById("shell");
+
+  // cache-bust iframe so it always pulls the newest organizer without manual refresh
+  frame.src = "/job/{jid}/organizer_raw?v=" + Date.now();
 
   function measureSpan(doc) {{
     var els = Array.from(doc.querySelectorAll("body *"));
@@ -263,4 +395,10 @@ def download(jid: str, name: str):
     f = job_dir / name
     if not f.exists():
         return HTMLResponse("File not ready yet.", status_code=404)
-    return FileResponse(str(f), filename=name)
+
+    # FileResponse is fine; we keep no-store via middleware, but also set here explicitly
+    return FileResponse(
+        str(f),
+        filename=name,
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache", "Expires": "0"},
+    )
