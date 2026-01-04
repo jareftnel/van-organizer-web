@@ -1199,6 +1199,12 @@ function renderBags(r, q){
     return `(${pk})`;
   }
 
+  function bagBadgeText(anchor, other, idx){
+    const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
+    return src.sort_zone ? idx : "";
+  }
+
+  const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
   function badgeText(cur, _other, idx){
     const hasZone = cur && cur.sort_zone && String(cur.sort_zone).trim();
     return hasZone ? idx : "";
