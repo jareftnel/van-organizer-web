@@ -817,6 +817,85 @@ function buildDisplayItems(r, q){
   return items;
 }
 
+function buildToteLayout(items, routeShort, getSubLine){
+  const cols = Math.max(1, Math.ceil(items.length/3));
+  const gap = 14;
+  const pad = 36;
+  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
+  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
+  cardW = Math.max(130, Math.min(280, cardW));
+
+  const colsHtml = Array.from({length: cols}, (_,c)=>{
+    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
+      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
+      const cur = it.cur;
+      const second = it.second;
+      const main1 = (cur.bag_id || cur.bag || "").toString();
+      const chip1 = bagColorChip(cur.bag);
+      const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+
+      if(second){
+        const main2 = (second.bag_id || second.bag || "").toString();
+        const chip2 = bagColorChip(second.bag);
+        const sub = getSubLine(cur, second);
+        const topNum = (cur.sort_zone ? main1 : main2);
+        const botNum = (cur.sort_zone ? main2 : main1);
+        return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
+          <div class="toteBar"></div>
+          <div class="toteIdx">${it.idx}</div>
+          <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
+          <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
+          ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+        </div>`;
+      }
+
+      const sub = getSubLine(cur, null);
+      const starHtml = it.eligibleCombine ? `<div class="toteStar" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+
+      return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+        <div class="toteBar"></div>
+        <div class="toteIdx">${it.idx}</div>
+        ${starHtml}
+        <div class="toteMain">${main1}</div>
+        ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+      </div>`;
+    }).join("");
+    return `<div class="toteCol">${cells}</div>`;
+  }).join("");
+
+  return { colsHtml, cardW };
+}
+
+function buildOverflowMap(r){
+  const map = new Map();
+  (r.combined || []).forEach((x)=>{
+    const bag = String(x.bag || "").trim();
+    if(!bag) return;
+    const zones = normZonesText(x.zones || "");
+    const total = parseInt(x.total || "", 10);
+    let entry = map.get(bag);
+    if(!entry){
+      entry = { zones: [], total: 0 };
+      map.set(bag, entry);
+    }
+    if(zones) entry.zones.push(zones);
+    if(!Number.isNaN(total)) entry.total += total;
+  });
+  return map;
+}
+
+function overflowSummary(bagLabel, ovMap){
+  if(!bagLabel || !ovMap) return "";
+  const entry = ovMap.get(bagLabel);
+  if(!entry) return "";
+  const zones = entry.zones.length ? entry.zones.join("; ") : "";
+  const total = entry.total ? entry.total : "";
+  if(zones && total) return `${zones} (${total})`;
+  if(zones) return zones;
+  if(total) return `(${total})`;
+  return "";
+}
+
 
 function fitToteText(){
   const cards = document.querySelectorAll('#bagsBoard .toteCard');
@@ -1073,15 +1152,6 @@ function renderBags(r, q){
 
   const items = buildDisplayItems(r, q);
 
-  const cols = Math.max(1, Math.ceil(items.length/3));
-  const gap = 14;
-  const pad = 36;
-  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
-  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
-  cardW = Math.max(130, Math.min(280, cardW));
-
-  const byIdx = Object.fromEntries((r.bags_detail||[]).map(x=>[x.idx, x]));
-
   function subLine(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
     const sz = normZone(src.sort_zone);
@@ -1092,43 +1162,7 @@ function renderBags(r, q){
     return `(${pk})`;
   }
 
-  const colsHtml = Array.from({length: cols}, (_,c)=>{
-    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
-      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
-      const cur = it.cur;
-      const second = it.second;
-      const main1 = (cur.bag_id || cur.bag || "").toString();
-      const chip1 = bagColorChip(cur.bag);
-      const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
-
-      if(second){
-        const main2 = (second.bag_id || second.bag || "").toString();
-        const chip2 = bagColorChip(second.bag);
-        const sub = subLine(cur, second);
-        const topNum = (cur.sort_zone ? main1 : main2);
-        const botNum = (cur.sort_zone ? main2 : main1);
-        return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
-          <div class="toteBar"></div>
-          <div class="toteIdx">${it.idx}</div>
-          <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
-          <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
-          ${sub ? `<div class="toteSub">${sub}</div>` : ``}
-        </div>`;
-      }
-
-      const sub = subLine(cur, null);
-      const starHtml = it.eligibleCombine ? `<div class="toteStar" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-
-      return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
-        <div class="toteBar"></div>
-        <div class="toteIdx">${it.idx}</div>
-        ${starHtml}
-        <div class="toteMain">${main1}</div>
-        ${sub ? `<div class="toteSub">${sub}</div>` : ``}
-      </div>`;
-    }).join("");
-    return `<div class="toteCol">${cells}</div>`;
-  }).join("");
+  const layout = buildToteLayout(items, routeShort, subLine);
 
   content.innerHTML = `
     <div class="controlsRow">
@@ -1150,7 +1184,7 @@ function renderBags(r, q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${cardW}px">${colsHtml}</div>
+      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1265,23 +1299,46 @@ const routeShort = r.short || r.route_short || "";
 }
 
 function renderCombined(r,q){
-  const rows = (r.combined||[]).filter(x=>match(`${x.bag} ${x.zones} ${x.total}`, q));
+  const routeShort = r.route_short;
+  const mode = getMode(routeShort);
+  const items = buildDisplayItems(r, q);
+  const ovMap = buildOverflowMap(r);
+
+  function combinedSubLine(anchor, other){
+    const first = overflowSummary(anchor.bag, ovMap);
+    const second = other ? overflowSummary(other.bag, ovMap) : "";
+    const parts = [first, second].filter(Boolean);
+    if(!parts.length) return "";
+    return parts.join(" | ");
+  }
+
+  const layout = buildToteLayout(items, routeShort, combinedSubLine);
   content.innerHTML = `
-    <div class="ovWrap">
-    <div class="ovHeader">
+    <div class="controlsRow">
       <div>
         <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
-        <div class="hint">Exact bag→overflow mapping from Excel.</div>
+        <div class="hint">Overflow zones + pkgs under each tote.</div>
       </div>
-      <div class="badge"><span class="dot"></span>${rows.length} rows</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="modeToggle">
+          <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
+          <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
+          <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+        </div>
+        <div class="badge"><span class="dot"></span>${items.length} bags</div>
+      </div>
     </div>
-    <table>
-      <thead><tr><th>#</th><th>Bag</th><th>Overflow Zone(s)</th><th style="text-align:right">Overflow Pkgs</th></tr></thead>
-      <tbody>
-        ${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.bag||""}</td><td>${normZonesText(x.zones||"")}</td><td>${x.total||""}</td></tr>`).join("")}
-      </tbody>
-    </table>
+    <div class="toteWrap">
+      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
+    </div>
+    <div class="clearRow">
+      <button id="clearLoadedBtn" class="clearBtn">Clear</button>
+      <button id="resetBagsBtn" class="clearBtn">Reset</button>
+    </div>
   `;
+
+  const allowDrag = (mode === "custom") && !q;
+  attachBagHandlers(routeShort, allowDrag);
 }
 
 function render(){
@@ -1290,7 +1347,7 @@ function render(){
   bagsCount.textContent = r.bags_count ?? 0;
   ovCount.textContent = r.overflow_total ?? 0;
   const q = qBox.value.trim();
-  content.classList.toggle('plain', activeTab==='bags');
+  content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
