@@ -270,8 +270,35 @@ def organizer_raw(jid: str):
     if not html_path.exists():
         return HTMLResponse("Organizer not ready yet.", status_code=404)
 
+    html = html_path.read_text(encoding="utf-8")
+    # Patch older organizer HTML so the combined tab is visible and default.
+    old_tabs = """  <div class="pills">
+    <div class="tab active" data-tab="bags">Bags</div>
+    <div class="tab" data-tab="overflow">Overflow</div>
+    <div class="tab" data-tab="combined">Bags + Overflow</div>
+  </div>
+"""
+    new_tabs = """  <div class="pills">
+    <div class="tab active" data-tab="combined">Bags + Overflow</div>
+    <div class="tab" data-tab="bags">Bags</div>
+    <div class="tab" data-tab="overflow">Overflow</div>
+  </div>
+"""
+    if old_tabs in html and new_tabs not in html:
+        html = html.replace(old_tabs, new_tabs)
+    html = html.replace('.tab[data-tab="combined"]{display:none !important;}', "")
+    html = html.replace('#combinedPanel, .combinedPanel, [data-panel="combined"]{display:none !important;}', "")
+    if 'let activeTab = "bags";' in html:
+        html = html.replace('let activeTab = "bags";', 'let activeTab = "combined";')
+    html = html.replace('  if(activeTab==="combined") activeTab="bags";', "")
+    if ".pills{display:flex;gap:8px;margin-top:12px}" in html:
+        html = html.replace(
+            ".pills{display:flex;gap:8px;margin-top:12px}",
+            ".pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}",
+        )
+
     # Explicit no-cache for embedded content too
-    resp = HTMLResponse(html_path.read_text(encoding="utf-8"))
+    resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
