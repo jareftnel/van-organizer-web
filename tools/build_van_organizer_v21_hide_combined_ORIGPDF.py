@@ -1205,6 +1205,12 @@ function renderBags(r, q){
   }
 
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
+  function badgeText(cur, _other, idx){
+    const hasZone = cur && cur.sort_zone && String(cur.sort_zone).trim();
+    return hasZone ? idx : "";
+  }
+
+  const layout = buildToteLayout(items, routeShort, subLine, badgeText);
 
   content.innerHTML = `
     <div class="controlsRow">
