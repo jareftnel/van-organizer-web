@@ -601,6 +601,18 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovWrap{width:100%;max-width:none;margin:0 auto;padding:0 18px;}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.syncBtn{
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid rgba(140,170,200,.6);
+  background:#5f7fa6;
+  color:#0b0f14;
+  font-weight:900;
+  cursor:pointer;
+}
+.syncBtn:hover{filter:brightness(1.08)}
+.syncBtn:active{transform:translateY(1px)}
 
 /* Overflow checklist cells */
 .ovChecks{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-start;min-height:22px}
@@ -1105,7 +1117,41 @@ function attachBagHandlers(routeShort, allowDrag){
 
 
 
-function attachOverflowHandlers(routeShort, allowDrag){
+function buildOverflowSyncOrder(r){
+  const base = (r.overflow_seq || []).map((x,i)=>({
+    zone: x.zone,
+    count: x.count||0,
+    bag_idx: x.bag_idx || 0,
+    _i: i,
+    _id: `${x.bag_idx||0}|${normZone(x.zone)}|${i}`,
+  }));
+  const buckets = new Map();
+  base.forEach(item=>{
+    const key = item.bag_idx || 0;
+    if(!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(item);
+  });
+  const ids = [];
+  const seen = new Set();
+  const bagOrder = buildOrder(r);
+  bagOrder.forEach(idx=>{
+    const items = buckets.get(idx) || [];
+    items.forEach(it=>{
+      if(seen.has(it._id)) return;
+      seen.add(it._id);
+      ids.push(it._id);
+    });
+    buckets.delete(idx);
+  });
+  base.forEach(it=>{
+    if(seen.has(it._id)) return;
+    seen.add(it._id);
+    ids.push(it._id);
+  });
+  return ids;
+}
+
+function attachOverflowHandlers(routeShort, allowDrag, r){
   // mode toggle
   document.querySelectorAll('[data-ovmode]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -1115,6 +1161,16 @@ function attachOverflowHandlers(routeShort, allowDrag){
       render();
     });
   });
+
+  const ovSync = document.getElementById('ovSync');
+  if(ovSync){
+    ovSync.addEventListener('click', ()=>{
+      const ids = buildOverflowSyncOrder(r);
+      setOvOrder(routeShort, ids);
+      setOvMode(routeShort, "custom");
+      render();
+    });
+  }
 
   // checkbox toggles (click + keyboard)
   document.querySelectorAll('.ovBox[data-rowid][data-k]').forEach(box=>{
@@ -1279,8 +1335,10 @@ const routeShort = r.short || r.route_short || "";
     <div class="ovWrap">
     <div class="ovHeader">
       <div>
-        <div style="font-weight:900">${routeTitle(r)} — Overflow</div>
-        
+        <div class="ovTitleRow">
+          <div style="font-weight:900">${routeTitle(r)} — Overflow</div>
+          <button class="syncBtn" id="ovSync" type="button">Sync</button>
+        </div>
       </div>
       <div class="ovHeaderRight">
         ${modeHtml}
@@ -1332,7 +1390,7 @@ const routeShort = r.short || r.route_short || "";
     </div>
   `;
 
-  attachOverflowHandlers(routeShort, allowDrag);
+  attachOverflowHandlers(routeShort, allowDrag, r);
 }
 
 function renderCombined(r,q){
