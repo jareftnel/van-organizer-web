@@ -503,13 +503,21 @@ input{min-width:260px;flex:1}
   z-index:3;
 }
 .toteStar.combine{
-  left:10px;
+  top:6px;
+  left:6px;
   right:auto;
   color:#FFD400;
   border-color: rgba(255,212,0,.45);
   background: rgba(255,212,0,.12);
 }
-.toteStar.on{border-color: rgba(255,75,75,.45); background: rgba(255,75,75,.08);}
+.toteCard.hasPkg .toteStar.combine{top:6px;}
+.toteStar.on{
+  top:auto;
+  bottom:10px;
+  border-color: rgba(255,75,75,.45);
+  background: rgba(255,75,75,.08);
+}
+.toteCard.hasPkg .toteStar.on{top:auto; bottom:10px;}
 
 .toteMain{
   position:absolute; left:0; right:0;
