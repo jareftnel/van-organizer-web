@@ -613,10 +613,7 @@ tr.ovDrag.dropTarget{outline:2px dashed rgba(255,255,255,.25); outline-offset:-6
 th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
-/* Hide combined tab (Bags + Overflow) - keep logic intact */
-.tab[data-tab="combined"]{display:none !important;}
-/* Some builds use 'Bags + Overflow' as 'combined' panel wrapper */
-#combinedPanel, .combinedPanel, [data-panel="combined"]{display:none !important;}
+/* Combined tab is shown by default */
 
 </style>
 </head>
@@ -631,9 +628,9 @@ td:last-child,th:last-child{text-align:right}
   </div>
 
   <div class="pills">
-    <div class="tab active" data-tab="bags">Bags</div>
+    <div class="tab active" data-tab="combined">Bags + Overflow</div>
+    <div class="tab" data-tab="bags">Bags</div>
     <div class="tab" data-tab="overflow">Overflow</div>
-    <div class="tab" data-tab="combined">Bags + Overflow</div>
   </div>
 
   <div id="content" class="card"></div>
@@ -729,8 +726,7 @@ function resetBagsPage(routeShort, baseOrderArr){
 
 
 let activeRouteIndex = 0;
-let activeTab = "bags";
-  if(activeTab==="combined") activeTab="bags";
+let activeTab = "combined";
 
 
 const routeSel = document.getElementById("routeSel");
