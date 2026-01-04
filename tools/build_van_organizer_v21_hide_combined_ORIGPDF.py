@@ -502,6 +502,13 @@ input{min-width:260px;flex:1}
   user-select:none;
   z-index:3;
 }
+.toteStar.combine{
+  left:10px;
+  right:auto;
+  color:#FFD400;
+  border-color: rgba(255,212,0,.45);
+  background: rgba(255,212,0,.12);
+}
 .toteStar.on{border-color: rgba(255,75,75,.45); background: rgba(255,75,75,.08);}
 
 .toteMain{
@@ -873,7 +880,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       }
 
       const sub = getSubLine(cur, null);
-      const starHtml = it.eligibleCombine ? `<div class="toteStar" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+      const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
       return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
         <div class="toteBar"></div>
