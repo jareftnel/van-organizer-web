@@ -270,8 +270,152 @@ def organizer_raw(jid: str):
     if not html_path.exists():
         return HTMLResponse("Organizer not ready yet.", status_code=404)
 
+    html = html_path.read_text(encoding="utf-8")
+    # Patch older organizer HTML so the combined tab is visible and default.
+    old_tabs = """  <div class="pills">
+    <div class="tab active" data-tab="bags">Bags</div>
+    <div class="tab" data-tab="overflow">Overflow</div>
+    <div class="tab" data-tab="combined">Bags + Overflow</div>
+  </div>
+"""
+    new_tabs = """  <div class="pills">
+    <div class="tab active" data-tab="combined">Bags + Overflow</div>
+    <div class="tab" data-tab="bags">Bags</div>
+    <div class="tab" data-tab="overflow">Overflow</div>
+  </div>
+"""
+    if old_tabs in html and new_tabs not in html:
+        html = html.replace(old_tabs, new_tabs)
+    html = html.replace('.tab[data-tab="combined"]{display:none !important;}', "")
+    html = html.replace('#combinedPanel, .combinedPanel, [data-panel="combined"]{display:none !important;}', "")
+    if 'let activeTab = "bags";' in html:
+        html = html.replace('let activeTab = "bags";', 'let activeTab = "combined";')
+    html = html.replace('  if(activeTab==="combined") activeTab="bags";', "")
+    if ".pills{display:flex;gap:8px;margin-top:12px}" in html:
+        html = html.replace(
+            ".pills{display:flex;gap:8px;margin-top:12px}",
+            ".pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}",
+        )
+    extra_css = """
+.toteMeta{
+  position:absolute; top:10px; left:10px; right:10px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-weight:900; font-size:12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  pointer-events:none;
+  z-index:3;
+}
+.toteMeta .zone{color:rgba(10,10,10,.65);}
+.toteMeta .pkgs{color:#ff4b4b;}
+.toteOverflow{
+  position:absolute; left:12px; right:12px; bottom:10px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.ovChip{
+  display:flex; align-items:center; justify-content:center;
+  padding:4px 8px; border-radius:10px;
+  background:rgba(0,0,0,.32);
+  border:1px solid rgba(255,255,255,.18);
+  font-weight:800; font-size:12px; color:#e8eef6;
+  text-align:center;
+}
+.ovChip.empty{background:rgba(255,255,255,.06); color:var(--muted);}
+"""
+    if ".toteMeta{" not in html and "</style>" in html:
+        html = html.replace("</style>", f"{extra_css}</style>")
+    old_combined = """function renderCombined(r,q){
+  const rows = (r.combined||[]).filter(x=>match(`${x.bag} ${x.zones} ${x.total}`, q));
+  content.innerHTML = `
+    <div class="ovWrap">
+    <div class="ovHeader">
+      <div>
+        <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
+        <div class="hint">Exact bag→overflow mapping from Excel.</div>
+      </div>
+      <div class="badge"><span class="dot"></span>${rows.length} rows</div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Bag</th><th>Overflow Zone(s)</th><th style="text-align:right">Overflow Pkgs</th></tr></thead>
+      <tbody>
+        ${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.bag||""}</td><td>${normZonesText(x.zones||"")}</td><td>${x.total||""}</td></tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+}
+"""
+    new_combined = """function renderCombined(r,q){
+  const rows = r.combined || [];
+  const byIdx = Object.fromEntries((r.bags_detail||[]).map(x=>[x.idx, x]));
+  const items = rows.map((row, i)=>{
+    const idx = i + 1;
+    const bagInfo = byIdx[idx] || {};
+    const text = `${row.bag||""} ${row.zones||""} ${row.total||""}`;
+    return { idx, row, bagInfo, text };
+  }).filter(x=>match(x.text, q));
+
+  const cols = Math.max(1, Math.ceil(items.length/3));
+  const gap = 14;
+  const pad = 36;
+  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
+  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
+  cardW = Math.max(130, Math.min(280, cardW));
+
+  function zonesList(zones){
+    if(!zones) return [];
+    return String(zones)
+      .split(';')
+      .map(p=>p.trim())
+      .filter(Boolean);
+  }
+
+  const colsHtml = Array.from({length: cols}, (_,c)=>{
+    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
+      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
+      const bagLabel = it.row.bag || it.bagInfo.bag || "";
+      const bagMain = it.bagInfo.bag_id || bagLabel;
+      const chip = bagColorChip(bagLabel);
+      const zone = normZone(it.bagInfo.sort_zone || "");
+      const pkgs = (it.bagInfo.sort_zone && it.bagInfo.pkgs !== undefined && it.bagInfo.pkgs !== null) ? String(it.bagInfo.pkgs) : "";
+      const chips = zonesList(it.row.zones || "");
+      const chipsHtml = chips.length
+        ? chips.map(z=>`<div class="ovChip">${normZonesText(z)}</div>`).join("")
+        : `<div class="ovChip empty">No overflow</div>`;
+
+      return `<div class="toteCard" data-idx="${it.idx}" style="--chipL:${chip};--chipR:${chip}">
+        <div class="toteBar"></div>
+        <div class="toteIdx">${it.idx}</div>
+        <div class="toteMeta">
+          <span class="zone">${zone}</span>
+          <span class="pkgs">${pkgs}</span>
+        </div>
+        <div class="toteMain">${bagMain}</div>
+        <div class="toteOverflow">${chipsHtml}</div>
+      </div>`;
+    }).join("");
+    return `<div class="toteCol">${cells}</div>`;
+  }).join("");
+
+  content.innerHTML = `
+    <div class="controlsRow">
+      <div>
+        <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
+        <div class="hint">Tote layout matches the stacked PDF board.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="badge"><span class="dot"></span>${items.length} bags</div>
+      </div>
+    </div>
+    <div class="toteWrap">
+      <div class="toteBoard" style="--cardW:${cardW}px">${colsHtml}</div>
+    </div>
+  `;
+}
+"""
+    if old_combined in html and new_combined not in html:
+        html = html.replace(old_combined, new_combined)
+
     # Explicit no-cache for embedded content too
-    resp = HTMLResponse(html_path.read_text(encoding="utf-8"))
+    resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"

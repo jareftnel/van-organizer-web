@@ -414,7 +414,7 @@ select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
 input{min-width:260px;flex:1}
-.pills{display:flex;gap:8px;margin-top:12px}
+.pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px}
@@ -509,6 +509,29 @@ input{min-width:260px;flex:1}
   white-space:nowrap;
   z-index:2;
 }
+.toteMeta{
+  position:absolute; top:10px; left:10px; right:10px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-weight:900; font-size:12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  pointer-events:none;
+  z-index:3;
+}
+.toteMeta .zone{color:rgba(10,10,10,.65);}
+.toteMeta .pkgs{color:#ff4b4b;}
+.toteOverflow{
+  position:absolute; left:12px; right:12px; bottom:10px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.ovChip{
+  display:flex; align-items:center; justify-content:center;
+  padding:4px 8px; border-radius:10px;
+  background:rgba(0,0,0,.32);
+  border:1px solid rgba(255,255,255,.18);
+  font-weight:800; font-size:12px; color:#e8eef6;
+  text-align:center;
+}
+.ovChip.empty{background:rgba(255,255,255,.06); color:var(--muted);}
 .toteMainStack{
   position:absolute; left:0; right:0;
   top:62px; bottom:52px;
@@ -613,10 +636,7 @@ tr.ovDrag.dropTarget{outline:2px dashed rgba(255,255,255,.25); outline-offset:-6
 th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
-/* Hide combined tab (Bags + Overflow) - keep logic intact */
-.tab[data-tab="combined"]{display:none !important;}
-/* Some builds use 'Bags + Overflow' as 'combined' panel wrapper */
-#combinedPanel, .combinedPanel, [data-panel="combined"]{display:none !important;}
+/* Combined tab is shown by default */
 
 </style>
 </head>
@@ -631,9 +651,9 @@ td:last-child,th:last-child{text-align:right}
   </div>
 
   <div class="pills">
-    <div class="tab active" data-tab="bags">Bags</div>
+    <div class="tab active" data-tab="combined">Bags + Overflow</div>
+    <div class="tab" data-tab="bags">Bags</div>
     <div class="tab" data-tab="overflow">Overflow</div>
-    <div class="tab" data-tab="combined">Bags + Overflow</div>
   </div>
 
   <div id="content" class="card"></div>
@@ -729,8 +749,7 @@ function resetBagsPage(routeShort, baseOrderArr){
 
 
 let activeRouteIndex = 0;
-let activeTab = "bags";
-  if(activeTab==="combined") activeTab="bags";
+let activeTab = "combined";
 
 
 const routeSel = document.getElementById("routeSel");
@@ -1269,22 +1288,70 @@ const routeShort = r.short || r.route_short || "";
 }
 
 function renderCombined(r,q){
-  const rows = (r.combined||[]).filter(x=>match(`${x.bag} ${x.zones} ${x.total}`, q));
+  const rows = r.combined || [];
+  const byIdx = Object.fromEntries((r.bags_detail||[]).map(x=>[x.idx, x]));
+  const items = rows.map((row, i)=>{
+    const idx = i + 1;
+    const bagInfo = byIdx[idx] || {};
+    const text = `${row.bag||""} ${row.zones||""} ${row.total||""}`;
+    return { idx, row, bagInfo, text };
+  }).filter(x=>match(x.text, q));
+
+  const cols = Math.max(1, Math.ceil(items.length/3));
+  const gap = 14;
+  const pad = 36;
+  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
+  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
+  cardW = Math.max(130, Math.min(280, cardW));
+
+  function zonesList(zones){
+    if(!zones) return [];
+    return String(zones)
+      .split(';')
+      .map(p=>p.trim())
+      .filter(Boolean);
+  }
+
+  const colsHtml = Array.from({length: cols}, (_,c)=>{
+    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
+      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
+      const bagLabel = it.row.bag || it.bagInfo.bag || "";
+      const bagMain = it.bagInfo.bag_id || bagLabel;
+      const chip = bagColorChip(bagLabel);
+      const zone = normZone(it.bagInfo.sort_zone || "");
+      const pkgs = (it.bagInfo.sort_zone && it.bagInfo.pkgs !== undefined && it.bagInfo.pkgs !== null) ? String(it.bagInfo.pkgs) : "";
+      const chips = zonesList(it.row.zones || "");
+      const chipsHtml = chips.length
+        ? chips.map(z=>`<div class="ovChip">${normZonesText(z)}</div>`).join("")
+        : `<div class="ovChip empty">No overflow</div>`;
+
+      return `<div class="toteCard" data-idx="${it.idx}" style="--chipL:${chip};--chipR:${chip}">
+        <div class="toteBar"></div>
+        <div class="toteIdx">${it.idx}</div>
+        <div class="toteMeta">
+          <span class="zone">${zone}</span>
+          <span class="pkgs">${pkgs}</span>
+        </div>
+        <div class="toteMain">${bagMain}</div>
+        <div class="toteOverflow">${chipsHtml}</div>
+      </div>`;
+    }).join("");
+    return `<div class="toteCol">${cells}</div>`;
+  }).join("");
+
   content.innerHTML = `
-    <div class="ovWrap">
-    <div class="ovHeader">
+    <div class="controlsRow">
       <div>
         <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
-        <div class="hint">Exact bag→overflow mapping from Excel.</div>
+        <div class="hint">Tote layout matches the stacked PDF board.</div>
       </div>
-      <div class="badge"><span class="dot"></span>${rows.length} rows</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="badge"><span class="dot"></span>${items.length} bags</div>
+      </div>
     </div>
-    <table>
-      <thead><tr><th>#</th><th>Bag</th><th>Overflow Zone(s)</th><th style="text-align:right">Overflow Pkgs</th></tr></thead>
-      <tbody>
-        ${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${x.bag||""}</td><td>${normZonesText(x.zones||"")}</td><td>${x.total||""}</td></tr>`).join("")}
-      </tbody>
-    </table>
+    <div class="toteWrap">
+      <div class="toteBoard" style="--cardW:${cardW}px">${colsHtml}</div>
+    </div>
   `;
 }
 
