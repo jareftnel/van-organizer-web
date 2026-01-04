@@ -602,6 +602,16 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.downloadRow{flex-basis:100%;display:flex;justify-content:flex-end}
+.downloadBtn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:6px 12px;border-radius:999px;
+  border:1px solid rgba(140,170,200,.6);
+  background:#3fa7ff;color:#001018;
+  font-weight:900;text-decoration:none;letter-spacing:.02em;
+}
+.downloadBtn:hover{filter:brightness(1.08)}
+.downloadBtn:active{transform:translateY(1px)}
 .syncBtn{
   padding:6px 12px;
   border-radius:999px;
@@ -664,6 +674,9 @@ td:last-child,th:last-child{text-align:right}
     <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
     <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
     <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
+    <div class="downloadRow">
+      <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+    </div>
   </div>
 
   <div class="pills">
