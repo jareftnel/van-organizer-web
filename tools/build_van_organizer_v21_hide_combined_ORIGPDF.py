@@ -479,6 +479,15 @@ input{min-width:260px;flex:1}
   z-index:3;
 }
 
+.totePkg{
+  position:absolute; right:10px; top:10px;
+  font-weight:900;
+  font-size:11px;
+  color:#ff4b4b;
+  z-index:3;
+}
+.toteCard.hasPkg .toteStar{ top:32px; }
+
 .toteStar{
   position:absolute; right:10px; top:10px;
   width:22px; height:22px;
@@ -540,6 +549,9 @@ input{min-width:260px;flex:1}
   padding:0 12px;
   box-sizing:border-box;
 }
+.ovZone{color:inherit;}
+.ovZone99{color:#b46bff;}
+.toteSub .ovLine{line-height:1.25;}
 
 @container (max-width: 240px){
   .toteMain{ top:58px; bottom:50px; font-size: clamp(18px, 24cqi, 44px); }
@@ -756,14 +768,19 @@ function normZone(z){
   const m = s.match(/(\d+\.\d+[A-Za-z])/);
   return m ? m[1] : s;
 }
-function normZonesText(zones){
-  if(!zones) return "";
+function parseZoneCounts(zones){
+  if(!zones) return [];
   return String(zones)
     .split(';')
     .map(p=>p.trim())
     .filter(Boolean)
-    .map(p=>p.replace(/([A-Za-z]-)?(\d+\.\d+[A-Za-z])/, (m,pre,code)=>code))
-    .join('; ');
+    .map((p)=>{
+      const cnt = p.match(/(\d+\.\d+[A-Za-z])\s*\((\d+)\)/);
+      if(cnt) return { zone: cnt[1], count: parseInt(cnt[2],10) || 0 };
+      const zon = p.match(/(\d+\.\d+[A-Za-z])/);
+      if(zon) return { zone: zon[1], count: 0 };
+      return { zone: p, count: 0 };
+    });
 }
 function match(text,q){ return !q || (text||"").toLowerCase().includes(q.toLowerCase()); }
 
@@ -817,7 +834,7 @@ function buildDisplayItems(r, q){
   return items;
 }
 
-function buildToteLayout(items, routeShort, getSubLine){
+function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
   const cols = Math.max(1, Math.ceil(items.length/3));
   const gap = 14;
   const pad = 36;
@@ -833,6 +850,11 @@ function buildToteLayout(items, routeShort, getSubLine){
       const main1 = (cur.bag_id || cur.bag || "").toString();
       const chip1 = bagColorChip(cur.bag);
       const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+      const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
+      const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
+      const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
+      const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
+      const pkgClass = pkgText ? "hasPkg" : "";
 
       if(second){
         const main2 = (second.bag_id || second.bag || "").toString();
@@ -840,9 +862,10 @@ function buildToteLayout(items, routeShort, getSubLine){
         const sub = getSubLine(cur, second);
         const topNum = (cur.sort_zone ? main1 : main2);
         const botNum = (cur.sort_zone ? main2 : main1);
-        return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
+        return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
           <div class="toteBar"></div>
-          <div class="toteIdx">${it.idx}</div>
+          ${badgeHtml}
+          ${pkgHtml}
           <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
           <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
           ${sub ? `<div class="toteSub">${sub}</div>` : ``}
@@ -852,9 +875,10 @@ function buildToteLayout(items, routeShort, getSubLine){
       const sub = getSubLine(cur, null);
       const starHtml = it.eligibleCombine ? `<div class="toteStar" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
-      return `<div class="toteCard ${loadedClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
         <div class="toteBar"></div>
-        <div class="toteIdx">${it.idx}</div>
+        ${badgeHtml}
+        ${pkgHtml}
         ${starHtml}
         <div class="toteMain">${main1}</div>
         ${sub ? `<div class="toteSub">${sub}</div>` : ``}
@@ -871,15 +895,12 @@ function buildOverflowMap(r){
   (r.combined || []).forEach((x)=>{
     const bag = String(x.bag || "").trim();
     if(!bag) return;
-    const zones = normZonesText(x.zones || "");
-    const total = parseInt(x.total || "", 10);
     let entry = map.get(bag);
     if(!entry){
-      entry = { zones: [], total: 0 };
+      entry = [];
       map.set(bag, entry);
     }
-    if(zones) entry.zones.push(zones);
-    if(!Number.isNaN(total)) entry.total += total;
+    parseZoneCounts(x.zones || "").forEach(z=>entry.push(z));
   });
   return map;
 }
@@ -887,13 +908,14 @@ function buildOverflowMap(r){
 function overflowSummary(bagLabel, ovMap){
   if(!bagLabel || !ovMap) return "";
   const entry = ovMap.get(bagLabel);
-  if(!entry) return "";
-  const zones = entry.zones.length ? entry.zones.join("; ") : "";
-  const total = entry.total ? entry.total : "";
-  if(zones && total) return `${zones} (${total})`;
-  if(zones) return zones;
-  if(total) return `(${total})`;
-  return "";
+  if(!entry || !entry.length) return "";
+  return entry.map((item)=>{
+    const label = normZone(item.zone);
+    if(!label) return "";
+    const count = item.count ? ` (${item.count})` : "";
+    const cls = label.startsWith("99.") ? "ovZone ovZone99" : "ovZone";
+    return `<div class="ovLine"><span class="${cls}">${label}${count}</span></div>`;
+  }).filter(Boolean).join("");
 }
 
 
@@ -1281,7 +1303,7 @@ const routeShort = r.short || r.route_short || "";
           return `
             <tr class="${trCls}" draggable="${allowDrag?'true':'false'}" data-rowid="${rowId}">
               <td style="font-weight:900">${x.bag_idx||""}</td>
-              <td>${normZone(x.zone)}</td>
+              <td><span class="${normZone(x.zone).startsWith("99.") ? "ovZone ovZone99" : "ovZone"}">${normZone(x.zone)}</span></td>
               <td>${total ? `<div class="ovChecks">${checks}</div>${(done&&total>0)?`<span class="ovLoadedPill">LOADED</span>`:""}` : `<span style="color:var(--muted)">—</span>`}</td>
               <td style="text-align:right;font-weight:900">${total||""}</td>
             </tr>
@@ -1304,15 +1326,26 @@ function renderCombined(r,q){
   const items = buildDisplayItems(r, q);
   const ovMap = buildOverflowMap(r);
 
+  function combinedBadgeText(anchor, other){
+    const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
+    return normZone(src.sort_zone);
+  }
+
+  function combinedPkgCount(anchor, other){
+    const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
+    const pk = (src.pkgs===undefined || src.pkgs===null) ? "" : String(src.pkgs);
+    return pk;
+  }
+
   function combinedSubLine(anchor, other){
     const first = overflowSummary(anchor.bag, ovMap);
     const second = other ? overflowSummary(other.bag, ovMap) : "";
     const parts = [first, second].filter(Boolean);
     if(!parts.length) return "";
-    return parts.join(" | ");
+    return parts.join("");
   }
 
-  const layout = buildToteLayout(items, routeShort, combinedSubLine);
+  const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
     <div class="controlsRow">
       <div>
