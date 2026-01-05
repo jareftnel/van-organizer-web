@@ -322,7 +322,7 @@ iframe{{border:0; display:block}}
         <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
       </div>
     </div>
-    <div class="hint">Auto-fit width. Scroll this page.</div>
+    <div class="hint">Auto-fit width + shift into view. Scroll this page.</div>
   </div>
 
 <script>
@@ -369,6 +369,8 @@ iframe{{border:0; display:block}}
 
   var baseSpan = null;
   var currentScale = 1;
+  var shiftTimer = null;
+
   function getViewportWidth() {{
     if (window.visualViewport && window.visualViewport.width) {{
       return window.visualViewport.width;
@@ -405,17 +407,61 @@ iframe{{border:0; display:block}}
     }} catch (e) {{}}
   }}
 
+  function shiftIntoView() {{
+    var viewportWidth = getViewportWidth();
+    var viewportHeight = (window.visualViewport && window.visualViewport.height)
+      ? window.visualViewport.height
+      : (window.innerHeight || document.documentElement.clientHeight);
+
+    var rect = shell.getBoundingClientRect();
+    var dx = 0;
+    var dy = 0;
+
+    if (rect.left < 0) dx = rect.left;
+    else if (rect.right > viewportWidth) dx = rect.right - viewportWidth;
+
+    if (rect.top < 0) dy = rect.top;
+    else if (rect.bottom > viewportHeight) dy = rect.bottom - viewportHeight;
+
+    if (dx || dy) {{
+      window.scrollBy({{ left: dx, top: dy, behavior: "instant" }});
+    }}
+  }}
+
+  function scheduleShiftIntoView() {{
+    if (shiftTimer) clearTimeout(shiftTimer);
+    shiftTimer = setTimeout(function () {{
+      shiftTimer = null;
+      shiftIntoView();
+    }}, 150);
+  }}
+
   frame.addEventListener("load", function () {{
     refreshBaseSpan();
     setTimeout(refreshBaseSpan, 150);
     setTimeout(refreshBaseSpan, 700);
     setTimeout(refreshBaseSpan, 1600);
     setTimeout(refreshBaseSpan, 3000);
+    scheduleShiftIntoView();
   }});
 
   window.addEventListener("resize", function () {{
     refreshBaseSpan();
+    scheduleShiftIntoView();
   }});
+  if (window.visualViewport) {{
+    window.visualViewport.addEventListener("resize", function () {{
+      scheduleShiftIntoView();
+    }});
+    window.visualViewport.addEventListener("scroll", function () {{
+      scheduleShiftIntoView();
+    }});
+    if ("onscrollend" in window.visualViewport) {{
+      window.visualViewport.addEventListener("scrollend", function () {{
+        scheduleShiftIntoView();
+      }});
+    }}
+  }}
 }})();
 </script>
 </body>
