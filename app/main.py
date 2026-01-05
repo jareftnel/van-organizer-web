@@ -367,91 +367,80 @@ iframe{{border:0; display:block}}
     return {{ minLeft: minLeft, width: width, height: height }};
   }}
 
-  var baseSpan = null;
-  var scheduled = false;
-
-  function getViewportWidth() {{
-    if (window.visualViewport && window.visualViewport.width) {{
-      return window.visualViewport.width;
-    }}
-    return window.innerWidth || document.documentElement.clientWidth;
-  }}
-
-  function applyScale() {{
-    if (!baseSpan) return;
-    var viewportWidth = getViewportWidth();
-    var available = Math.max(0, viewportWidth - 20);
-    var scale = 1;
-    if (baseSpan.width > 0) {{
-      scale = Math.min(1, available / baseSpan.width);
-    }}
-
-    var shiftX = (baseSpan.minLeft < 0) ? (-baseSpan.minLeft) : 0;
-
-    // NO template literals here (avoid Python f-string conflicts)
-    inner.style.transform = "translateX(" + shiftX + "px) scale(" + scale.toFixed(4) + ")";
-    inner.style.width = baseSpan.width + "px";
-    shell.style.height = (baseSpan.height * scale) + "px";
-  }}
-
-  function refreshBaseSpan() {{
+  function sizeAndScale() {{
     try {{
       var doc = frame.contentDocument || frame.contentWindow.document;
       if (!doc) return;
-      baseSpan = measureSpan(doc);
-      frame.style.width = baseSpan.width + "px";
-      frame.style.height = baseSpan.height + "px";
-      applyScale();
+
+      var span = measureSpan(doc);
+      var viewportWidth = document.documentElement.clientWidth;
+      if (window.visualViewport && window.visualViewport.width) {{
+        viewportWidth = window.visualViewport.width;
+      }}
+      var available = viewportWidth - 20;
+
+      var scale = 1;
+      if (span.width > 0) {{
+        scale = Math.min(0.985, available / span.width);
+      }}
+
+      var shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
+
+      // NO template literals here (avoid Python f-string conflicts)
+      inner.style.transform = "translateX(" + shiftX + "px) scale(" + scale.toFixed(4) + ")";
+      inner.style.width = span.width + "px";
+
+      frame.style.width = span.width + "px";
+      frame.style.height = span.height + "px";
+
+      shell.style.height = (span.height * scale) + "px";
     }} catch (e) {{}}
   }}
 
-  function scheduleScale() {{
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(function () {{
-      scheduled = false;
-      applyScale();
-    }});
+  frame.addEventListener("load", function () {{
+    sizeAndScale();
+    setTimeout(sizeAndScale, 150);
+    setTimeout(sizeAndScale, 700);
+    setTimeout(sizeAndScale, 1600);
+    setTimeout(sizeAndScale, 3000);
+  }});
+
+  var scaleTimer = null;
+  function scheduleScale(delay) {{
+    if (scaleTimer) {{
+      clearTimeout(scaleTimer);
+    }}
+    scaleTimer = setTimeout(function () {{
+      sizeAndScale();
+    }}, delay || 180);
   }}
 
-  frame.addEventListener("load", function () {{
-    refreshBaseSpan();
-    setTimeout(refreshBaseSpan, 150);
-    setTimeout(refreshBaseSpan, 700);
-    setTimeout(refreshBaseSpan, 1600);
-    setTimeout(refreshBaseSpan, 3000);
-  }});
-
   window.addEventListener("resize", function () {{
-    refreshBaseSpan();
-    scheduleScale();
+    sizeAndScale();
+    scheduleScale(220);
   }});
   window.addEventListener("scroll", function () {{
-    scheduleScale();
-  }}, {{ passive: true }});
-  window.addEventListener("touchstart", function () {{
-    scheduleScale();
-  }}, {{ passive: true }});
-  window.addEventListener("touchmove", function () {{
-    scheduleScale();
+    scheduleScale(200);
   }}, {{ passive: true }});
   window.addEventListener("touchend", function () {{
-    scheduleScale();
+    sizeAndScale();
+    scheduleScale(220);
   }}, {{ passive: true }});
   window.addEventListener("touchcancel", function () {{
-    scheduleScale();
+    scheduleScale(220);
   }}, {{ passive: true }});
   if ("onscrollend" in window) {{
     window.addEventListener("scrollend", function () {{
-      scheduleScale();
+      sizeAndScale();
     }}, {{ passive: true }});
   }}
   if (window.visualViewport) {{
     window.visualViewport.addEventListener("resize", function () {{
-      scheduleScale();
+      sizeAndScale();
+      scheduleScale(220);
     }});
     window.visualViewport.addEventListener("scroll", function () {{
-      scheduleScale();
+      scheduleScale(200);
     }});
   }}
 }})();
