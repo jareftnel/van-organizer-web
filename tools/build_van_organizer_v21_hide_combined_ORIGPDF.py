@@ -402,8 +402,9 @@ HTML_TEMPLATE = r"""<!doctype html>
 <style>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *{box-sizing:border-box}
+html,body{height:100%;width:100%}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{max-width:none;width:100%;margin:0;padding:18px 18px 40px;}
+.wrap{width:100vw;height:100dvh;margin:0;padding:clamp(12px,2vw,18px);display:flex;flex-direction:column;gap:12px;}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;}
 .brand{font-weight:900}
 .sel{margin-left:10px}
@@ -417,7 +418,7 @@ input{min-width:260px;flex:1}
 .pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
-.card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px}
+.card{margin-top:0;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;flex:1;min-height:0;overflow:auto}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -426,24 +427,22 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:flex;justify-content:center;width:100%;}
+.contentPane{display:flex;flex-direction:column;gap:12px;height:100%;}
+.toteWrap{display:flex;flex:1;min-height:0;width:100%;}
 .toteBoard{
-  display:inline-flex;
-  flex-direction:row-reverse;
-  gap:14px;
-  padding:8px 0;
-  --cardW: 190px;
-  --cardH: 150px;
+  display:grid;
+  width:100%;
+  height:100%;
+  grid-template-columns:repeat(auto-fit, minmax(min(220px, 24vw), 1fr));
+  gap:clamp(10px,1.5vw,16px);
+  align-content:start;
 }
-@media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
-@media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
-@media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
-.toteCol{display:flex;flex-direction:column;gap:14px;}
 
 .toteCard{
   position:relative;
-  width:var(--cardW);
-  height:var(--cardH);
+  width:100%;
+  aspect-ratio: 19 / 15;
+  min-height: clamp(120px, 16vh, 190px);
   border-radius:18px;
   background:rgba(10,14,20,.72);
   border:1px solid rgba(255,255,255,.08);
@@ -875,59 +874,48 @@ function buildDisplayItems(r, q){
 }
 
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cols = Math.max(1, Math.ceil(items.length/3));
-  const gap = 14;
-  const pad = 36;
-  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
-  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
-  cardW = Math.max(130, Math.min(280, cardW));
+  const itemsHtml = items.map((it)=>{
+    const cur = it.cur;
+    const second = it.second;
+    const main1 = (cur.bag_id || cur.bag || "").toString();
+    const chip1 = bagColorChip(cur.bag);
+    const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+    const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
+    const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
+    const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
+    const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
+    const pkgClass = pkgText ? "hasPkg" : "";
 
-  const colsHtml = Array.from({length: cols}, (_,c)=>{
-    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
-      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
-      const cur = it.cur;
-      const second = it.second;
-      const main1 = (cur.bag_id || cur.bag || "").toString();
-      const chip1 = bagColorChip(cur.bag);
-      const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
-      const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
-      const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-      const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
-      const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
-      const pkgClass = pkgText ? "hasPkg" : "";
-
-      if(second){
-        const main2 = (second.bag_id || second.bag || "").toString();
-        const chip2 = bagColorChip(second.bag);
-        const sub = getSubLine(cur, second);
-        const topNum = (cur.sort_zone ? main1 : main2);
-        const botNum = (cur.sort_zone ? main2 : main1);
-        return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
-          <div class="toteBar"></div>
-          ${badgeHtml}
-          ${pkgHtml}
-          <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
-          <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
-          ${sub ? `<div class="toteSub">${sub}</div>` : ``}
-        </div>`;
-      }
-
-      const sub = getSubLine(cur, null);
-      const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+    if(second){
+      const main2 = (second.bag_id || second.bag || "").toString();
+      const chip2 = bagColorChip(second.bag);
+      const sub = getSubLine(cur, second);
+      const topNum = (cur.sort_zone ? main1 : main2);
+      const botNum = (cur.sort_zone ? main2 : main1);
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
         <div class="toteBar"></div>
         ${badgeHtml}
         ${pkgHtml}
-        ${starHtml}
-        <div class="toteMain">${main1}</div>
+        <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
+        <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
         ${sub ? `<div class="toteSub">${sub}</div>` : ``}
       </div>`;
-    }).join("");
-    return `<div class="toteCol">${cells}</div>`;
+    }
+
+    const sub = getSubLine(cur, null);
+    const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+
+    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+      <div class="toteBar"></div>
+      ${badgeHtml}
+      ${pkgHtml}
+      ${starHtml}
+      <div class="toteMain">${main1}</div>
+      ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+    </div>`;
   }).join("");
 
-  return { colsHtml, cardW };
+  return { itemsHtml };
 }
 
 function buildOverflowMap(r){
@@ -1000,10 +988,6 @@ function fitToteText(){
       }
       const blockH = stack.scrollHeight;
       if(blockH > innerH){
-        const scale = Math.max(0.80, innerH / blockH);
-        stack.style.transform = `scale(${scale})`;
-        stack.style.transformOrigin = 'center';
-      } else {
         stack.style.transform = '';
       }
     }
@@ -1276,30 +1260,32 @@ function renderBags(r, q){
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
 
   content.innerHTML = `
-    <div class="controlsRow">
-      <div>
-        <div style="font-weight:900">${routeTitle(r)} — Bags</div>
-        <div class="hint">Tap to mark loaded. ${
-          mode==="custom" ? "Drag to reorder (badge numbers stay the same)." :
-          mode==="reversed" ? "Showing last bag → first bag." :
-          "Showing first bag → last bag."
-        }</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="modeToggle">
-          <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
-          <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
-          <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+    <div class="contentPane">
+      <div class="controlsRow">
+        <div>
+          <div style="font-weight:900">${routeTitle(r)} — Bags</div>
+          <div class="hint">Tap to mark loaded. ${
+            mode==="custom" ? "Drag to reorder (badge numbers stay the same)." :
+            mode==="reversed" ? "Showing last bag → first bag." :
+            "Showing first bag → last bag."
+          }</div>
         </div>
-        <div class="badge"><span class="dot"></span>${items.length} bags</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="modeToggle">
+            <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
+            <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
+            <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+          </div>
+          <div class="badge"><span class="dot"></span>${items.length} bags</div>
+        </div>
       </div>
-    </div>
-    <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
-    </div>
-    <div class="clearRow">
-      <button id="clearLoadedBtn" class="clearBtn">Clear</button>
-      <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      <div class="toteWrap">
+        <div class="toteBoard">${layout.itemsHtml}</div>
+      </div>
+      <div class="clearRow">
+        <button id="clearLoadedBtn" class="clearBtn">Clear</button>
+        <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      </div>
     </div>
   `;
 
@@ -1438,26 +1424,28 @@ function renderCombined(r,q){
 
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
-    <div class="controlsRow">
-      <div>
-        <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
-        <div class="hint">Overflow zones + pkgs under each tote.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="modeToggle">
-          <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
-          <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
-          <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+    <div class="contentPane">
+      <div class="controlsRow">
+        <div>
+          <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
+          <div class="hint">Overflow zones + pkgs under each tote.</div>
         </div>
-        <div class="badge"><span class="dot"></span>${items.length} bags</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="modeToggle">
+            <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
+            <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
+            <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+          </div>
+          <div class="badge"><span class="dot"></span>${items.length} bags</div>
+        </div>
       </div>
-    </div>
-    <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
-    </div>
-    <div class="clearRow">
-      <button id="clearLoadedBtn" class="clearBtn">Clear</button>
-      <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      <div class="toteWrap">
+        <div class="toteBoard">${layout.itemsHtml}</div>
+      </div>
+      <div class="clearRow">
+        <button id="clearLoadedBtn" class="clearBtn">Clear</button>
+        <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      </div>
     </div>
   `;
 
@@ -1533,7 +1521,6 @@ function init(){
       render();
     });
   });
-  window.addEventListener('resize', ()=>{ if(activeTab==='bags') render(); });
   render();
 }
 init();
