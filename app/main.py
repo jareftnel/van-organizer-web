@@ -55,11 +55,10 @@ def home():
 <!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer Builder</title>
 <style>
-html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;touch-action:none;position:fixed}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:18px;background:#0b0f14;color:#e8eef6}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}
 .card{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}
 h1{margin:0 0 10px;font-size:22px}
 p{color:#97a7bd;margin:0 0 14px}
@@ -78,15 +77,6 @@ button{width:100%;margin-top:12px;padding:14px;border-radius:12px;border:0;backg
     </form>
     <div class="small">Tip: open this link in Safari for best results.</div>
   </div>
-<script>
-(function(){
-  function preventDefault(e){ e.preventDefault(); }
-  document.addEventListener("touchmove", preventDefault, { passive: false });
-  document.addEventListener("gesturestart", preventDefault);
-  document.addEventListener("wheel", preventDefault, { passive: false });
-  window.scrollTo(0, 0);
-})();
-</script>
 </body>
 </html>
 """
@@ -154,11 +144,10 @@ def job_page(jid: str):
 
     html = """<!doctype html><html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Job __JID__</title>
 <style>
-html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;touch-action:none;position:fixed}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:18px;background:#0b0f14;color:#e8eef6}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}
 .card{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}
 .muted{color:#97a7bd}
 .bar{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
@@ -189,13 +178,6 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
   </div>
 
 <script>
-(function(){
-  function preventDefault(e){ e.preventDefault(); }
-  document.addEventListener("touchmove", preventDefault, { passive: false });
-  document.addEventListener("gesturestart", preventDefault);
-  document.addEventListener("wheel", preventDefault, { passive: false });
-  window.scrollTo(0, 0);
-})();
 (function(){
   var jid = "__JID__";
   var stEl = document.getElementById("st");
@@ -266,26 +248,6 @@ def organizer_raw(jid: str):
         return HTMLResponse("Organizer not ready yet.", status_code=404)
 
     html = html_path.read_text(encoding="utf-8")
-    lock_marker = "data-viewport-lock"
-    lock_snippet = """
-<style data-viewport-lock>
-html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;touch-action:none;position:fixed}
-</style>
-<script data-viewport-lock>
-(function(){
-  function preventDefault(e){ e.preventDefault(); }
-  document.addEventListener("touchmove", preventDefault, { passive: false });
-  document.addEventListener("gesturestart", preventDefault);
-  document.addEventListener("wheel", preventDefault, { passive: false });
-  window.scrollTo(0, 0);
-})();
-</script>
-"""
-    if lock_marker not in html:
-        if "<head>" in html:
-            html = html.replace("<head>", "<head>" + lock_snippet, 1)
-        else:
-            html = lock_snippet + html
     # Patch older organizer HTML so the combined tab is visible and default.
     old_tabs = """  <div class="pills">
     <div class="tab active" data-tab="bags">Bags</div>
@@ -334,10 +296,10 @@ def organizer_wrapper(jid: str):
 <!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer</title>
 <style>
-html,body{{width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;touch-action:none;position:fixed;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}}
+html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}}
 .topbar{{position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
 .topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
 .wrap{{padding:10px}}
@@ -360,13 +322,6 @@ iframe{{border:0; display:block}}
   </div>
 
 <script>
-(function(){
-  function preventDefault(e){ e.preventDefault(); }
-  document.addEventListener("touchmove", preventDefault, { passive: false });
-  document.addEventListener("gesturestart", preventDefault);
-  document.addEventListener("wheel", preventDefault, { passive: false });
-  window.scrollTo(0, 0);
-})();
 (function () {{
   var frame = document.getElementById("orgFrame");
   var inner = document.getElementById("inner");
