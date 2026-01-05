@@ -368,8 +368,7 @@ iframe{{border:0; display:block}}
   }}
 
   var baseSpan = null;
-  var currentScale = 1;
-  var shiftTimer = null;
+  var scheduled = false;
 
   function getViewportWidth() {{
     if (window.visualViewport && window.visualViewport.width) {{
@@ -388,12 +387,11 @@ iframe{{border:0; display:block}}
     }}
 
     var shiftX = (baseSpan.minLeft < 0) ? (-baseSpan.minLeft) : 0;
-    currentScale = scale;
 
     // NO template literals here (avoid Python f-string conflicts)
-    inner.style.transform = "translateX(" + shiftX + "px) scale(" + currentScale.toFixed(4) + ")";
+    inner.style.transform = "translateX(" + shiftX + "px) scale(" + scale.toFixed(4) + ")";
     inner.style.width = baseSpan.width + "px";
-    shell.style.height = (baseSpan.height * currentScale) + "px";
+    shell.style.height = (baseSpan.height * scale) + "px";
   }}
 
   function refreshBaseSpan() {{
@@ -407,33 +405,13 @@ iframe{{border:0; display:block}}
     }} catch (e) {{}}
   }}
 
-  function shiftIntoView() {{
-    var viewportWidth = getViewportWidth();
-    var viewportHeight = (window.visualViewport && window.visualViewport.height)
-      ? window.visualViewport.height
-      : (window.innerHeight || document.documentElement.clientHeight);
-
-    var rect = shell.getBoundingClientRect();
-    var dx = 0;
-    var dy = 0;
-
-    if (rect.left < 0) dx = rect.left;
-    else if (rect.right > viewportWidth) dx = rect.right - viewportWidth;
-
-    if (rect.top < 0) dy = rect.top;
-    else if (rect.bottom > viewportHeight) dy = rect.bottom - viewportHeight;
-
-    if (dx || dy) {{
-      window.scrollBy({{ left: dx, top: dy, behavior: "instant" }});
-    }}
-  }}
-
-  function scheduleShiftIntoView() {{
-    if (shiftTimer) clearTimeout(shiftTimer);
-    shiftTimer = setTimeout(function () {{
-      shiftTimer = null;
-      shiftIntoView();
-    }}, 150);
+  function scheduleScale() {{
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(function () {{
+      scheduled = false;
+      applyScale();
+    }});
   }}
 
   frame.addEventListener("load", function () {{
@@ -442,25 +420,39 @@ iframe{{border:0; display:block}}
     setTimeout(refreshBaseSpan, 700);
     setTimeout(refreshBaseSpan, 1600);
     setTimeout(refreshBaseSpan, 3000);
-    scheduleShiftIntoView();
   }});
 
   window.addEventListener("resize", function () {{
     refreshBaseSpan();
-    scheduleShiftIntoView();
+    scheduleScale();
   }});
+  window.addEventListener("scroll", function () {{
+    scheduleScale();
+  }}, {{ passive: true }});
+  window.addEventListener("touchstart", function () {{
+    scheduleScale();
+  }}, {{ passive: true }});
+  window.addEventListener("touchmove", function () {{
+    scheduleScale();
+  }}, {{ passive: true }});
+  window.addEventListener("touchend", function () {{
+    scheduleScale();
+  }}, {{ passive: true }});
+  window.addEventListener("touchcancel", function () {{
+    scheduleScale();
+  }}, {{ passive: true }});
+  if ("onscrollend" in window) {{
+    window.addEventListener("scrollend", function () {{
+      scheduleScale();
+    }}, {{ passive: true }});
+  }}
   if (window.visualViewport) {{
     window.visualViewport.addEventListener("resize", function () {{
-      scheduleShiftIntoView();
+      scheduleScale();
     }});
     window.visualViewport.addEventListener("scroll", function () {{
-      scheduleShiftIntoView();
+      scheduleScale();
     }});
-    if ("onscrollend" in window.visualViewport) {{
-      window.visualViewport.addEventListener("scrollend", function () {{
-        scheduleShiftIntoView();
-      }});
-    }}
   }}
 }})();
 </script>
