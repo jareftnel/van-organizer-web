@@ -288,7 +288,6 @@ def organizer_wrapper(jid: str):
     Wrapper that:
     - loads organizer_raw in an iframe
     - measures true content span (minLeft..maxRight) inside the iframe
-    - shifts content into view (fixes left cutoff)
     - parent page scrolls normally
 
     IMPORTANT: do NOT use JS template literals (`...${}...`) inside this Python f-string.
@@ -307,7 +306,6 @@ html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:syste
 .scale-shell{{width:100%; overflow:visible}}
 .scale-inner{{transform-origin: top left; will-change: transform}}
 iframe{{border:0; display:block}}
-.hint{{color:#97a7bd;font-size:12px;padding:6px 0 0}}
 </style>
 </head>
 <body>
@@ -321,7 +319,6 @@ iframe{{border:0; display:block}}
         <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
       </div>
     </div>
-    <div class="hint">Shift into view. Scroll this page.</div>
   </div>
 
 <script>
@@ -370,10 +367,8 @@ iframe{{border:0; display:block}}
       var span = measureSpan(doc);
       var scale = 1;
 
-      var shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
-
       // NO template literals here (avoid Python f-string conflicts)
-      inner.style.transform = "translateX(" + shiftX + "px) scale(" + scale.toFixed(4) + ")";
+      inner.style.transform = "scale(" + scale.toFixed(4) + ")";
       inner.style.width = span.width + "px";
 
       frame.style.width = span.width + "px";
