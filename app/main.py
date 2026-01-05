@@ -412,27 +412,12 @@ iframe{{border:0; display:block}}
     }} catch (e) {{}}
   }}
 
-  function attachResizeObserver() {{
-    try {{
-      var doc = frame.contentDocument || frame.contentWindow.document;
-      if (!doc || !doc.body) return;
-      if (window.ResizeObserver) {{
-        var ro = new ResizeObserver(function () {{
-          sizeAndScale();
-        }});
-        ro.observe(doc.body);
-        ro.observe(doc.documentElement);
-      }}
-    }} catch (e) {{}}
-  }}
-
   frame.addEventListener("load", function () {{
     sizeAndScale();
     setTimeout(sizeAndScale, 150);
     setTimeout(sizeAndScale, 700);
     setTimeout(sizeAndScale, 1600);
     setTimeout(sizeAndScale, 3000);
-    attachResizeObserver();
   }});
 
   window.addEventListener("resize", sizeAndScale);
