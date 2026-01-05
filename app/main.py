@@ -152,9 +152,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .muted{color:#97a7bd}
 .bar{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
 .fill{height:100%;background:#3fa7ff;transition:width .25s ease}
-.grid{display:grid;gap:10px;margin-top:14px}
-.btnA{padding:14px;border-radius:12px;background:#3fa7ff;color:#001018;font-weight:900;text-decoration:none;text-align:center}
-.btnB{padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6;text-decoration:none;text-align:center}
 pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px}
 </style>
 </head>
@@ -173,12 +170,6 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
     <div class="muted" style="margin-top:10px">Progress:</div>
     <pre id="prog">__PROG__</pre>
 
-    <div class="grid" id="links" style="display:none">
-      <a id="aOrg" class="btnA" href="/job/__JID__/organizer">Open Van Organizer</a>
-      <a id="aPdf" class="btnB" href="/job/__JID__/download/STACKED.pdf">Download STACKED.pdf</a>
-      <a id="aXlsx" class="btnB" href="/job/__JID__/download/Bags_with_Overflow.xlsx">Download Excel</a>
-    </div>
-
     <pre id="err" style="display:none"></pre>
 
     <div class="muted" style="margin-top:14px;font-size:13px">
@@ -192,33 +183,16 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
   var stEl = document.getElementById("st");
   var fill = document.getElementById("fill");
   var prog = document.getElementById("prog");
-  var links = document.getElementById("links");
   var err = document.getElementById("err");
-
-  var aOrg = document.getElementById("aOrg");
-  var aPdf = document.getElementById("aPdf");
-  var aXlsx = document.getElementById("aXlsx");
 
   function setPct(p){
     p = Math.max(0, Math.min(100, p|0));
     fill.style.width = p + "%";
   }
 
-  function showDone(s){
-    // Cache-bust so mobile browsers don't show old files
-    var bust = "v=" + Date.now();
-    aOrg.href  = s.organizer_url + "?" + bust;
-    aPdf.href  = s.pdf_url + "?" + bust;
-    aXlsx.href = s.xlsx_url + "?" + bust;
-
-    links.style.display = "grid";
-    err.style.display = "none";
-  }
-
   function showErr(msg){
     err.textContent = msg || "Unknown error";
     err.style.display = "block";
-    links.style.display = "none";
   }
 
   async function tick(){
@@ -234,8 +208,11 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
       if(s.progress && typeof s.progress.pct !== "undefined") pct = parseInt(s.progress.pct, 10) || 0;
       setPct(pct);
 
-      if(s.status === "done"){
-        showDone(s);
+      var stage = s.progress ? s.progress.stage : "";
+      if(s.status === "done" && stage === "done" && pct >= 100){
+        // Cache-bust so mobile browsers don't show old files
+        var bust = "v=" + Date.now();
+        window.location.replace(s.organizer_url + "?" + bust);
         clearInterval(timer);
       } else if(s.status === "error"){
         showErr(s.error);
