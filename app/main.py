@@ -373,11 +373,7 @@ iframe{{border:0; display:block}}
       if (!doc) return;
 
       var span = measureSpan(doc);
-      var viewportWidth = document.documentElement.clientWidth;
-      if (window.visualViewport && window.visualViewport.width) {{
-        viewportWidth = window.visualViewport.width;
-      }}
-      var available = viewportWidth - 20;
+      var available = document.documentElement.clientWidth - 20;
 
       var scale = 1;
       if (span.width > 0) {{
@@ -405,44 +401,7 @@ iframe{{border:0; display:block}}
     setTimeout(sizeAndScale, 3000);
   }});
 
-  var scaleTimer = null;
-  function scheduleScale(delay) {{
-    if (scaleTimer) {{
-      clearTimeout(scaleTimer);
-    }}
-    scaleTimer = setTimeout(function () {{
-      sizeAndScale();
-    }}, delay || 180);
-  }}
-
-  window.addEventListener("resize", function () {{
-    sizeAndScale();
-    scheduleScale(220);
-  }});
-  window.addEventListener("scroll", function () {{
-    scheduleScale(200);
-  }}, {{ passive: true }});
-  window.addEventListener("touchend", function () {{
-    sizeAndScale();
-    scheduleScale(220);
-  }}, {{ passive: true }});
-  window.addEventListener("touchcancel", function () {{
-    scheduleScale(220);
-  }}, {{ passive: true }});
-  if ("onscrollend" in window) {{
-    window.addEventListener("scrollend", function () {{
-      sizeAndScale();
-    }}, {{ passive: true }});
-  }}
-  if (window.visualViewport) {{
-    window.visualViewport.addEventListener("resize", function () {{
-      sizeAndScale();
-      scheduleScale(220);
-    }});
-    window.visualViewport.addEventListener("scroll", function () {{
-      scheduleScale(200);
-    }});
-  }}
+  window.addEventListener("resize", sizeAndScale);
 }})();
 </script>
 </body>
