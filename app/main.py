@@ -344,23 +344,19 @@ iframe{{border:0; display:block}}
       var el = els[i];
       if (!el.getBoundingClientRect) continue;
       var r = el.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
+      if (r.width < 40 || r.height < 40) continue;
       if (r.left < minLeft) minLeft = r.left;
       if (r.right > maxRight) maxRight = r.right;
       if (r.bottom > maxBottom) maxBottom = r.bottom;
     }}
 
-    var b = doc.body;
-    var h = doc.documentElement;
-    var docRight = Math.max(b.scrollWidth, h.scrollWidth, b.offsetWidth, h.offsetWidth, b.clientWidth, h.clientWidth);
-    var docBottom = Math.max(b.scrollHeight, h.scrollHeight, b.offsetHeight, h.offsetHeight, b.clientHeight, h.clientHeight);
-
     if (!isFinite(minLeft) || !isFinite(maxRight)) {{
+      var b = doc.body;
+      var h = doc.documentElement;
       minLeft = 0;
-      maxRight = docRight;
+      maxRight = Math.max(b.scrollWidth, h.scrollWidth, b.offsetWidth, h.offsetWidth, b.clientWidth, h.clientWidth);
+      maxBottom = Math.max(b.scrollHeight, h.scrollHeight, b.offsetHeight, h.offsetHeight, b.clientHeight, h.clientHeight);
     }}
-
-    maxBottom = Math.max(maxBottom, docBottom);
 
     var width = (maxRight - minLeft) + 20;
     var height = maxBottom + 20;
