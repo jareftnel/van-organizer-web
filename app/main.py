@@ -289,7 +289,6 @@ def organizer_wrapper(jid: str):
     - loads organizer_raw in an iframe
     - measures true content span (minLeft..maxRight) inside the iframe
     - shifts content into view (fixes left cutoff)
-    - scales to fit phone width
     - parent page scrolls normally
 
     IMPORTANT: do NOT use JS template literals (`...${}...`) inside this Python f-string.
@@ -322,7 +321,7 @@ iframe{{border:0; display:block}}
         <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
       </div>
     </div>
-    <div class="hint">Auto-fit width + shift into view. Scroll this page.</div>
+    <div class="hint">Shift into view. Scroll this page.</div>
   </div>
 
 <script>
@@ -369,12 +368,7 @@ iframe{{border:0; display:block}}
       if (!doc) return;
 
       var span = measureSpan(doc);
-      var available = document.documentElement.clientWidth - 20;
-
       var scale = 1;
-      if (span.width > 0) {{
-        scale = Math.min(0.985, available / span.width);
-      }}
 
       var shiftX = (span.minLeft < 0) ? (-span.minLeft) : 0;
 
