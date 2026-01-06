@@ -476,18 +476,18 @@ body{
 .job-progress{ width:min(860px,92vw); margin:18px auto 0; }
 .road{
   position:relative;
-  height:18px;
+  height:20px;
   border-radius:999px;
-  background:linear-gradient(180deg,#1a1f26,#0f141b);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  background:linear-gradient(180deg,#5b5f66,#3f434a);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
   overflow:hidden;
 }
 .lane{
   position:absolute; left:0; right:0; top:50%;
-  height:2px; transform:translateY(-50%);
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 12px,transparent 12px 24px);
+  height:3px; transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,#f6c945 0 12px,transparent 12px 24px);
   background-size:24px 100%;
-  opacity:.45;
+  opacity:.9;
   animation:laneMove 1.2s linear infinite;
 }
 @keyframes laneMove{ from{background-position:0 0;} to{background-position:24px 0;} }
@@ -501,7 +501,7 @@ body{
   pointer-events:none;
 }
 .van img{
-  width:32px;
+  width:44px;
   height:auto;
   display:block;
 }
