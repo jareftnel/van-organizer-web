@@ -238,6 +238,11 @@ button{
     height:100%;
     overflow:hidden;
   }
+  .brandBanner{
+    height:min(180px, 26svh);
+    object-fit:cover;
+    object-position:center top;
+  }
   .uploadPage{
     height:100svh;
     align-items:flex-start;
