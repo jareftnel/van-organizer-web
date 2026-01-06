@@ -79,7 +79,7 @@ body{
   --glassBorder:rgba(255,255,255,0.10);
 }
 .uploadPage{
-  height:100vh;
+  height:100svh;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -239,7 +239,7 @@ button{
     overflow:hidden;
   }
   .uploadPage{
-    height:100dvh;
+    height:100svh;
     align-items:flex-start;
     padding-top:8px;
     padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
@@ -249,7 +249,7 @@ button{
       0.7,
       calc(
         (
-          100dvh
+          100svh
           - 24px
           - env(safe-area-inset-top, 0px)
           - env(safe-area-inset-bottom, 0px)
