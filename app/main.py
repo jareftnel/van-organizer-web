@@ -76,54 +76,62 @@ body{
   justify-content:center;
   padding:36px 18px 18px;
 }
-.brandBlock{
+.uploadShell{
+  width:min(1100px, calc(100vw - 48px));
+  margin:40px auto 0;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  gap:0;
-  width:100%;
+  gap:16px;
 }
-.bannerWrap{
-  width:min(980px, calc(100% - 48px));
-  margin:0 auto 16px;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 12px 30px rgba(0,0,0,0.35);
-  border-bottom:1px solid rgba(255,255,255,0.08);
+.bannerImg,
+.taglineGlass,
+.uploadCard{
+  width:100%;
 }
 .bannerImg{
-  width:100%;
   height:auto;
   max-width:100%;
   object-fit:contain;
   display:block;
+  border-radius:26px;
+  box-shadow:0 18px 60px rgba(0,0,0,0.30);
 }
-.authorityLine{
-  width:min(980px, calc(100% - 48px));
-  margin:0 auto 14px;
+.taglineGlass{
+  border-radius:22px;
+  padding:14px 18px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  margin-top:-10px;
+  border-top-left-radius:18px;
+  border-top-right-radius:18px;
+}
+.taglineText{
   text-align:center;
-  font-size:14px;
-  letter-spacing:0.08em;
-  color:rgba(255,255,255,0.55);
+  letter-spacing:0.22em;
+  font-size:12px;
+  opacity:0.8;
   text-transform:uppercase;
 }
-.card{
-  width:min(980px, calc(100% - 48px));
-  background:#101826;
-  border:1px solid #1c2a3a;
-  border-radius:18px;
-  padding:32px;
-  box-shadow:0 14px 36px rgba(0,0,0,0.35);
+.uploadCard{
+  background:rgba(10,16,26,0.55);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:26px;
+  padding:22px;
+  box-shadow:0 18px 60px rgba(0,0,0,0.35);
 }
 form{display:flex;flex-direction:column;gap:16px}
 .fileRow{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:14px 16px;
+  gap:14px;
+  height:64px;
+  padding:0 18px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
-  border-radius:14px;
+  border-radius:16px;
 }
 .fileIcon{
   display:inline-flex;
@@ -136,29 +144,25 @@ form{display:flex;flex-direction:column;gap:16px}
   height:18px;
   fill:currentColor;
 }
-.fileInput{
-  flex:0 0 auto;
-  background:transparent;
-  color:transparent;
-}
-.fileInput::file-selector-button{
-  margin-right:12px;
-  padding:10px 14px;
-  border-radius:10px;
-  border:1px solid #2a3a4d;
-  background:#111c2b;
+.uploadBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:40px;
+  padding:0 16px;
+  border-radius:12px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(0,0,0,0.18);
   color:#e8eef6;
   font-weight:600;
-}
-.fileRow button,
-.fileRow input[type="file"]::file-selector-button{
   transition:transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
-.fileRow input[type="file"]::file-selector-button:hover{
+.uploadBtn:hover{
   transform:translateY(-1px);
   box-shadow:0 8px 18px rgba(0,0,0,0.25);
 }
-.fileRow input[type="file"]::file-selector-button:focus-visible{
+.uploadBtn:focus-within{
   outline:2px solid rgba(63,167,255,0.6);
   outline-offset:2px;
 }
@@ -169,6 +173,8 @@ form{display:flex;flex-direction:column;gap:16px}
   text-overflow:ellipsis;
   min-width:0;
   flex:1;
+  text-align:center;
+  opacity:0.9;
 }
 button{
   width:100%;
@@ -197,12 +203,12 @@ button{
 </head>
 <body>
   <div class="uploadPage">
-    <div class="brandBlock">
-      <div class="bannerWrap">
-        <img class="bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+    <div class="uploadShell">
+      <img class="bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+      <div class="taglineGlass">
+        <div class="taglineText">Optimize Your Route</div>
       </div>
-      <div class="authorityLine">Optimize Your Route</div>
-      <div class="card">
+      <div class="uploadCard">
         <form action="/upload" method="post" enctype="multipart/form-data">
           <div class="fileRow">
             <span class="fileIcon" aria-hidden="true">
@@ -210,8 +216,11 @@ button{
                 <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
               </svg>
             </span>
-            <input class="fileInput" type="file" name="file" accept="application/pdf" required />
-            <span class="fileName" id="fileName">No file chosen</span>
+            <label class="uploadBtn">
+              Upload
+              <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
+            </label>
+            <span class="fileName" id="fileName">Choose file</span>
           </div>
           <button class="buildBtn" type="submit">Build</button>
         </form>
@@ -219,14 +228,14 @@ button{
     </div>
   </div>
   <script>
-    const fileInput = document.querySelector(".fileInput");
+    const fileInput = document.getElementById("fileInput");
     const fileName = document.getElementById("fileName");
 
     if (fileInput && fileName) {
       fileInput.addEventListener("change", () => {
         const name = fileInput.files && fileInput.files.length > 0
           ? fileInput.files[0].name
-          : "No file chosen";
+          : "Choose file";
         fileName.textContent = name;
       });
     }
