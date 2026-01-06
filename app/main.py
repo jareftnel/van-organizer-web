@@ -709,11 +709,21 @@ def organizer_wrapper(jid: str):
 <title>Van Organizer</title>
 <style>
 html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}}
-body{{display:flex;flex-direction:column;height:100vh}}
+body{{display:flex;flex-direction:column;height:100dvh}}
 .banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
 .banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}}
 .wrap{{flex:1 1 auto;padding:0 10px 10px;min-height:0}}
 iframe{{border:0; display:block; width:100%; height:100%}}
+
+@media (max-width: 900px){{
+  .wrap{{padding:0}}
+}}
+@media (max-height: 560px){{
+  .banner img{{max-height:110px}}
+}}
+@media (max-width: 600px) and (orientation: portrait){{
+  .banner img{{max-height:130px}}
+}}
 </style>
 </head>
 <body>
