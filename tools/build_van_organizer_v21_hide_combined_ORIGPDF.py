@@ -414,7 +414,7 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .organizerHeaderRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px}
 .topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
 .topbar > *{min-width:0}
-.brand{font-weight:900}
+.brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
 .sel{margin-left:10px}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
 select{min-width:240px; color-scheme: dark;}
