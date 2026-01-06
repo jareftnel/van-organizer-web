@@ -505,6 +505,7 @@ body{
   width:64px;
   height:auto;
   display:block;
+  filter:drop-shadow(0 0 10px rgba(255,152,0,.85));
 }
 .van.moving img{ animation:vanBob 1.2s ease-in-out infinite; }
 @keyframes vanBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
