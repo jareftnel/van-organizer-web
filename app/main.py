@@ -109,6 +109,7 @@ body{
   height:auto;
   object-fit:contain;
   object-position:center;
+  box-sizing:border-box;
   border:1px solid var(--glassBorder);
   border-radius:var(--r) var(--r) 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
