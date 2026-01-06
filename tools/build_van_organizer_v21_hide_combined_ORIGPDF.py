@@ -400,10 +400,13 @@ HTML_TEMPLATE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>__HEADER_TITLE__</title>
 <style>
-:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
+:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;--page-pad:16px;}
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+main,#app,.page,.shell{width:100%;max-width:none;}
 .wrap{max-width:none;width:100%;margin:0;padding:18px 18px 40px;}
+.organizer-wrap{width:100%;max-width:none;margin:0;padding:0 var(--page-pad) 40px;}
+.organizer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;width:100%;}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;}
 .brand{font-weight:900}
 .sel{margin-left:10px}
@@ -417,7 +420,7 @@ input{min-width:260px;flex:1}
 .pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
-.card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px}
+.card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;width:100%}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -426,23 +429,22 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:flex;justify-content:center;width:100%;}
+.toteWrap{width:100%;}
 .toteBoard{
-  display:inline-flex;
-  flex-direction:row-reverse;
-  gap:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
   padding:8px 0;
-  --cardW: 190px;
+  width:100%;
   --cardH: 150px;
 }
-@media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
-@media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
-@media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
-.toteCol{display:flex;flex-direction:column;gap:14px;}
+@media (max-width: 1200px){ .toteBoard{ --cardH: 145px; } }
+@media (max-width: 980px){  .toteBoard{ --cardH: 140px; } }
+@media (max-width: 760px){  .toteBoard{ --cardH: 136px; gap:12px; } }
 
 .toteCard{
   position:relative;
-  width:var(--cardW);
+  width:100%;
   height:var(--cardH);
   border-radius:18px;
   background:rgba(10,14,20,.72);
@@ -598,7 +600,7 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovTable td:nth-child(2){white-space:nowrap}
 .ovTable td:nth-child(4){white-space:nowrap}
 
-.ovWrap{width:100%;max-width:none;margin:0 auto;padding:0 18px;}
+.ovWrap{width:100%;max-width:none;margin:0 auto;padding:0 var(--page-pad);}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -667,7 +669,7 @@ td:last-child,th:last-child{text-align:right}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap organizer-wrap">
   <div class="topbar">
     <div class="brand">__HEADER_TITLE__</div>
     <div class="sel"><select id="routeSel"></select></div>
@@ -875,59 +877,48 @@ function buildDisplayItems(r, q){
 }
 
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cols = Math.max(1, Math.ceil(items.length/3));
-  const gap = 14;
-  const pad = 36;
-  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
-  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
-  cardW = Math.max(130, Math.min(280, cardW));
+  const cardsHtml = items.map((it)=>{
+    const cur = it.cur;
+    const second = it.second;
+    const main1 = (cur.bag_id || cur.bag || "").toString();
+    const chip1 = bagColorChip(cur.bag);
+    const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+    const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
+    const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
+    const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
+    const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
+    const pkgClass = pkgText ? "hasPkg" : "";
 
-  const colsHtml = Array.from({length: cols}, (_,c)=>{
-    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
-      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
-      const cur = it.cur;
-      const second = it.second;
-      const main1 = (cur.bag_id || cur.bag || "").toString();
-      const chip1 = bagColorChip(cur.bag);
-      const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
-      const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
-      const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-      const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
-      const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
-      const pkgClass = pkgText ? "hasPkg" : "";
-
-      if(second){
-        const main2 = (second.bag_id || second.bag || "").toString();
-        const chip2 = bagColorChip(second.bag);
-        const sub = getSubLine(cur, second);
-        const topNum = (cur.sort_zone ? main1 : main2);
-        const botNum = (cur.sort_zone ? main2 : main1);
-        return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
-          <div class="toteBar"></div>
-          ${badgeHtml}
-          ${pkgHtml}
-          <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
-          <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
-          ${sub ? `<div class="toteSub">${sub}</div>` : ``}
-        </div>`;
-      }
-
-      const sub = getSubLine(cur, null);
-      const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+    if(second){
+      const main2 = (second.bag_id || second.bag || "").toString();
+      const chip2 = bagColorChip(second.bag);
+      const sub = getSubLine(cur, second);
+      const topNum = (cur.sort_zone ? main1 : main2);
+      const botNum = (cur.sort_zone ? main2 : main1);
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
         <div class="toteBar"></div>
         ${badgeHtml}
         ${pkgHtml}
-        ${starHtml}
-        <div class="toteMain">${main1}</div>
+        <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
+        <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
         ${sub ? `<div class="toteSub">${sub}</div>` : ``}
       </div>`;
-    }).join("");
-    return `<div class="toteCol">${cells}</div>`;
+    }
+
+    const sub = getSubLine(cur, null);
+    const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+
+    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+      <div class="toteBar"></div>
+      ${badgeHtml}
+      ${pkgHtml}
+      ${starHtml}
+      <div class="toteMain">${main1}</div>
+      ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+    </div>`;
   }).join("");
 
-  return { colsHtml, cardW };
+  return { cardsHtml };
 }
 
 function buildOverflowMap(r){
@@ -1295,7 +1286,7 @@ function renderBags(r, q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
+      <div class="toteBoard organizer-grid">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1453,7 +1444,7 @@ function renderCombined(r,q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
+      <div class="toteBoard organizer-grid">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
