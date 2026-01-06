@@ -82,12 +82,15 @@ body{
   padding:36px 18px 18px;
 }
 .uploadShell{
-  width:min(1100px, calc(100vw - 120px));
+  width:min(1100px, 92vw);
   margin:0 auto;
   display:flex;
   flex-direction:column;
   align-items:stretch;
   gap:0;
+}
+.uploadShell > *{
+  width:100%;
 }
 .brandBanner{
   height:auto;
@@ -98,13 +101,15 @@ body{
 }
 .taglineGlass{
   width:100%;
-  margin-top:-10px;
+  margin-top:0;
   padding:14px 18px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
   border-radius:10px;
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:0;
   box-shadow:0 16px 40px rgba(0,0,0,0.35);
 }
 .taglineText{
@@ -118,8 +123,10 @@ body{
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
   border-radius:10px;
+  border-top-left-radius:0;
+  border-top-right-radius:0;
   padding:22px;
-  margin-top:12px;
+  margin-top:0;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
 form{display:flex;flex-direction:column;gap:16px}
