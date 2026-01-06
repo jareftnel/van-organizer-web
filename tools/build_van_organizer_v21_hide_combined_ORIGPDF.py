@@ -472,7 +472,13 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;display:flex;flex-direction:column;gap:16px}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;display:flex;flex-direction:column}
+.cardContent{
+  display:flex;
+  flex-direction:column;
+  gap:clamp(10px, 2vh, 18px);
+  padding:clamp(12px, 3vh, 24px);
+}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -784,7 +790,7 @@ td:last-child,th:last-child{text-align:right}
   </div>
 
   <div class="organizerBody">
-    <div id="content" class="card content"></div>
+    <div id="content" class="card content cardContent"></div>
   </div>
 </div>
 
