@@ -86,7 +86,7 @@ body{
   margin:40px auto 0;
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:0;
 }
 .uploadShell > *{
   width:100%;
@@ -105,8 +105,8 @@ body{
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
 .taglineGlass{
-  margin-top:16px;
-  margin-bottom:-12px;
+  margin-top:-10px;
+  margin-bottom:10px;
   padding:12px 18px;
   text-align:center;
   background:linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
@@ -130,34 +130,31 @@ body{
   border-top-left-radius:calc(var(--r) - 6px);
   border-top-right-radius:calc(var(--r) - 6px);
   padding:22px;
+  margin-top:-12px;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
 form{display:flex;flex-direction:column;gap:16px}
 .fileRow{
-  display:flex;
+  display:grid;
+  grid-template-columns:140px 1fr 140px;
   align-items:center;
-  gap:14px;
-  height:64px;
-  padding:0 18px;
+  gap:12px;
+  padding:14px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;
+  border-radius:14px;
 }
-.fileIcon{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  opacity:0.85;
-}
-.fileIcon svg{
+.fileBtn svg{
   width:18px;
   height:18px;
   fill:currentColor;
 }
-.uploadBtn{
+.fileBtn{
+  grid-column:1;
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:8px;
   height:40px;
   padding:0 16px;
   border-radius:12px;
@@ -168,24 +165,34 @@ form{display:flex;flex-direction:column;gap:16px}
   font-weight:600;
   transition:transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
-.uploadBtn:hover{
+.fileBtn:hover{
   transform:translateY(-1px);
   box-shadow:0 8px 18px rgba(0,0,0,0.25);
 }
-.uploadBtn:focus-within{
+.fileBtn:focus-visible{
   outline:2px solid rgba(63,167,255,0.6);
   outline-offset:2px;
 }
-.fileName{
+.fileLabel{
+  grid-column:2;
+  justify-self:center;
   color:rgba(255,255,255,0.85);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   min-width:0;
-  flex:1;
   text-align:center;
   opacity:0.9;
   font-weight:600;
+}
+.fileSpacer{
+  grid-column:3;
+}
+.page, .container, .shell{
+  max-width:none !important;
+  width:100% !important;
+  padding-left:24px;
+  padding-right:24px;
 }
 button{
   width:100%;
@@ -222,16 +229,15 @@ button{
       <div class="uploadCard">
         <form action="/upload" method="post" enctype="multipart/form-data">
           <div class="fileRow">
-            <span class="fileIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
+            <button class="fileBtn" type="button">
+              <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
                 <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
               </svg>
-            </span>
-            <label class="uploadBtn">
               Upload
-              <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
-            </label>
-            <span class="fileName" id="fileName">Choose File</span>
+            </button>
+            <div class="fileLabel" id="fileLabel">Choose File</div>
+            <div class="fileSpacer"></div>
+            <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
           </div>
           <button class="buildBtn" type="submit">Build</button>
         </form>
@@ -240,14 +246,19 @@ button{
   </div>
   <script>
     const fileInput = document.getElementById("fileInput");
-    const fileName = document.getElementById("fileName");
+    const fileLabel = document.getElementById("fileLabel");
+    const fileBtn = document.querySelector(".fileBtn");
 
-    if (fileInput && fileName) {
+    if (fileBtn && fileInput) {
+      fileBtn.addEventListener("click", () => fileInput.click());
+    }
+
+    if (fileInput && fileLabel) {
       fileInput.addEventListener("change", () => {
         const name = fileInput.files && fileInput.files.length > 0
           ? fileInput.files[0].name
           : "Choose File";
-        fileName.textContent = name;
+        fileLabel.textContent = name;
       });
     }
   </script>
