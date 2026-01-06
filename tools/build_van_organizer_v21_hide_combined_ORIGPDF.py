@@ -404,7 +404,9 @@ HTML_TEMPLATE = r"""<!doctype html>
 *{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{width:100%;max-width:none;min-width:0;margin:0;padding:18px;height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
+.wrap{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
+.layout{display:grid;grid-template-columns:620px 1fr;gap:24px;align-items:start;min-width:0;height:100%}
+.controls{display:flex;flex-direction:column;gap:12px;min-width:0}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
 .brand{font-weight:900}
@@ -672,32 +674,42 @@ tr.ovDrag.dropTarget{outline:2px dashed rgba(255,255,255,.25); outline-offset:-6
 th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
+@media (max-width: 1100px){
+  .wrap{padding:16px;height:auto;min-height:100vh;}
+  .layout{height:auto}
+  .layout{grid-template-columns:1fr}
+}
+
 /* Combined tab is shown by default */
 
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="header">
-    <div class="topbar">
-      <div class="brand">__HEADER_TITLE__</div>
-      <div class="sel"><select id="routeSel"></select></div>
-      <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
-      <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
-      <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
-      <div class="downloadRow">
-        <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+  <div class="layout">
+    <div class="controls">
+      <div class="header">
+        <div class="topbar">
+          <div class="brand">__HEADER_TITLE__</div>
+          <div class="sel"><select id="routeSel"></select></div>
+          <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
+          <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
+          <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
+          <div class="downloadRow">
+            <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+          </div>
+        </div>
+
+        <div class="pills">
+          <div class="tab active" data-tab="combined">Bags + Overflow</div>
+          <div class="tab" data-tab="bags">Bags</div>
+          <div class="tab" data-tab="overflow">Overflow</div>
+        </div>
       </div>
     </div>
 
-    <div class="pills">
-      <div class="tab active" data-tab="combined">Bags + Overflow</div>
-      <div class="tab" data-tab="bags">Bags</div>
-      <div class="tab" data-tab="overflow">Overflow</div>
-    </div>
+    <div id="content" class="card content"></div>
   </div>
-
-  <div id="content" class="card content"></div>
 </div>
 
 <script>
