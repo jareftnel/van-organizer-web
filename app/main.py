@@ -438,9 +438,63 @@ body{
 .muted{color:#97a7bd}
 .status{margin-top:14px;font-size:15px;font-weight:600}
 .subtle{margin-top:6px;font-size:13px}
-.bar{margin-top:16px;height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
-.fill{height:100%;background:linear-gradient(90deg,#3fa7ff,#66b6ff);transition:width .25s ease}
 .error{margin-top:12px;color:#ffb4b4;background:#291414;border:1px solid #3a1c1c;padding:10px 12px;border-radius:10px;font-size:13px}
+
+:root{
+  --edv-blue:#2b6f9c;
+  --edv-blue-dark:#1e4f72;
+  --edv-glass:#9ec6df;
+  --edv-wheel:#0b0f14;
+}
+.job-progress{ width:min(860px,92vw); margin:18px auto 0; }
+.road{
+  position:relative;
+  height:18px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#1a1f26,#0f141b);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.lane{
+  position:absolute; left:0; right:0; top:50%;
+  height:2px; transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 12px,transparent 12px 24px);
+  opacity:.45;
+  animation:laneMove 1.2s linear infinite;
+}
+@keyframes laneMove{ from{background-position:0 0;} to{background-position:24px 0;} }
+.van{
+  position:absolute;
+  top:50%;
+  left:0%;
+  transform:translate(-50%,-65%);
+  transition:left .35s ease;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+  pointer-events:none;
+}
+.van svg rect:nth-child(1){ fill:var(--edv-blue); }
+.van svg rect:nth-child(2){ fill:var(--edv-blue-dark); }
+.van svg rect:nth-child(3){ fill:var(--edv-glass); }
+.van svg circle{ fill:var(--edv-wheel); }
+.van.moving svg circle{ animation:wheelSpin 1.2s linear infinite; transform-origin:center; }
+@keyframes wheelSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.van.parsing svg rect:nth-child(1){ fill:#475569; }
+.van.parsing svg rect:nth-child(2){ fill:#334155; }
+.van.building svg rect:nth-child(1){ fill:var(--edv-blue); }
+.van.building svg rect:nth-child(2){ fill:var(--edv-blue-dark); }
+.van.organizing svg rect:nth-child(1){ fill:#f59e0b; }
+.van.organizing svg rect:nth-child(2){ fill:#d97706; }
+.van.complete{ filter:drop-shadow(0 0 12px rgba(34,197,94,.6)); }
+.van.complete svg rect:nth-child(1),
+.van.complete svg rect:nth-child(2){ fill:#22c55e; }
+.job-complete .lane{ animation:none; opacity:.25; }
+.progress-meta{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+  font-weight:600;
+  opacity:.9;
+}
 </style>
 </head>
 <body>
@@ -448,11 +502,25 @@ body{
     <div class="card">
       <div class="title">Building…</div>
 
-      <div class="bar">
-        <div class="fill" id="fill" style="width: __PCT__%"></div>
+      <div class="job-progress" id="jobProgress">
+        <div class="road" aria-hidden="true">
+          <div class="lane"></div>
+          <div class="van building moving" id="vanIcon" style="left: __PCT__%">
+            <svg viewBox="0 0 120 60" width="44" aria-hidden="true">
+              <rect x="10" y="20" rx="6" ry="6" width="75" height="22" />
+              <rect x="70" y="14" rx="6" ry="6" width="30" height="28" />
+              <rect x="78" y="18" rx="3" ry="3" width="14" height="10" />
+              <circle cx="30" cy="46" r="6" />
+              <circle cx="80" cy="46" r="6" />
+            </svg>
+          </div>
+        </div>
+        <div class="progress-meta">
+          <div id="statusText">__STATUS_LINE__</div>
+          <div id="pctText">__PCT__%</div>
+        </div>
       </div>
 
-      <div class="status" id="statusLine">__STATUS_LINE__</div>
       <div class="muted subtle">This page updates automatically.</div>
 
       <div class="error" id="err" style="display:none"></div>
@@ -462,13 +530,36 @@ body{
 <script>
 (function(){
   var jid = "__JID__";
-  var fill = document.getElementById("fill");
-  var statusLine = document.getElementById("statusLine");
   var err = document.getElementById("err");
+  var van = document.getElementById("vanIcon");
+  var root = document.getElementById("jobProgress");
+  var pctEl = document.getElementById("pctText");
+  var statusEl = document.getElementById("statusText");
 
-  function setPct(p){
-    p = Math.max(0, Math.min(100, p|0));
-    fill.style.width = p + "%";
+  function setProgress(pct, statusText){
+    var clamped = Math.max(0, Math.min(100, Number(pct) || 0));
+    van.style.left = clamped + "%";
+    pctEl.textContent = clamped.toFixed(0) + "%";
+    if (typeof statusText === "string") statusEl.textContent = statusText;
+
+    van.className = "van";
+    root.classList.remove("job-complete");
+
+    if (clamped < 100) van.classList.add("moving");
+
+    if (clamped < 25) van.classList.add("parsing");
+    else if (clamped < 60) van.classList.add("building");
+    else if (clamped < 95) van.classList.add("organizing");
+    else van.classList.add("complete");
+
+    if (clamped >= 100){
+      root.classList.add("job-complete");
+      van.classList.remove("moving");
+
+      setTimeout(function(){
+        if (typeof openVanOrganizer === "function") openVanOrganizer();
+      }, 600);
+    }
   }
 
   function showErr(msg){
@@ -492,11 +583,10 @@ body{
       }else{
         nextLine = "Working…";
       }
-      statusLine.textContent = nextLine;
 
       var pct = 0;
       if(s.progress && typeof s.progress.pct !== "undefined") pct = parseInt(s.progress.pct, 10) || 0;
-      setPct(pct);
+      setProgress(pct, nextLine);
 
       var stage = s.progress ? s.progress.stage : "";
       if(s.status === "done" || s.has_html){
