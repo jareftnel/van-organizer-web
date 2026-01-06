@@ -142,16 +142,16 @@ form{display:flex;flex-direction:column;gap:16px}
   border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
 }
-.fileBtn svg{
+.fileBtn .fileIcon{
   width:18px;
   height:18px;
   fill:currentColor;
 }
 .fileBtn{
+  position:relative;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
   height:40px;
   padding:0 16px;
   border-radius:12px;
@@ -162,6 +162,13 @@ form{display:flex;flex-direction:column;gap:16px}
   font-weight:600;
   flex:0 0 auto;
   transition:transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+.fileBtn .fileIcon{
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
 }
 .fileBtn:hover{
   transform:translateY(-1px);
@@ -226,10 +233,10 @@ button{
         <form action="/upload" method="post" enctype="multipart/form-data">
           <div class="fileRow">
             <button class="fileBtn" type="button">
-              <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+              <svg class="fileIcon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
                 <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
               </svg>
-              Upload
+              <span class="uploadText">Upload</span>
             </button>
             <div class="fileNameLabel" id="fileLabel">Choose file</div>
             <div class="fileSpacer"></div>
