@@ -245,26 +245,26 @@ button{
   }
   .brandBanner{
     height:auto;
-    max-height:min(150px, 22svh);
+    max-height:min(180px, 28svh);
     object-fit:contain;
     object-position:center;
   }
   .uploadPage{
     height:100svh;
-    align-items:flex-start;
+    align-items:center;
     padding-top:8px;
-    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+    padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
     --hero-scale:min(
-      0.7,
+      0.82,
       calc(
         (
           100svh
           - 24px
           - env(safe-area-inset-top, 0px)
           - env(safe-area-inset-bottom, 0px)
-        ) / 900
+        ) / 760
       )
     );
     transform:scale(var(--hero-scale));
