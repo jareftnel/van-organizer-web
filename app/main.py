@@ -480,7 +480,7 @@ body{
   border-radius:999px;
   background:linear-gradient(180deg,#5b5f66,#3f434a);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
-  overflow:hidden;
+  overflow:visible;
 }
 .lane{
   position:absolute; left:0; right:0; top:50%;
@@ -493,15 +493,15 @@ body{
 @keyframes laneMove{ from{background-position:0 0;} to{background-position:24px 0;} }
 .van{
   position:absolute;
-  top:50%;
+  top:0;
   left:0%;
-  transform:translate(-50%,-65%);
+  transform:translate(-50%,-80%);
   transition:left .35s ease;
   filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
   pointer-events:none;
 }
 .van img{
-  width:44px;
+  width:64px;
   height:auto;
   display:block;
 }
