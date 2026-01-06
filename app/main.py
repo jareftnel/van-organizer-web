@@ -456,11 +456,12 @@ body{
   max-height:100svh;
   display:flex;
   flex-direction:column;
+  gap:16px;
   border-radius:22px;
   overflow:hidden;
   background:#101826;
   border:1px solid #1c2a3a;
-  padding:24px 22px;
+  padding:26px 24px;
   box-shadow:0 18px 40px rgba(5,9,14,.45);
 }
 .title{font-size:24px;font-weight:800;letter-spacing:.2px}
@@ -475,7 +476,7 @@ body{
   --edv-glass:#9ec6df;
   --edv-wheel:#0b0f14;
 }
-.job-progress{ width:min(860px,92vw); margin:18px auto 0; }
+.job-progress{ width:100%; margin:10px 0 0; }
 .road{
   position:relative;
   height:20px;
@@ -518,7 +519,7 @@ body{
 .progress-meta{
   display:flex;
   justify-content:space-between;
-  margin-top:10px;
+  margin-top:14px;
   font-weight:600;
   opacity:.9;
 }
