@@ -405,9 +405,9 @@ HTML_TEMPLATE = r"""<!doctype html>
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
-.layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;max-width:none;margin:0;height:100%}
+.layout{display:grid;grid-template-columns:clamp(420px,32vw,560px) minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;height:100%}
 .layout > *{min-width:0}
-.controls{display:flex;flex-direction:column;gap:12px;min-width:0}
+.controls{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:560px;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
 .topbar > *{min-width:0}
