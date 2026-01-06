@@ -411,7 +411,7 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
-.organizerHeaderRow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px}
+.organizerHeaderRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px}
 .topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
 .topbar > *{min-width:0}
 .brand{font-weight:900}
@@ -762,12 +762,6 @@ td:last-child,th:last-child{text-align:right}
             <div class="sel"><select id="routeSel"></select></div>
             <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
           </div>
-          <div class="topCounts">
-            <span class="dot"></span>
-            <span id="bagsCount">0</span>&nbsp;bags
-            <span aria-hidden="true">•</span>
-            <span id="ovCount">0</span>&nbsp;overflow
-          </div>
           <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
         </div>
 
@@ -778,6 +772,12 @@ td:last-child,th:last-child{text-align:right}
             <div class="toggleRow" id="toggleRow"></div>
           </div>
           <div class="sectionRight">
+            <div class="topCounts">
+              <span class="dot"></span>
+              <span id="bagsCount">0</span>&nbsp;bags
+              <span aria-hidden="true">•</span>
+              <span id="ovCount">0</span>&nbsp;overflow
+            </div>
             <div class="tabsRow">
               <div class="tab active" data-tab="combined">Bags + Overflow</div>
               <div class="tab" data-tab="bags">Bags</div>
