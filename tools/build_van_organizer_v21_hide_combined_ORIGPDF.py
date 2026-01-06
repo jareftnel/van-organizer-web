@@ -403,11 +403,12 @@ HTML_TEMPLATE = r"""<!doctype html>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *{box-sizing:border-box}
 html,body{height:100%;width:100%}
-body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerRoot{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
-.layout{display:grid;grid-template-columns:clamp(420px,32vw,560px) minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;height:100%}
-.layout > *{min-width:0}
-.controls{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:560px;width:100%}
+body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
+.organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
+.organizerBody{flex:1 1 auto;min-height:0;overflow:auto}
+.organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
+.controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
 .topbar > *{min-width:0}
@@ -424,7 +425,7 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:visible;min-height:0}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow:visible}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -436,14 +437,12 @@ input{min-width:260px;flex:1}
 .toteWrap{display:flex;justify-content:flex-start;width:100%;min-width:0;}
 .toteBoard{
   display:grid;
-  grid-auto-flow:column;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  grid-auto-columns: minmax(0, 1fr);
+  width:100%;
   gap:16px;
   padding:8px 0;
-  width:100%;
   min-width:0;
-  direction:rtl;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-flow: row;
   --cardW: 190px;
   --cardH: 150px;
 }
@@ -680,14 +679,12 @@ th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
 @media (max-width: 1100px){
-  .organizerRoot{padding:16px;height:auto;min-height:100vh;}
-  .layout{height:auto}
-  .layout{grid-template-columns:1fr}
+  .organizerPage{padding:16px;min-height:100vh;}
 }
 
 /* FULL-WIDTH OVERRIDE */
-.organizerRoot,
-.layout{
+.organizerPage,
+.organizerRoot{
   width:100% !important;
   max-width:none !important;
   margin:0 !important;
@@ -698,8 +695,8 @@ td:last-child,th:last-child{text-align:right}
 </style>
 </head>
 <body>
-<div class="organizerRoot">
-  <div class="layout">
+<div class="organizerRoot organizerPage">
+  <div class="organizerHeader">
     <div class="controls">
       <div class="header">
         <div class="topbar">
@@ -720,7 +717,9 @@ td:last-child,th:last-child{text-align:right}
         </div>
       </div>
     </div>
+  </div>
 
+  <div class="organizerBody">
     <div id="content" class="card content"></div>
   </div>
 </div>

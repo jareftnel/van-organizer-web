@@ -425,10 +425,15 @@ iframe{{border:0; display:block}}
       if (!isMobile) scale = 1;
 
       // NO template literals here (avoid Python f-string conflicts)
-      inner.style.transform = "scale(" + scale.toFixed(4) + ")";
-      inner.style.width = span.width + "px";
+      if (isMobile && scale < 1) {{
+        inner.style.transform = "scale(" + scale.toFixed(4) + ")";
+        inner.style.width = span.width + "px";
+      }} else {{
+        inner.style.transform = "none";
+        inner.style.width = "100%";
+      }}
 
-      if (scale < 1) {{
+      if (isMobile && scale < 1) {{
         frame.style.width = span.width + "px";
       }} else {{
         frame.style.width = "100%";
