@@ -441,8 +441,10 @@ input{min-width:260px;flex:1}
   gap:16px;
   padding:8px 0;
   min-width:0;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  grid-auto-flow: row;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
+  direction: rtl;
   --cardW: 190px;
   --cardH: 150px;
 }
