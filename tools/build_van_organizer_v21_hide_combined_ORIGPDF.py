@@ -406,9 +406,11 @@ html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
 .layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;max-width:none;margin:0;height:100%}
+.layout > *{min-width:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
+.topbar > *{min-width:0}
 .brand{font-weight:900}
 .sel{margin-left:10px}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
@@ -611,7 +613,10 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovTable td:nth-child(4){white-space:nowrap}
 
 .ovWrap{width:100%;max-width:none;margin:0;padding:0 18px;}
+.controlsRow{min-width:0}
+.controlsRow > *{min-width:0}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ovHeader > *{min-width:0}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .downloadRow{flex-basis:100%;display:flex;justify-content:flex-end}
@@ -723,6 +728,40 @@ td:last-child,th:last-child{text-align:right}
 <script>
 const ROUTES = __ROUTES_JSON__;
 const WAVE_LABEL_BY_TIME = __WAVE_JSON__;
+const organizerRoot = document.querySelector(".organizerRoot");
+
+let layoutWidth = 0;
+let measureRaf = 0;
+let renderRaf = 0;
+
+function applyLayoutWidth(nextWidth){
+  if(!nextWidth || !isFinite(nextWidth)) return;
+  if(Math.abs(nextWidth - layoutWidth) < 0.5) return;
+  layoutWidth = nextWidth;
+  document.documentElement.style.setProperty("--layoutWidth", Math.round(layoutWidth) + "px");
+}
+
+function measureLayout(){
+  if(!organizerRoot) return;
+  const w = organizerRoot.getBoundingClientRect().width;
+  applyLayoutWidth(w);
+}
+
+function scheduleMeasure(){
+  if(measureRaf) cancelAnimationFrame(measureRaf);
+  measureRaf = requestAnimationFrame(()=>{
+    measureLayout();
+    requestAnimationFrame(measureLayout);
+  });
+}
+
+function scheduleRender(){
+  if(renderRaf) return;
+  renderRaf = requestAnimationFrame(()=>{
+    renderRaf = 0;
+    render();
+  });
+}
 
 // --- Persistent state ---
 const STORAGE_KEY = "vanorg_loaded_v1";
@@ -1518,6 +1557,7 @@ function render(){
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
+  scheduleMeasure();
 }
 
 function buildRouteDropdown(){
@@ -1576,7 +1616,28 @@ function init(){
       render();
     });
   });
-  window.addEventListener('resize', ()=>{ if(activeTab==='bags') render(); });
+  if(organizerRoot && "ResizeObserver" in window){
+    const ro = new ResizeObserver(()=>{
+      measureLayout();
+      scheduleRender();
+    });
+    ro.observe(organizerRoot);
+  }
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{
+      scheduleMeasure();
+      scheduleRender();
+    });
+  }
+  window.addEventListener('orientationchange', ()=>{
+    scheduleMeasure();
+    scheduleRender();
+  });
+  window.addEventListener('resize', ()=>{
+    scheduleMeasure();
+    scheduleRender();
+  });
+  scheduleMeasure();
   render();
 }
 init();
