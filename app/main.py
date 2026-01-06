@@ -495,7 +495,7 @@ body{
   pointer-events:none;
 }
 .van img{
-  width:46px;
+  width:32px;
   height:auto;
   display:block;
 }
