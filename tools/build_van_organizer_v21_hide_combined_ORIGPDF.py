@@ -412,7 +412,6 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0;overflow-x:auto}
 .organizerHeaderRow{display:flex;align-items:center;gap:16px;flex-wrap:nowrap;min-width:0}
-.topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:nowrap;min-width:0;flex:1 1 auto;overflow:hidden}
 .topbar > *{min-width:0}
 .brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
 .brand .routeDate{font-weight:800;}
@@ -424,6 +423,8 @@ select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
 input{min-width:140px;flex:1 1 auto;width:auto}
+.topbar .downloadBtn{margin-left:auto;}
+.topbarBreak{display:none;}
 .topCounts{
   display:flex;
   align-items:center;
@@ -742,6 +743,15 @@ td:last-child,th:last-child{text-align:right}
   .downloadBtn{padding:6px 10px;font-size:12px;}
 }
 
+@media (max-width: 720px) and (orientation: portrait){
+  .organizerHeaderRow{flex-wrap:wrap;align-items:center;}
+  .topbar .brand{order:1;}
+  .topbar .downloadBtn{order:2;}
+  .topbarBreak{display:block;flex-basis:100%;height:0;order:3;}
+  .topbar .sel{order:4;margin-left:0;}
+  .topbar #q{order:5;}
+}
+
 /* FULL-WIDTH OVERRIDE */
 .organizerPage,
 .organizerRoot{
@@ -767,19 +777,18 @@ td:last-child,th:last-child{text-align:right}
     <div class="controls">
       <div class="header">
         <div class="topbar organizerHeaderRow">
-          <div class="topbarLeft">
-            <div class="brand">
-              <span class="routeCode">__HEADER_ROUTE_CODE__</span>
-              <span class="routeSep">__HEADER_ROUTE_SEP__</span>
-              <span class="routeDate">__HEADER_ROUTE_DATE__</span>
-            </div>
-            <div class="sel"><select id="routeSel"></select></div>
-            <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
+          <div class="brand">
+            <span class="routeCode">__HEADER_ROUTE_CODE__</span>
+            <span class="routeSep">__HEADER_ROUTE_SEP__</span>
+            <span class="routeDate">__HEADER_ROUTE_DATE__</span>
           </div>
+          <div class="sel"><select id="routeSel"></select></div>
+          <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
           <a class="downloadBtn" href="download/STACKED.pdf">
             <span class="downloadLabelFull">DOWNLOAD PDF</span>
             <span class="downloadLabelShort">PDF</span>
           </a>
+          <span class="topbarBreak" aria-hidden="true"></span>
         </div>
 
         <div class="sectionHeaderRow">
