@@ -748,8 +748,9 @@ td:last-child,th:last-child{text-align:right}
   .topbar .brand{order:1;}
   .topbar .downloadBtn{order:2;}
   .topbarBreak{display:block;flex-basis:100%;height:0;order:3;}
-  .topbar .sel{order:4;margin-left:0;}
-  .topbar #q{order:5;}
+  .topbar .sel{order:4;margin-left:0;flex:0 1 44%;}
+  .topbar .sel select{width:100%;}
+  .topbar #q{order:5;flex:1 1 56%;min-width:0;}
 }
 
 /* FULL-WIDTH OVERRIDE */
@@ -783,7 +784,7 @@ td:last-child,th:last-child{text-align:right}
             <span class="routeDate">__HEADER_ROUTE_DATE__</span>
           </div>
           <div class="sel"><select id="routeSel"></select></div>
-          <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
+          <input id="q" placeholder="Search"/>
           <a class="downloadBtn" href="download/STACKED.pdf">
             <span class="downloadLabelFull">DOWNLOAD PDF</span>
             <span class="downloadLabelShort">PDF</span>
