@@ -401,12 +401,12 @@ HTML_TEMPLATE = r"""<!doctype html>
 <title>__HEADER_TITLE__</title>
 <style>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
-*{box-sizing:border-box}
+*, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
-body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+body{margin:0;min-height:100vh;overflow-x:hidden;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:auto;padding:24px}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow-y:auto;overflow-x:hidden;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -446,6 +446,7 @@ input{min-width:260px;flex:1}
   --cardW: 190px;
   --cardH: 150px;
 }
+.bagsGrid{width:100%;max-width:100%;overflow:visible}
 @media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
 @media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
 @media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
@@ -1380,7 +1381,7 @@ function renderBags(r, q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
+      <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1538,7 +1539,7 @@ function renderCombined(r,q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
+      <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
