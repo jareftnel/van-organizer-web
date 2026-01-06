@@ -110,7 +110,7 @@ body{
   object-fit:contain;
   object-position:center;
   border:1px solid var(--glassBorder);
-  border-radius:22px 22px 0 0;
+  border-radius:var(--r) var(--r) 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
 .tagGlass{
@@ -138,7 +138,7 @@ body{
   max-width:100%;
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
-  border-radius:0 0 18px 18px;
+  border-radius:0 0 var(--r) var(--r);
   padding:22px;
   margin-top:0;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
