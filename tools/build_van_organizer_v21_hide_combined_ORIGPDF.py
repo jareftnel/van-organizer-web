@@ -402,11 +402,11 @@ HTML_TEMPLATE = r"""<!doctype html>
 <style>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;min-height:100vh;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{max-width:none;width:100%;margin:0;padding:18px;min-height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
-.header{display:flex;flex-direction:column;gap:12px}
-.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;}
+html,body{height:100%;width:100%}
+body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+.wrap{max-width:none;width:100%;min-width:0;margin:0;padding:18px;min-height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
+.header{display:flex;flex-direction:column;gap:12px;min-width:0}
+.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
 .brand{font-weight:900}
 .sel{margin-left:10px}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
@@ -419,8 +419,8 @@ input{min-width:260px;flex:1}
 .pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
-.card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px}
-.content{margin-top:0;overflow:auto;min-height:0}
+.card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:visible;min-height:0}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -429,12 +429,14 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:flex;justify-content:center;width:100%;}
+.toteWrap{display:flex;justify-content:center;width:100%;min-width:0;}
 .toteBoard{
-  display:inline-flex;
-  flex-direction:row-reverse;
-  gap:14px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px;
   padding:8px 0;
+  width:100%;
+  min-width:0;
   --cardW: 190px;
   --cardH: 150px;
 }
@@ -445,7 +447,8 @@ input{min-width:260px;flex:1}
 
 .toteCard{
   position:relative;
-  width:var(--cardW);
+  width:100%;
+  min-width:0;
   height:var(--cardH);
   border-radius:18px;
   background:rgba(10,14,20,.72);
@@ -880,59 +883,48 @@ function buildDisplayItems(r, q){
 }
 
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cols = Math.max(1, Math.ceil(items.length/3));
-  const gap = 14;
-  const pad = 36;
-  const containerW = Math.max(360, (window.innerWidth||1200) - pad);
-  let cardW = Math.floor((containerW - gap*(cols-1)) / cols);
-  cardW = Math.max(130, Math.min(280, cardW));
+  const cardsHtml = items.map((it)=>{
+    const cur = it.cur;
+    const second = it.second;
+    const main1 = (cur.bag_id || cur.bag || "").toString();
+    const chip1 = bagColorChip(cur.bag);
+    const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+    const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
+    const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
+    const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
+    const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
+    const pkgClass = pkgText ? "hasPkg" : "";
 
-  const colsHtml = Array.from({length: cols}, (_,c)=>{
-    const cells = [items[c*3], items[c*3+1], items[c*3+2]].map(it=>{
-      if(!it) return `<div class="toteCard" style="opacity:.10;cursor:default"><div class="toteBar" style="--chipL:#222;--chipR:#222"></div></div>`;
-      const cur = it.cur;
-      const second = it.second;
-      const main1 = (cur.bag_id || cur.bag || "").toString();
-      const chip1 = bagColorChip(cur.bag);
-      const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
-      const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
-      const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-      const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
-      const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
-      const pkgClass = pkgText ? "hasPkg" : "";
-
-      if(second){
-        const main2 = (second.bag_id || second.bag || "").toString();
-        const chip2 = bagColorChip(second.bag);
-        const sub = getSubLine(cur, second);
-        const topNum = (cur.sort_zone ? main1 : main2);
-        const botNum = (cur.sort_zone ? main2 : main1);
-        return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
-          <div class="toteBar"></div>
-          ${badgeHtml}
-          ${pkgHtml}
-          <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
-          <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
-          ${sub ? `<div class="toteSub">${sub}</div>` : ``}
-        </div>`;
-      }
-
-      const sub = getSubLine(cur, null);
-      const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+    if(second){
+      const main2 = (second.bag_id || second.bag || "").toString();
+      const chip2 = bagColorChip(second.bag);
+      const sub = getSubLine(cur, second);
+      const topNum = (cur.sort_zone ? main1 : main2);
+      const botNum = (cur.sort_zone ? main2 : main1);
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
         <div class="toteBar"></div>
         ${badgeHtml}
         ${pkgHtml}
-        ${starHtml}
-        <div class="toteMain">${main1}</div>
+        <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
+        <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
         ${sub ? `<div class="toteSub">${sub}</div>` : ``}
       </div>`;
-    }).join("");
-    return `<div class="toteCol">${cells}</div>`;
+    }
+
+    const sub = getSubLine(cur, null);
+    const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+
+    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+      <div class="toteBar"></div>
+      ${badgeHtml}
+      ${pkgHtml}
+      ${starHtml}
+      <div class="toteMain">${main1}</div>
+      ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+    </div>`;
   }).join("");
 
-  return { colsHtml, cardW };
+  return { cardsHtml };
 }
 
 function buildOverflowMap(r){
@@ -1300,7 +1292,7 @@ function renderBags(r, q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
+      <div class="toteBoard">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1458,7 +1450,7 @@ function renderCombined(r,q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard" style="--cardW:${layout.cardW}px">${layout.colsHtml}</div>
+      <div class="toteBoard">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
