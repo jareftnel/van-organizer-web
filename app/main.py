@@ -181,49 +181,51 @@ def job_page(jid: str):
     pct = int(prog.get("pct", 0) or 0)
     pct = max(0, min(100, pct))
 
-    prog_pretty = json.dumps(prog, indent=2)
+    status_line = ""
+    if prog.get("page") is not None and prog.get("pages") is not None:
+        status_line = f"Processing route {prog.get('page')} of {prog.get('pages')}"
+    elif prog.get("msg"):
+        status_line = str(prog.get("msg"))
+    elif status:
+        status_line = str(status)
+    else:
+        status_line = "Working…"
 
     html = """<!doctype html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Job __JID__</title>
+<title>Building…</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}
-.card{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b0f14;color:#e8eef6;padding:24px}
+.card{width:min(540px,100%);background:#101826;border:1px solid #1c2a3a;border-radius:18px;padding:24px 22px;box-shadow:0 18px 40px rgba(5,9,14,.45)}
+.title{font-size:24px;font-weight:800;letter-spacing:.2px}
 .muted{color:#97a7bd}
-.bar{height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
-.fill{height:100%;background:#3fa7ff;transition:width .25s ease}
-pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12px;border-radius:12px;margin-top:12px}
+.status{margin-top:14px;font-size:15px;font-weight:600}
+.subtle{margin-top:6px;font-size:13px}
+.bar{margin-top:16px;height:10px;background:#0f1722;border:1px solid #1c2a3a;border-radius:999px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#3fa7ff,#66b6ff);transition:width .25s ease}
+.error{margin-top:12px;color:#ffb4b4;background:#291414;border:1px solid #3a1c1c;padding:10px 12px;border-radius:10px;font-size:13px}
 </style>
 </head>
 <body>
   <div class="card">
-    <div style="font-weight:900">Job __JID__</div>
+    <div class="title">Building…</div>
 
-    <div class="muted" style="margin-top:6px">
-      Status: <b id="st">__STATUS__</b>
-    </div>
-
-    <div style="margin-top:12px" class="bar">
+    <div class="bar">
       <div class="fill" id="fill" style="width: __PCT__%"></div>
     </div>
 
-    <div class="muted" style="margin-top:10px">Progress:</div>
-    <pre id="prog">__PROG__</pre>
+    <div class="status" id="statusLine">__STATUS_LINE__</div>
+    <div class="muted subtle">This page updates automatically.</div>
 
-    <pre id="err" style="display:none"></pre>
-
-    <div class="muted" style="margin-top:14px;font-size:13px">
-      Leave this page open — it will update automatically.
-    </div>
+    <div class="error" id="err" style="display:none"></div>
   </div>
 
 <script>
 (function(){
   var jid = "__JID__";
-  var stEl = document.getElementById("st");
   var fill = document.getElementById("fill");
-  var prog = document.getElementById("prog");
+  var statusLine = document.getElementById("statusLine");
   var err = document.getElementById("err");
 
   function setPct(p){
@@ -242,15 +244,24 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
       if(!r.ok) return;
       var s = await r.json();
 
-      stEl.textContent = s.status || "";
-      prog.textContent = JSON.stringify(s.progress || {}, null, 2);
+      var nextLine = "";
+      if(s.progress && typeof s.progress.page !== "undefined" && typeof s.progress.pages !== "undefined"){
+        nextLine = "Processing route " + s.progress.page + " of " + s.progress.pages;
+      }else if(s.progress && s.progress.msg){
+        nextLine = s.progress.msg;
+      }else if(s.status){
+        nextLine = s.status;
+      }else{
+        nextLine = "Working…";
+      }
+      statusLine.textContent = nextLine;
 
       var pct = 0;
       if(s.progress && typeof s.progress.pct !== "undefined") pct = parseInt(s.progress.pct, 10) || 0;
       setPct(pct);
 
       var stage = s.progress ? s.progress.stage : "";
-      if(s.status === "done" && stage === "done" && pct >= 100){
+      if(s.status === "done" || s.has_html){
         // Cache-bust so mobile browsers don't show old files
         var bust = "v=" + Date.now();
         window.location.replace(s.organizer_url + "?" + bust);
@@ -274,9 +285,8 @@ pre{white-space:pre-wrap;background:#0f1722;border:1px solid #1c2a3a;padding:12p
 
     html = (
         html.replace("__JID__", jid)
-            .replace("__STATUS__", str(status))
             .replace("__PCT__", str(pct))
-            .replace("__PROG__", prog_pretty)
+            .replace("__STATUS_LINE__", status_line)
     )
     return HTMLResponse(html)
 
