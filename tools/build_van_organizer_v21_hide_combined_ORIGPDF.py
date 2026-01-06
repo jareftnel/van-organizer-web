@@ -489,14 +489,16 @@ input{min-width:260px;flex:1}
 }
 .bagsGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-  grid-auto-flow:row;
+  grid-template-rows:repeat(3, minmax(0, 1fr));
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(240px, 1fr);
   gap:16px;
   align-items:stretch;
   width:100%;
   max-width:100%;
   height:auto;
   overflow:visible;
+  direction:rtl;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
