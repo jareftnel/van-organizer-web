@@ -233,7 +233,23 @@ button{
   transform:translateY(1px);
   box-shadow:0 8px 18px rgba(0,0,0,0.25);
 }
-@media (max-height: 560px){
+@media (orientation: landscape) and (max-height: 560px){
+  html, body{
+    height:100%;
+    overflow:hidden;
+  }
+  .uploadPage{
+    height:100svh;
+    align-items:flex-start;
+    padding-top:12px;
+    padding-bottom:12px;
+  }
+  .heroWrap{
+    transform:scale(0.85);
+    transform-origin:top center;
+  }
+}
+@media (orientation: portrait) and (max-height: 560px){
   html, body{
     height:auto;
     min-height:100%;
