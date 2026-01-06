@@ -421,7 +421,40 @@ select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
 input{min-width:260px;flex:1}
-.pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.subHeaderRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  width:100%;
+  margin-top:10px;
+}
+.subHeaderLeft{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:420px;
+}
+.subHeaderRight{
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-start;
+  flex:1;
+  padding-top:2px;
+}
+.routeTitle{
+  height:34px;
+  display:flex;
+  align-items:center;
+  font-weight:900;
+}
+.toggleRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.tabsRow{display:flex;gap:10px;margin:0 !important;}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
@@ -470,24 +503,40 @@ input{min-width:260px;flex:1}
   cursor:pointer;
   container-type:inline-size;
   direction:ltr;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  row-gap:10px;
+  padding:14px 16px;
+  min-height:160px;
 }
+.toteCard *{box-sizing:border-box;}
 .toteCard.draggable{cursor:grab;}
 .toteCard.dragging{opacity:.25;}
 .toteCard.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
 .toteCard.loaded{filter:grayscale(.85) brightness(.72);}
 
+.toteTopRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.toteMetaRight{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 .toteBar{
-  position:absolute; left:48px; right:48px; top:16px;
+  flex:1;
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
-  z-index:1;
   pointer-events:none;
+  min-width:40px;
 }
 
 .toteIdx{
-  position:absolute; left:10px; top:10px;
   width:26px; height:26px;
   display:flex; align-items:center; justify-content:center;
   border-radius:999px;
@@ -495,20 +544,17 @@ input{min-width:260px;flex:1}
   border:1px solid rgba(255,255,255,.16);
   font-weight:900;
   font-size:12px;
-  z-index:3;
+  flex-shrink:0;
 }
 
 .totePkg{
-  position:absolute; right:10px; top:10px;
   font-weight:900;
   font-size:11px;
   color:#ff4b4b;
-  z-index:3;
+  flex-shrink:0;
 }
-.toteCard.hasPkg .toteStar{ top:32px; }
 
 .toteStar{
-  position:absolute; right:10px; top:10px;
   width:22px; height:22px;
   display:flex; align-items:center; justify-content:center;
   border-radius:8px;
@@ -519,93 +565,64 @@ input{min-width:260px;flex:1}
   color:#ff4b4b;
   line-height:1;
   user-select:none;
-  z-index:3;
+  flex-shrink:0;
 }
 .toteStar.combine{
-  top:6px;
-  left:6px;
-  right:auto;
   color:#FFD400;
   border-color: rgba(255,212,0,.45);
   background: rgba(255,212,0,.12);
 }
-.toteCard.hasPkg .toteStar.combine{top:6px;}
 .toteStar.on{
-  top:auto;
-  bottom:10px;
   border-color: rgba(255,75,75,.45);
   background: rgba(255,75,75,.08);
 }
-.toteCard.hasPkg .toteStar.on{top:auto; bottom:10px;}
-
-.toteMain{
-  position:absolute; left:0; right:0;
-  top:64px; bottom:52px;
-  display:flex; align-items:center; justify-content:center;
+.toteBigNumber{
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  font-weight:900;
+  font-weight:800;
+  line-height:1;
+  font-size: clamp(44px, 5vw, 64px);
+  margin:0;
   letter-spacing:1px;
-  line-height:1.08;
-  padding:0 12px 6px;
-  box-sizing:border-box;
-  font-size: clamp(20px, 22cqi, 56px);
   white-space:nowrap;
-  z-index:2;
+  position:static !important;
 }
-.toteMainStack{
-  position:absolute; left:0; right:0;
-  top:62px; bottom:52px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
+.toteBigNumberStack{
+  flex-direction:column;
   gap: clamp(2px, 1.2cqi, 10px);
-  padding:0 12px 6px;
-  box-sizing:border-box;
-  text-align:center;
-  z-index:2;
 }
-.toteMainStack .toteMainLine{
+.toteBigNumberLine{
   font-weight:900;
   letter-spacing:1px;
-  line-height:1.08;
+  line-height:1;
   max-width:100%;
   white-space:nowrap;
-  font-size: clamp(18px, 18cqi, 48px);
+  font-size: clamp(32px, 4.5vw, 56px);
 }
-
-.toteSub{
-  position:absolute; left:0; right:0; bottom:12px;
+.toteBottomRow{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  line-height:1.1;
   text-align:center;
   font-weight:800;
   letter-spacing:.2px;
   opacity:.92;
   font-size: clamp(11px, 7cqi, 14px);
-  line-height:1.1;
-  padding:0 12px;
-  box-sizing:border-box;
+  position:static !important;
 }
 .ovZone{color:inherit;}
 .ovZone99{color:#b46bff;}
-.toteSub .ovLine{line-height:1.25;}
+.toteBottomRow .ovLine{line-height:1.25;}
 
 @container (max-width: 240px){
-  .toteMain{ top:58px; bottom:50px; font-size: clamp(18px, 24cqi, 44px); }
-  .toteMainStack{ top:56px; bottom:50px; }
-  .toteMainStack .toteMainLine{ font-size: clamp(16px, 20cqi, 38px); }
-  .toteSub{ bottom:10px; font-size: clamp(10px, 8cqi, 13px); }
-}
-  .toteMainStack{
-  position:absolute; left:0; right:0;
-  top:62px; bottom:52px;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap: clamp(2px, 1.2cqi, 10px);
-  padding:0 12px 6px;
-  box-sizing:border-box;
-  text-align:center;
-  z-index:2;
-}
-  .toteMainStack .toteMainLine{ font-size: clamp(16px, 20cqi, 38px); }
-  .toteSub{ bottom:10px; font-size: clamp(10px, 8cqi, 13px); }
+  .toteBigNumber{ font-size: clamp(36px, 6vw, 52px); }
+  .toteBigNumberLine{ font-size: clamp(24px, 5vw, 40px); }
+  .toteBottomRow{ font-size: clamp(10px, 8cqi, 13px); }
 }
 
 /* tables */
@@ -618,7 +635,7 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovTable td:nth-child(4){white-space:nowrap}
 
 .ovWrap{width:100%;max-width:none;margin:0;padding:0 18px;}
-.controlsRow{min-width:0}
+.controlsRow{min-width:0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .controlsRow > *{min-width:0}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .ovHeader > *{min-width:0}
@@ -716,10 +733,18 @@ td:last-child,th:last-child{text-align:right}
           </div>
         </div>
 
-        <div class="pills">
-          <div class="tab active" data-tab="combined">Bags + Overflow</div>
-          <div class="tab" data-tab="bags">Bags</div>
-          <div class="tab" data-tab="overflow">Overflow</div>
+        <div class="subHeaderRow">
+          <div class="subHeaderLeft">
+            <div class="routeTitle" id="routeTitle"></div>
+            <div class="toggleRow" id="toggleRow"></div>
+          </div>
+          <div class="subHeaderRight">
+            <div class="tabsRow">
+              <div class="tab active" data-tab="combined">Bags + Overflow</div>
+              <div class="tab" data-tab="bags">Bags</div>
+              <div class="tab" data-tab="overflow">Overflow</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -883,9 +908,34 @@ const qBox = document.getElementById("q");
 const bagsCount = document.getElementById("bagsCount");
 const ovCount = document.getElementById("ovCount");
 const content = document.getElementById("content");
+const routeTitleEl = document.getElementById("routeTitle");
+const toggleRow = document.getElementById("toggleRow");
 
 function routeTitle(r){ return (r.route_short||"") + (r.cx ? ` (${r.cx})` : ""); }
 function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
+function subHeaderTitle(r){
+  if(activeTab==="bags") return `${routeTitle(r)} — Bags`;
+  if(activeTab==="overflow") return `${routeTitle(r)} — Overflow`;
+  return `${routeTitle(r)} — Bags + Overflow`;
+}
+function updateSubHeader(r){
+  if(routeTitleEl) routeTitleEl.textContent = subHeaderTitle(r);
+  if(!toggleRow) return;
+  if(activeTab === "overflow"){
+    toggleRow.innerHTML = "";
+    toggleRow.style.display = "none";
+    return;
+  }
+  const mode = getMode(r.route_short);
+  toggleRow.style.display = "flex";
+  toggleRow.innerHTML = `
+    <div class="modeToggle" role="tablist" aria-label="Bag order mode">
+      <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
+      <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
+      <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
+    </div>
+  `;
+}
 
 // Saturated chips (high-contrast)
 function bagColorChip(label){
@@ -1014,12 +1064,19 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
       return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};${posStyle}">
-        <div class="toteBar"></div>
-        ${badgeHtml}
-        ${pkgHtml}
-        <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
-        <div class="toteMainStack"><div class="toteMainLine">${topNum}</div><div class="toteMainLine">${botNum}</div></div>
-        ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+        <div class="toteTopRow">
+          ${badgeHtml}
+          <div class="toteBar"></div>
+          <div class="toteMetaRight">
+            ${pkgHtml}
+            <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
+          </div>
+        </div>
+        <div class="toteBigNumber toteBigNumberStack">
+          <div class="toteBigNumberLine">${topNum}</div>
+          <div class="toteBigNumberLine">${botNum}</div>
+        </div>
+        ${sub ? `<div class="toteBottomRow">${sub}</div>` : ``}
       </div>`;
     }
 
@@ -1027,12 +1084,16 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
     return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};${posStyle}">
-      <div class="toteBar"></div>
-      ${badgeHtml}
-      ${pkgHtml}
-      ${starHtml}
-      <div class="toteMain">${main1}</div>
-      ${sub ? `<div class="toteSub">${sub}</div>` : ``}
+      <div class="toteTopRow">
+        ${badgeHtml}
+        <div class="toteBar"></div>
+        <div class="toteMetaRight">
+          ${pkgHtml}
+          ${starHtml}
+        </div>
+      </div>
+      <div class="toteBigNumber">${main1}</div>
+      ${sub ? `<div class="toteBottomRow">${sub}</div>` : ``}
     </div>`;
   }).join("");
 
@@ -1071,17 +1132,16 @@ function overflowSummary(bagLabel, ovMap){
 function fitToteText(){
   const cards = document.querySelectorAll('#bagsBoard .toteCard');
   for(const card of cards){
-    const main = card.querySelector('.toteMain');
-    const stack = card.querySelector('.toteMainStack');
-    const innerW = card.clientWidth - 24;
-    const innerH = card.clientHeight - 64 - 52;
+    const main = card.querySelector('.toteBigNumber:not(.toteBigNumberStack)');
+    const stack = card.querySelector('.toteBigNumberStack');
+    const innerW = card.clientWidth - 32;
     if(main){
       const el = main;
       const max = parseFloat(getComputedStyle(el).fontSize);
       let lo = 10, hi = max, best = 10;
       const fits = (fs)=>{
         el.style.fontSize = fs+'px';
-        return (el.scrollWidth <= innerW + 1) && (el.scrollHeight <= innerH + 1);
+        return el.scrollWidth <= innerW + 1;
       };
       if(fits(max)){ el.style.fontSize=''; }
       else{
@@ -1093,7 +1153,7 @@ function fitToteText(){
       }
     }
     if(stack){
-      const lines = stack.querySelectorAll('.toteMainLine');
+      const lines = stack.querySelectorAll('.toteBigNumberLine');
       for(const el of lines){
         const max = parseFloat(getComputedStyle(el).fontSize);
         let lo = 10, hi = max, best = 10;
@@ -1107,7 +1167,6 @@ function fitToteText(){
           el.style.fontSize = best+'px';
         }
       }
-      stack.style.transform = '';
     }
   }
 }
@@ -1382,22 +1441,12 @@ function renderBags(r, q){
 
   content.innerHTML = `
     <div class="controlsRow">
-      <div>
-        <div style="font-weight:900">${routeTitle(r)} — Bags</div>
-        <div class="hint">Tap to mark loaded. ${
-          mode==="custom" ? "Drag to reorder (badge numbers stay the same)." :
-          mode==="reversed" ? "Showing last bag → first bag." :
-          "Showing first bag → last bag."
-        }</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="modeToggle">
-          <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
-          <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
-          <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
-        </div>
-        <div class="badge"><span class="dot"></span>${items.length} bags</div>
-      </div>
+      <div class="hint">Tap to mark loaded. ${
+        mode==="custom" ? "Drag to reorder (badge numbers stay the same)." :
+        mode==="reversed" ? "Showing last bag → first bag." :
+        "Showing first bag → last bag."
+      }</div>
+      <div class="badge"><span class="dot"></span>${items.length} bags</div>
     </div>
     <div class="toteWrap">
       <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
@@ -1459,7 +1508,7 @@ const routeShort = r.short || r.route_short || "";
     <div class="ovHeader">
       <div>
         <div class="ovTitleRow">
-          <div style="font-weight:900">${routeTitle(r)} — Overflow</div>
+          <div style="font-weight:900">Overflow</div>
           <button class="syncBtn" id="ovSync" type="button">Sync</button>
         </div>
       </div>
@@ -1544,18 +1593,8 @@ function renderCombined(r,q){
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
     <div class="controlsRow">
-      <div>
-        <div style="font-weight:900">${routeTitle(r)} — Bags + Overflow</div>
-        <div class="hint">Overflow zones + pkgs under each tote.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="modeToggle">
-          <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
-          <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
-          <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
-        </div>
-        <div class="badge"><span class="dot"></span>${items.length} bags</div>
-      </div>
+      <div class="hint">Overflow zones + pkgs under each tote.</div>
+      <div class="badge"><span class="dot"></span>${items.length} bags</div>
     </div>
     <div class="toteWrap">
       <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
@@ -1575,6 +1614,7 @@ function render(){
   if(!r){ content.innerHTML = "<div style='color:var(--muted)'>No routes found.</div>"; return; }
   bagsCount.textContent = r.bags_count ?? 0;
   ovCount.textContent = r.overflow_total ?? 0;
+  updateSubHeader(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
   if(activeTab==="bags") renderBags(r,q);
