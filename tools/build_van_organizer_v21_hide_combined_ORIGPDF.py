@@ -680,6 +680,15 @@ td:last-child,th:last-child{text-align:right}
   .layout{grid-template-columns:1fr}
 }
 
+/* FULL-WIDTH OVERRIDE */
+.wrap,
+.layout{
+  width:100% !important;
+  max-width:none !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+
 /* Combined tab is shown by default */
 
 </style>
