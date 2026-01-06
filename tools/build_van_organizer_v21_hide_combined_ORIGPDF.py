@@ -415,14 +415,15 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:nowrap;min-width:0;flex:1 1 auto;overflow:hidden}
 .topbar > *{min-width:0}
 .brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
+.brand .routeDate{font-weight:800;}
 .sel{margin-left:10px;flex:0 0 auto}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
-select{min-width:0;width:clamp(140px, 22vw, 240px);color-scheme: dark;}
+select{min-width:0;width:max-content;max-width:100%;color-scheme: dark;}
 /* Make native dropdown readable (Chrome/Windows) */
 select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
-input{min-width:0;flex:1 1 240px;width:clamp(180px, 35vw, 360px)}
+input{min-width:140px;flex:1 1 auto;width:auto}
 .topCounts{
   display:flex;
   align-items:center;
@@ -676,6 +677,7 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
   background:#3fa7ff;color:#001018;
   font-weight:900;text-decoration:none;letter-spacing:.02em;white-space:nowrap;flex:0 0 auto;
 }
+.downloadLabelShort{display:none;}
 .downloadBtn:hover{filter:brightness(1.08)}
 .downloadBtn:active{transform:translateY(1px)}
 .syncBtn{
@@ -732,6 +734,14 @@ td:last-child,th:last-child{text-align:right}
   .organizerPage{padding:16px;min-height:100vh;}
 }
 
+@media (max-width: 720px){
+  .brand .routeCode,
+  .brand .routeSep{display:none;}
+  .downloadLabelFull{display:none;}
+  .downloadLabelShort{display:inline;}
+  .downloadBtn{padding:6px 10px;font-size:12px;}
+}
+
 /* FULL-WIDTH OVERRIDE */
 .organizerPage,
 .organizerRoot{
@@ -758,11 +768,18 @@ td:last-child,th:last-child{text-align:right}
       <div class="header">
         <div class="topbar organizerHeaderRow">
           <div class="topbarLeft">
-            <div class="brand">__HEADER_TITLE__</div>
+            <div class="brand">
+              <span class="routeCode">__HEADER_ROUTE_CODE__</span>
+              <span class="routeSep">__HEADER_ROUTE_SEP__</span>
+              <span class="routeDate">__HEADER_ROUTE_DATE__</span>
+            </div>
             <div class="sel"><select id="routeSel"></select></div>
             <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
           </div>
-          <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+          <a class="downloadBtn" href="download/STACKED.pdf">
+            <span class="downloadLabelFull">DOWNLOAD PDF</span>
+            <span class="downloadLabelShort">PDF</span>
+          </a>
         </div>
 
         <div class="sectionHeaderRow">
@@ -799,6 +816,7 @@ const ROUTES = __ROUTES_JSON__;
 const WAVE_LABEL_BY_TIME = __WAVE_JSON__;
 const organizerRoot = document.querySelector(".organizerRoot");
 const organizerBody = document.querySelector(".organizerBody");
+const selectMeasureCanvas = document.createElement("canvas");
 
 let renderRaf = 0;
 
@@ -1634,6 +1652,25 @@ function buildRouteDropdown(){
     });
     routeSel.appendChild(og);
   });
+  adjustRouteSelectWidth();
+}
+
+function adjustRouteSelectWidth(){
+  if(!routeSel) return;
+  const ctx = selectMeasureCanvas.getContext("2d");
+  if(!ctx) return;
+  const style = getComputedStyle(routeSel);
+  ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  let longest = "";
+  routeSel.querySelectorAll("option, optgroup").forEach((el)=>{
+    const text = (el.label || el.textContent || "").trim();
+    if(text.length > longest.length) longest = text;
+  });
+  const textWidth = ctx.measureText(longest || "Route").width;
+  const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+  const borders = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+  const extra = 36;
+  routeSel.style.width = `${Math.ceil(textWidth + padding + borders + extra)}px`;
 }
 
 function init(){
@@ -1664,6 +1701,7 @@ function init(){
   });
   window.addEventListener('resize', ()=>{
     scheduleRender();
+    adjustRouteSelectWidth();
   });
   render();
 }
@@ -1678,8 +1716,17 @@ def build_html(header_title: str, routes: List[dict], wave_map: dict) -> str:
     # Keep JSON dumps settings identical to previous: no indent, ensure_ascii False.
     routes_json = json.dumps(routes, ensure_ascii=False)
     wave_json = json.dumps(wave_map, ensure_ascii=False)
+    route_code = header_title
+    route_date = ""
+    route_sep = ""
+    if " • " in header_title:
+        route_code, route_date = header_title.split(" • ", 1)
+        route_sep = " • "
     return (HTML_TEMPLATE
             .replace("__HEADER_TITLE__", header_title)
+            .replace("__HEADER_ROUTE_CODE__", route_code)
+            .replace("__HEADER_ROUTE_DATE__", route_date)
+            .replace("__HEADER_ROUTE_SEP__", route_sep)
             .replace("__ROUTES_JSON__", routes_json)
             .replace("__WAVE_JSON__", wave_json))
 
