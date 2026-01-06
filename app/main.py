@@ -63,6 +63,10 @@ def home():
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer Builder</title>
 <style>
+html, body{
+  height:100%;
+  overflow:hidden;
+}
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   margin:0;
@@ -75,11 +79,12 @@ body{
   --glassBorder:rgba(255,255,255,0.10);
 }
 .uploadPage{
-  min-height:100vh;
+  height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:36px 18px 18px;
+  box-sizing:border-box;
 }
 .heroWrap{
   width:100%;
