@@ -403,10 +403,10 @@ HTML_TEMPLATE = r"""<!doctype html>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
-body{margin:0;min-height:100vh;overflow-x:hidden;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+body{margin:0;min-height:100vh;overflow-x:auto;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow-y:auto;overflow-x:hidden;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow-y:auto;overflow-x:visible;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
