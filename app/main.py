@@ -244,7 +244,7 @@ button{
     overflow:hidden;
   }
   .brandBanner{
-    height:min(180px, 26svh);
+    height:min(150px, 22svh);
     object-fit:cover;
     object-position:center top;
   }
@@ -263,7 +263,7 @@ button{
           - 24px
           - env(safe-area-inset-top, 0px)
           - env(safe-area-inset-bottom, 0px)
-        ) / 820
+        ) / 900
       )
     );
     transform:scale(var(--hero-scale));
@@ -273,20 +273,20 @@ button{
     padding:6px 0;
   }
   .uploadCard{
-    padding:12px;
+    padding:10px;
   }
   form{
-    gap:8px;
+    gap:6px;
   }
   .fileRow{
     padding:6px;
-    gap:8px;
+    gap:6px;
   }
   .uploadBtn,
   .buildBtn{
-    height:42px;
-    font-size:15px;
-    border-radius:13px;
+    height:36px;
+    font-size:14px;
+    border-radius:12px;
   }
 }
 @media (orientation: portrait) and (max-height: 560px){
