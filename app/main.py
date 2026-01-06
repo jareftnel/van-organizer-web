@@ -26,6 +26,11 @@ STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+@app.get("/van.png")
+def van_icon():
+    return FileResponse(REPO_ROOT / "van.png", media_type="image/png")
+
+
 # ---------------------------
 # No-cache middleware (important on Render + phones)
 # ---------------------------
@@ -489,21 +494,17 @@ body{
   filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
   pointer-events:none;
 }
-.van svg rect:nth-child(1){ fill:var(--edv-blue); }
-.van svg rect:nth-child(2){ fill:var(--edv-blue-dark); }
-.van svg rect:nth-child(3){ fill:var(--edv-glass); }
-.van svg circle{ fill:var(--edv-wheel); transform-box:fill-box; transform-origin:center; }
-.van.moving svg circle{ animation:wheelSpin 1.2s linear infinite; }
-@keyframes wheelSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-.van.parsing svg rect:nth-child(1){ fill:#475569; }
-.van.parsing svg rect:nth-child(2){ fill:#334155; }
-.van.building svg rect:nth-child(1){ fill:var(--edv-blue); }
-.van.building svg rect:nth-child(2){ fill:var(--edv-blue-dark); }
-.van.organizing svg rect:nth-child(1){ fill:#f59e0b; }
-.van.organizing svg rect:nth-child(2){ fill:#d97706; }
+.van img{
+  width:46px;
+  height:auto;
+  display:block;
+}
+.van.moving img{ animation:vanBob 1.2s ease-in-out infinite; }
+@keyframes vanBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+.van.parsing{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)) grayscale(0.5); }
+.van.building{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
+.van.organizing{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)) saturate(1.2); }
 .van.complete{ filter:drop-shadow(0 0 12px rgba(34,197,94,.6)); }
-.van.complete svg rect:nth-child(1),
-.van.complete svg rect:nth-child(2){ fill:#22c55e; }
 .job-complete .lane{ animation:none; opacity:.25; }
 .progress-meta{
   display:flex;
@@ -523,13 +524,7 @@ body{
         <div class="road" aria-hidden="true">
           <div class="lane"></div>
           <div class="van building moving" id="vanIcon" style="left: __PCT__%">
-            <svg viewBox="0 0 120 60" width="44" aria-hidden="true">
-              <rect x="10" y="20" rx="6" ry="6" width="75" height="22" />
-              <rect x="70" y="14" rx="6" ry="6" width="30" height="28" />
-              <rect x="78" y="18" rx="3" ry="3" width="14" height="10" />
-              <circle cx="30" cy="46" r="6" />
-              <circle cx="80" cy="46" r="6" />
-            </svg>
+            <img src="/van.png" alt="" aria-hidden="true" />
           </div>
         </div>
         <div class="progress-meta">
