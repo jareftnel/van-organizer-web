@@ -58,24 +58,65 @@ def home():
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer Builder</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:18px;background:#0b0f14;color:#e8eef6}
-.card{max-width:720px;margin:0 auto;background:#101826;border:1px solid #1c2a3a;border-radius:16px;padding:16px}
-h1{margin:0 0 10px;font-size:22px}
-p{color:#97a7bd;margin:0 0 14px}
-input{width:100%;padding:14px;border-radius:12px;border:1px solid #1c2a3a;background:#0f1722;color:#e8eef6}
-button{width:100%;margin-top:12px;padding:14px;border-radius:12px;border:0;background:#3fa7ff;color:#001018;font-weight:800;font-size:16px}
-.small{margin-top:10px;font-size:13px;color:#97a7bd}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:#0b0f14;
+  color:#e8eef6;
+}
+.card{
+  width:100%;
+  max-width:780px;
+  background:#101826;
+  border:1px solid #1c2a3a;
+  border-radius:18px;
+  padding:32px;
+  box-shadow:0 14px 36px rgba(0,0,0,0.35);
+}
+h1{margin:0 0 18px;font-size:24px;letter-spacing:0.2px}
+form{display:flex;flex-direction:column;gap:16px}
+input[type="file"]{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #1c2a3a;
+  background:#0f1722;
+  color:#e8eef6;
+}
+input[type="file"]::file-selector-button{
+  margin-right:12px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:1px solid #2a3a4d;
+  background:#111c2b;
+  color:#e8eef6;
+  font-weight:600;
+}
+button{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:0;
+  background:#3fa7ff;
+  color:#001018;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
   <div class="card">
-    <h1>Upload RouteSheets (ORIGINAL PDF)</h1>
-    <p>This generates: Van Organizer (mobile page) + STACKED PDF + Bags Excel.</p>
+    <h1>Van Organizer Builder</h1>
     <form action="/upload" method="post" enctype="multipart/form-data">
       <input type="file" name="file" accept="application/pdf" required />
       <button type="submit">Build</button>
     </form>
-    <div class="small">Tip: open this link in Safari for best results.</div>
   </div>
 </body>
 </html>
