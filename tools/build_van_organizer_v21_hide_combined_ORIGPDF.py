@@ -886,8 +886,62 @@ function buildDisplayItems(r, q){
   return items;
 }
 
+function getToteColumnCount(){
+  const w = window.innerWidth || document.documentElement.clientWidth || 0;
+  if(w >= 1500) return 5;
+  if(w >= 1200) return 4;
+  if(w >= 900) return 3;
+  return 2;
+}
+
+function orderForToteSweep(items, columns){
+  const cols = Math.max(1, columns|0);
+  if(items.length <= 1 || cols === 1) return items.slice();
+  const rows = Math.ceil(items.length / cols);
+  const grid = Array.from({length: rows}, ()=>Array(cols).fill(null));
+  let idx = 0;
+  for(let c=0; c<cols; c++){
+    for(let r=0; r<rows; r++){
+      if(idx >= items.length) break;
+      grid[r][c] = items[idx++];
+    }
+  }
+  const out = [];
+  for(let r=0; r<rows; r++){
+    for(let c=0; c<cols; c++){
+      const item = grid[r][c];
+      if(item !== null) out.push(item);
+    }
+  }
+  return out;
+}
+
+function orderFromToteSweep(items, columns){
+  const cols = Math.max(1, columns|0);
+  if(items.length <= 1 || cols === 1) return items.slice();
+  const rows = Math.ceil(items.length / cols);
+  const grid = Array.from({length: rows}, ()=>Array(cols).fill(null));
+  let idx = 0;
+  for(let r=0; r<rows; r++){
+    for(let c=0; c<cols; c++){
+      if(idx >= items.length) break;
+      grid[r][c] = items[idx++];
+    }
+  }
+  const out = [];
+  for(let c=0; c<cols; c++){
+    for(let r=0; r<rows; r++){
+      const item = grid[r][c];
+      if(item !== null) out.push(item);
+    }
+  }
+  return out;
+}
+
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cardsHtml = items.map((it)=>{
+  const cols = getToteColumnCount();
+  const orderedItems = orderForToteSweep(items, cols);
+  const cardsHtml = orderedItems.map((it)=>{
     const cur = it.cur;
     const second = it.second;
     const main1 = (cur.bag_id || cur.bag || "").toString();
@@ -1117,12 +1171,15 @@ function attachBagHandlers(routeShort, allowDrag){
       const base = baseOrder(r);
       let ord = removeCombinedSecondsFromOrder(routeShort, getCustomOrder(routeShort, base).slice());
 
-      const from = ord.indexOf(s);
-      const to = ord.indexOf(t);
+      const cols = getToteColumnCount();
+      let domOrder = orderForToteSweep(ord, cols);
+      const from = domOrder.indexOf(s);
+      const to = domOrder.indexOf(t);
       if(from === -1 || to === -1) return;
-      ord.splice(from, 1);
-      ord.splice(to, 0, s);
-      setCustomOrder(routeShort, ord);
+      domOrder.splice(from, 1);
+      domOrder.splice(to, 0, s);
+      const sweepOrder = orderFromToteSweep(domOrder, cols);
+      setCustomOrder(routeShort, sweepOrder);
       setMode(routeShort, "custom");
       render();
     });
