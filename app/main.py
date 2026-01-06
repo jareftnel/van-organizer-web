@@ -73,16 +73,24 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:24px;
+  padding:18px;
 }
-.brandBlock{display:flex;flex-direction:column;align-items:center;gap:16px}
+.brandBlock{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  width:100%;
+  max-width:780px;
+}
 .siteBanner{
-  width:min(960px, 92vw);
+  width:100%;
   height:auto;
   display:block;
   object-fit:contain;
   margin:0 auto;
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,.35));
+  max-height:150px;
+  border-radius:18px;
 }
 .card{
   width:100%;
