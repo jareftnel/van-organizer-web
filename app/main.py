@@ -31,6 +31,14 @@ def van_icon():
     return FileResponse(REPO_ROOT / "van.png", media_type="image/png")
 
 
+@app.get("/banner.png")
+def banner_image():
+    return FileResponse(
+        REPO_ROOT / "banner_clean_1600x400 (1).png",
+        media_type="image/png",
+    )
+
+
 # ---------------------------
 # No-cache middleware (important on Render + phones)
 # ---------------------------
@@ -702,6 +710,8 @@ def organizer_wrapper(jid: str):
 <style>
 html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}}
 body{{display:flex;flex-direction:column;height:100vh}}
+.banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
+.banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:cover}}
 .topbar{{flex:0 0 auto;position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
 .topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
 .wrap{{flex:1 1 auto;padding:10px;min-height:0}}
@@ -709,6 +719,9 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 </style>
 </head>
 <body>
+  <div class="banner">
+    <img src="/banner.png" alt="Van organizer banner" />
+  </div>
   <div class="topbar">
     <a href="/job/{jid}">← Back</a>
   </div>
