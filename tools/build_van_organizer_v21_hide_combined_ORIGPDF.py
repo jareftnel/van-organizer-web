@@ -432,18 +432,17 @@ input{min-width:260px;flex:1}
 .toteWrap{display:flex;justify-content:center;width:100%;min-width:0;}
 .toteBoard{
   display:grid;
-  grid-auto-flow:row;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow:column;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  grid-auto-columns: minmax(0, 1fr);
   gap:16px;
   padding:8px 0;
   width:100%;
   min-width:0;
+  direction:rtl;
   --cardW: 190px;
   --cardH: 150px;
 }
-@media (min-width: 900px){  .toteBoard{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1200px){ .toteBoard{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 1500px){ .toteBoard{ grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 @media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
 @media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
 @media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
@@ -461,6 +460,7 @@ input{min-width:260px;flex:1}
   overflow:hidden;
   cursor:pointer;
   container-type:inline-size;
+  direction:ltr;
 }
 .toteCard.draggable{cursor:grab;}
 .toteCard.dragging{opacity:.25;}
@@ -886,60 +886,25 @@ function buildDisplayItems(r, q){
   return items;
 }
 
-function getToteColumnCount(){
-  const w = window.innerWidth || document.documentElement.clientWidth || 0;
-  if(w >= 1500) return 5;
-  if(w >= 1200) return 4;
-  if(w >= 900) return 3;
-  return 2;
+const TOTE_ROWS = 3;
+
+function getToteColumnCount(itemCount){
+  const count = Math.max(1, itemCount|0);
+  return Math.max(1, Math.ceil(count / TOTE_ROWS));
 }
 
 function orderForToteSweep(items, columns){
-  const cols = Math.max(1, columns|0);
-  if(items.length <= 1 || cols === 1) return items.slice();
-  const rows = Math.ceil(items.length / cols);
-  const grid = Array.from({length: rows}, ()=>Array(cols).fill(null));
-  let idx = 0;
-  for(let c=0; c<cols; c++){
-    for(let r=0; r<rows; r++){
-      if(idx >= items.length) break;
-      grid[r][c] = items[idx++];
-    }
-  }
-  const out = [];
-  for(let r=0; r<rows; r++){
-    for(let c=0; c<cols; c++){
-      const item = grid[r][c];
-      if(item !== null) out.push(item);
-    }
-  }
-  return out;
+  if(items.length <= 1) return items.slice();
+  return items.slice();
 }
 
 function orderFromToteSweep(items, columns){
-  const cols = Math.max(1, columns|0);
-  if(items.length <= 1 || cols === 1) return items.slice();
-  const rows = Math.ceil(items.length / cols);
-  const grid = Array.from({length: rows}, ()=>Array(cols).fill(null));
-  let idx = 0;
-  for(let r=0; r<rows; r++){
-    for(let c=0; c<cols; c++){
-      if(idx >= items.length) break;
-      grid[r][c] = items[idx++];
-    }
-  }
-  const out = [];
-  for(let c=0; c<cols; c++){
-    for(let r=0; r<rows; r++){
-      const item = grid[r][c];
-      if(item !== null) out.push(item);
-    }
-  }
-  return out;
+  if(items.length <= 1) return items.slice();
+  return items.slice();
 }
 
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cols = getToteColumnCount();
+  const cols = getToteColumnCount(items.length);
   const orderedItems = orderForToteSweep(items, cols);
   const cardsHtml = orderedItems.map((it)=>{
     const cur = it.cur;
@@ -1171,7 +1136,7 @@ function attachBagHandlers(routeShort, allowDrag){
       const base = baseOrder(r);
       let ord = removeCombinedSecondsFromOrder(routeShort, getCustomOrder(routeShort, base).slice());
 
-      const cols = getToteColumnCount();
+      const cols = getToteColumnCount(ord.length);
       let domOrder = orderForToteSweep(ord, cols);
       const from = domOrder.indexOf(s);
       const to = domOrder.indexOf(t);
