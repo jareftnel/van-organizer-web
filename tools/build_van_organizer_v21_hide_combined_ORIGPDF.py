@@ -415,6 +415,7 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .topbar > *{min-width:0}
 .brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
 .brand .routeDate{font-weight:800;}
+.filterRow{display:flex;align-items:center;gap:12px;flex:1 1 360px;min-width:0}
 .sel{margin-left:10px;flex:0 0 auto}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
 select{min-width:0;width:max-content;max-width:100%;color-scheme: dark;}
@@ -422,6 +423,7 @@ select{min-width:0;width:max-content;max-width:100%;color-scheme: dark;}
 select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
+.filterRow .sel{margin-left:0}
 input{min-width:140px;flex:1 1 auto;width:auto}
 .topbar .downloadBtn{margin-left:auto;}
 .topbarBreak{display:none;}
@@ -748,9 +750,10 @@ td:last-child,th:last-child{text-align:right}
   .topbar .brand{order:1;}
   .topbar .downloadBtn{order:2;}
   .topbarBreak{display:block;flex-basis:100%;height:0;order:3;}
-  .topbar .sel{order:4;margin-left:0;flex:0 1 45%;min-width:0;}
+  .topbar .filterRow{order:4;flex:1 1 100%;min-width:0;}
+  .topbar .sel{flex:0 1 45%;min-width:0;}
   .topbar .sel select{width:100%;}
-  .topbar #q{order:5;flex:1 1 55%;min-width:0;}
+  .topbar #q{flex:1 1 55%;min-width:0;}
 }
 
 /* FULL-WIDTH OVERRIDE */
@@ -783,8 +786,10 @@ td:last-child,th:last-child{text-align:right}
             <span class="routeSep">__HEADER_ROUTE_SEP__</span>
             <span class="routeDate">__HEADER_ROUTE_DATE__</span>
           </div>
-          <div class="sel"><select id="routeSel"></select></div>
-          <input id="q" placeholder="Search Bag / Overflow Info."/>
+          <div class="filterRow">
+            <div class="sel"><select id="routeSel"></select></div>
+            <input id="q" placeholder="Search Bag / Overflow Info."/>
+          </div>
           <a class="downloadBtn" href="download/STACKED.pdf">
             <span class="downloadLabelFull">DOWNLOAD PDF</span>
             <span class="downloadLabelShort">PDF</span>
