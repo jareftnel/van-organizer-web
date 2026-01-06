@@ -92,24 +92,26 @@ body{
 .uploadShell > *{
   width:100%;
 }
-.brandBanner{
-  height:auto;
+.bannerWrap{
   width:100%;
-  display:block;
-  border-radius:22px;
+  overflow:hidden;
+  border-radius:24px 24px 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
-.taglineGlass{
+.bannerWrap img{
+  display:block;
   width:100%;
-  margin-top:0;
-  padding:14px 18px;
+  height:auto;
+}
+.transitionBar{
+  width:100%;
+  margin-top:-14px;
+  padding:28px 18px 14px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
-  border-radius:10px;
-  border-bottom-left-radius:0;
-  border-bottom-right-radius:0;
+  border-radius:0 0 12px 12px;
   box-shadow:0 16px 40px rgba(0,0,0,0.35);
 }
 .taglineText{
@@ -122,12 +124,17 @@ body{
   width:100%;
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
-  border-radius:10px;
-  border-top-left-radius:0;
-  border-top-right-radius:0;
+  border-radius:0 0 12px 12px;
   padding:22px;
   margin-top:0;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
+}
+.bannerWrap,
+.transitionBar,
+.uploadCard{
+  max-width:none !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
 }
 form{display:flex;flex-direction:column;gap:16px}
 .fileRow{
@@ -218,8 +225,10 @@ button{
 <body>
   <div class="uploadPage">
     <div class="uploadShell">
-      <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
-      <div class="taglineGlass">
+      <div class="bannerWrap">
+        <img src="/banner.png" alt="Van Organizer Banner" />
+      </div>
+      <div class="transitionBar">
         <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
       </div>
       <div class="uploadCard">
