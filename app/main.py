@@ -354,8 +354,35 @@ def job_page(jid: str):
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Building…</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b0f14;color:#e8eef6;padding:24px}
-.card{width:min(540px,100%);background:#101826;border:1px solid #1c2a3a;border-radius:18px;padding:24px 22px;box-shadow:0 18px 40px rgba(5,9,14,.45)}
+html, body{
+  height:100%;
+  overflow:hidden;
+}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin:0;
+  background:#0b0f14;
+  color:#e8eef6;
+}
+.page{
+  height:100svh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.card{
+  width:min(92vw, 760px);
+  max-height:100svh;
+  display:flex;
+  flex-direction:column;
+  border-radius:22px;
+  overflow:hidden;
+  background:#101826;
+  border:1px solid #1c2a3a;
+  padding:24px 22px;
+  box-shadow:0 18px 40px rgba(5,9,14,.45);
+}
 .title{font-size:24px;font-weight:800;letter-spacing:.2px}
 .muted{color:#97a7bd}
 .status{margin-top:14px;font-size:15px;font-weight:600}
@@ -366,17 +393,19 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="title">Building…</div>
+  <div class="page">
+    <div class="card">
+      <div class="title">Building…</div>
 
-    <div class="bar">
-      <div class="fill" id="fill" style="width: __PCT__%"></div>
+      <div class="bar">
+        <div class="fill" id="fill" style="width: __PCT__%"></div>
+      </div>
+
+      <div class="status" id="statusLine">__STATUS_LINE__</div>
+      <div class="muted subtle">This page updates automatically.</div>
+
+      <div class="error" id="err" style="display:none"></div>
     </div>
-
-    <div class="status" id="statusLine">__STATUS_LINE__</div>
-    <div class="muted subtle">This page updates automatically.</div>
-
-    <div class="error" id="err" style="display:none"></div>
   </div>
 
 <script>
