@@ -439,11 +439,11 @@ input{min-width:260px;flex:1}
   display:grid;
   width:100%;
   height:100%;
-  gap:clamp(12px, 1.5vw, 20px);
+  gap:var(--tileGap, 16px);
   padding:0;
   min-width:0;
-  grid-template-rows: repeat(3, 1fr);
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(3, var(--tileH, 1fr));
+  grid-template-columns: repeat(var(--cols), var(--tileW, 1fr));
   grid-auto-flow: column;
   justify-content: center;
   align-content: center;
@@ -456,9 +456,9 @@ input{min-width:260px;flex:1}
 
 .toteCard{
   position:relative;
-  width:100%;
+  width:var(--tileW, 100%);
   min-width:0;
-  height:auto;
+  height:var(--tileH, auto);
   aspect-ratio:4/3;
   max-width:100%;
   max-height:100%;
@@ -734,10 +734,13 @@ td:last-child,th:last-child{text-align:right}
 const ROUTES = __ROUTES_JSON__;
 const WAVE_LABEL_BY_TIME = __WAVE_JSON__;
 const organizerRoot = document.querySelector(".organizerRoot");
+const organizerBody = document.querySelector(".organizerBody");
 
 let layoutWidth = 0;
 let measureRaf = 0;
 let renderRaf = 0;
+const TOTE_ASPECT = 4 / 3;
+const TOTE_GAP_PX = 16;
 
 function applyLayoutWidth(nextWidth){
   if(!nextWidth || !isFinite(nextWidth)) return;
@@ -750,6 +753,24 @@ function measureLayout(){
   if(!organizerRoot) return;
   const w = organizerRoot.getBoundingClientRect().width;
   applyLayoutWidth(w);
+  if(!organizerBody) return;
+  document.querySelectorAll(".toteWrap").forEach((wrap)=>{
+    const board = wrap.querySelector(".toteBoard");
+    if(!board) return;
+    const colsRaw = getComputedStyle(board).getPropertyValue("--cols");
+    const cols = Math.max(1, parseInt(colsRaw, 10) || 1);
+    const availW = Math.max(0, wrap.clientWidth);
+    const availH = Math.max(0, wrap.clientHeight);
+    const gap = TOTE_GAP_PX;
+    const tileWFromW = (availW - (cols - 1) * gap) / cols;
+    const tileWFromH = ((availH - (TOTE_ROWS - 1) * gap) * TOTE_ASPECT) / TOTE_ROWS;
+    const tileW = Math.floor(Math.min(tileWFromW, tileWFromH));
+    const tileH = Math.floor(tileW / TOTE_ASPECT);
+    if(!isFinite(tileW) || tileW <= 0 || !isFinite(tileH) || tileH <= 0) return;
+    board.style.setProperty("--tileW", `${tileW}px`);
+    board.style.setProperty("--tileH", `${tileH}px`);
+    board.style.setProperty("--tileGap", `${gap}px`);
+  });
 }
 
 function scheduleMeasure(){
