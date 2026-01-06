@@ -403,14 +403,15 @@ HTML_TEMPLATE = r"""<!doctype html>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
-body{margin:0;min-height:100vh;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;overflow:visible;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:hidden;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:18px 24px 28px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
-.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
+.topbar{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
+.topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
 .topbar > *{min-width:0}
 .brand{font-weight:900}
 .sel{margin-left:10px}
@@ -421,7 +422,24 @@ select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
 input{min-width:260px;flex:1}
-.subHeaderRow{
+.topRight{
+  display:grid;
+  grid-template-rows:auto auto;
+  justify-items:end;
+  gap:10px;
+}
+.topRightCounts{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  opacity:.9;
+}
+.topRightControls{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.sectionHeaderRow{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
@@ -429,18 +447,17 @@ input{min-width:260px;flex:1}
   width:100%;
   margin-top:10px;
 }
-.subHeaderLeft{
+.sectionLeft{
   display:flex;
   flex-direction:column;
   gap:8px;
-  min-width:420px;
+  min-width:520px;
 }
-.subHeaderRight{
+.sectionRight{
   display:flex;
-  justify-content:flex-end;
-  align-items:flex-start;
-  flex:1;
-  padding-top:2px;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
 }
 .routeTitle{
   height:34px;
@@ -454,11 +471,17 @@ input{min-width:260px;flex:1}
   gap:10px;
   flex-wrap:wrap;
 }
+.subText{
+  margin-top:6px;
+  text-align:center;
+  opacity:.75;
+  max-width:520px;
+}
 .tabsRow{display:flex;gap:10px;margin:0 !important;}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow:hidden;height:100%;display:flex;flex-direction:column;gap:16px}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;height:100%;display:flex;flex-direction:column;gap:16px}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -483,7 +506,17 @@ input{min-width:260px;flex:1}
   justify-items: center;
   align-items: center;
 }
-.bagsGrid{width:100%;max-width:100%;height:100%;overflow:hidden}
+.bagsGrid{
+  display:grid;
+  grid-template-rows:repeat(3, auto);
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(240px, 1fr);
+  gap:16px;
+  align-items:stretch;
+  width:100%;
+  max-width:100%;
+  height:100%;
+}
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
@@ -702,7 +735,7 @@ th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
 @media (max-width: 1100px){
-  .organizerPage{padding:16px;height:100vh;}
+  .organizerPage{padding:16px;min-height:100vh;}
 }
 
 /* FULL-WIDTH OVERRIDE */
@@ -711,6 +744,13 @@ td:last-child,th:last-child{text-align:right}
   width:100% !important;
   max-width:none !important;
   margin:0 !important;
+}
+.organizerPage,
+.organizerHeader,
+.panel,
+.shell,
+.container{
+  overflow:visible !important;
 }
 
 /* Combined tab is shown by default */
@@ -723,26 +763,33 @@ td:last-child,th:last-child{text-align:right}
     <div class="controls">
       <div class="header">
         <div class="topbar">
-          <div class="brand">__HEADER_TITLE__</div>
-          <div class="sel"><select id="routeSel"></select></div>
-          <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
-          <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
-          <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
-          <div class="downloadRow">
-            <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+          <div class="topbarLeft">
+            <div class="brand">__HEADER_TITLE__</div>
+            <div class="sel"><select id="routeSel"></select></div>
+            <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
           </div>
         </div>
 
-        <div class="subHeaderRow">
-          <div class="subHeaderLeft">
+        <div class="sectionHeaderRow">
+          <div class="sectionLeft">
             <div class="routeTitle" id="routeTitle"></div>
             <div class="toggleRow" id="toggleRow"></div>
+            <div class="subText" id="subText">Overflow zones + pkgs under each tote.</div>
           </div>
-          <div class="subHeaderRight">
-            <div class="tabsRow">
-              <div class="tab active" data-tab="combined">Bags + Overflow</div>
-              <div class="tab" data-tab="bags">Bags</div>
-              <div class="tab" data-tab="overflow">Overflow</div>
+          <div class="sectionRight">
+            <div class="topRight">
+              <div class="topRightCounts">
+                <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
+                <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
+              </div>
+              <div class="topRightControls">
+                <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+                <div class="tabsRow">
+                  <div class="tab active" data-tab="combined">Bags + Overflow</div>
+                  <div class="tab" data-tab="bags">Bags</div>
+                  <div class="tab" data-tab="overflow">Overflow</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -910,6 +957,7 @@ const ovCount = document.getElementById("ovCount");
 const content = document.getElementById("content");
 const routeTitleEl = document.getElementById("routeTitle");
 const toggleRow = document.getElementById("toggleRow");
+const subText = document.getElementById("subText");
 
 function routeTitle(r){ return (r.route_short||"") + (r.cx ? ` (${r.cx})` : ""); }
 function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
@@ -924,6 +972,7 @@ function updateSubHeader(r){
   if(activeTab === "overflow"){
     toggleRow.innerHTML = "";
     toggleRow.style.display = "none";
+    if(subText) subText.style.display = "none";
     return;
   }
   const mode = getMode(r.route_short);
@@ -935,6 +984,7 @@ function updateSubHeader(r){
       <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
     </div>
   `;
+  if(subText) subText.style.display = activeTab === "combined" ? "block" : "none";
 }
 
 // Saturated chips (high-contrast)
@@ -1592,10 +1642,6 @@ function renderCombined(r,q){
 
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
-    <div class="controlsRow">
-      <div class="hint">Overflow zones + pkgs under each tote.</div>
-      <div class="badge"><span class="dot"></span>${items.length} bags</div>
-    </div>
     <div class="toteWrap">
       <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
     </div>
