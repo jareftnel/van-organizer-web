@@ -103,6 +103,7 @@ body{
   width:100%;
   height:clamp(110px, 22vh, 180px);
   object-fit:cover;
+  object-position:top center;
   border-radius:22px 22px 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
