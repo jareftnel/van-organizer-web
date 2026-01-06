@@ -467,7 +467,7 @@ body{
 .title{font-size:24px;font-weight:800;letter-spacing:.2px}
 .muted{color:#97a7bd}
 .status{margin-top:14px;font-size:15px;font-weight:600}
-.subtle{margin-top:6px;font-size:13px}
+.subtle{margin-top:6px;font-size:12px;opacity:0.7}
 .error{margin-top:12px;color:#ffb4b4;background:#291414;border:1px solid #3a1c1c;padding:10px 12px;border-radius:10px;font-size:13px}
 
 :root{
