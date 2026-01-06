@@ -242,7 +242,7 @@ button{
     height:100svh;
     align-items:flex-start;
     padding-top:8px;
-    padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
     --hero-scale:min(
