@@ -82,55 +82,44 @@ body{
   padding:36px 18px 18px;
 }
 .uploadShell{
-  width:min(1100px, calc(100vw - 96px));
-  margin:40px auto 0;
+  width:min(1100px, calc(100vw - 120px));
+  margin:0 auto;
   display:flex;
   flex-direction:column;
+  align-items:stretch;
   gap:0;
 }
-.uploadShell > *{
-  width:100%;
-}
-.bannerImg,
-.taglineGlass,
-.uploadCard{
-  width:100%;
-}
-.bannerImg{
+.brandBanner{
   height:auto;
-  max-width:100%;
-  object-fit:contain;
+  width:100%;
   display:block;
-  border-radius:var(--r);
+  border-radius:22px;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
 .taglineGlass{
+  width:100%;
   margin-top:-10px;
-  margin-bottom:10px;
-  padding:12px 18px;
-  text-align:center;
-  background:linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
-  border:1px solid var(--glassBorder);
+  padding:14px 18px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
-  border-radius:var(--r);
-  box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  border-radius:10px;
+  box-shadow:0 16px 40px rgba(0,0,0,0.35);
 }
 .taglineText{
   text-align:center;
-  letter-spacing:0.22em;
-  font-size:12px;
-  opacity:0.8;
-  text-transform:uppercase;
+  letter-spacing:2px;
+  font-size:13px;
+  opacity:0.85;
 }
 .uploadCard{
+  width:100%;
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
-  border-radius:var(--r);
-  border-top-left-radius:calc(var(--r) - 6px);
-  border-top-right-radius:calc(var(--r) - 6px);
+  border-radius:10px;
   padding:22px;
-  margin-top:-12px;
+  margin-top:12px;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
 form{display:flex;flex-direction:column;gap:16px}
@@ -173,7 +162,7 @@ form{display:flex;flex-direction:column;gap:16px}
   outline:2px solid rgba(63,167,255,0.6);
   outline-offset:2px;
 }
-.fileLabel{
+.fileNameLabel{
   grid-column:2;
   justify-self:center;
   color:rgba(255,255,255,0.85);
@@ -222,9 +211,9 @@ button{
 <body>
   <div class="uploadPage">
     <div class="uploadShell">
-      <img class="bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+      <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
       <div class="taglineGlass">
-        <div class="taglineText">Optimize Your Route</div>
+        <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
       </div>
       <div class="uploadCard">
         <form action="/upload" method="post" enctype="multipart/form-data">
@@ -235,7 +224,7 @@ button{
               </svg>
               Upload
             </button>
-            <div class="fileLabel" id="fileLabel">Choose File</div>
+            <div class="fileNameLabel" id="fileLabel">Choose file</div>
             <div class="fileSpacer"></div>
             <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
           </div>
@@ -257,7 +246,7 @@ button{
       fileInput.addEventListener("change", () => {
         const name = fileInput.files && fileInput.files.length > 0
           ? fileInput.files[0].name
-          : "Choose File";
+          : "Choose file";
         fileLabel.textContent = name;
       });
     }
