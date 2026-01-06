@@ -244,9 +244,10 @@ button{
     overflow:hidden;
   }
   .brandBanner{
-    height:min(150px, 22svh);
-    object-fit:cover;
-    object-position:center top;
+    height:auto;
+    max-height:min(150px, 22svh);
+    object-fit:contain;
+    object-position:center;
   }
   .uploadPage{
     height:100svh;
