@@ -242,12 +242,25 @@ button{
     height:100svh;
     align-items:flex-start;
     padding-top:12px;
-    padding-bottom:12px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
-    --hero-scale:clamp(0.68, calc((100svh - 24px) / 720), 0.9);
+    --hero-scale:clamp(0.55, calc((100svh - 24px) / 820), 0.88);
     transform:scale(var(--hero-scale));
     transform-origin:top center;
+  }
+  .tagGlass{
+    padding:10px 0;
+  }
+  .uploadCard{
+    padding:16px;
+  }
+  form{
+    gap:12px;
+  }
+  .fileRow{
+    padding:10px;
+    gap:12px;
   }
 }
 @media (orientation: portrait) and (max-height: 560px){
