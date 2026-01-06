@@ -245,7 +245,8 @@ button{
     padding-bottom:12px;
   }
   .heroWrap{
-    transform:scale(0.85);
+    --hero-scale:clamp(0.68, calc((100svh - 24px) / 720), 0.9);
+    transform:scale(var(--hero-scale));
     transform-origin:top center;
   }
 }
