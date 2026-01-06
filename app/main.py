@@ -241,26 +241,32 @@ button{
   .uploadPage{
     height:100svh;
     align-items:flex-start;
-    padding-top:12px;
-    padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+    padding-top:10px;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
-    --hero-scale:clamp(0.55, calc((100svh - 24px) / 820), 0.88);
+    --hero-scale:min(0.78, calc((100svh - 16px) / 780));
     transform:scale(var(--hero-scale));
     transform-origin:top center;
   }
   .tagGlass{
-    padding:10px 0;
+    padding:8px 0;
   }
   .uploadCard{
-    padding:16px;
+    padding:14px;
   }
   form{
-    gap:12px;
+    gap:10px;
   }
   .fileRow{
-    padding:10px;
-    gap:12px;
+    padding:8px;
+    gap:10px;
+  }
+  .uploadBtn,
+  .buildBtn{
+    height:44px;
+    font-size:15px;
+    border-radius:14px;
   }
 }
 @media (orientation: portrait) and (max-height: 560px){
