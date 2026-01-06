@@ -465,6 +465,7 @@ body{
   position:absolute; left:0; right:0; top:50%;
   height:2px; transform:translateY(-50%);
   background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 12px,transparent 12px 24px);
+  background-size:24px 100%;
   opacity:.45;
   animation:laneMove 1.2s linear infinite;
 }
@@ -481,8 +482,8 @@ body{
 .van svg rect:nth-child(1){ fill:var(--edv-blue); }
 .van svg rect:nth-child(2){ fill:var(--edv-blue-dark); }
 .van svg rect:nth-child(3){ fill:var(--edv-glass); }
-.van svg circle{ fill:var(--edv-wheel); }
-.van.moving svg circle{ animation:wheelSpin 1.2s linear infinite; transform-origin:center; }
+.van svg circle{ fill:var(--edv-wheel); transform-box:fill-box; transform-origin:center; }
+.van.moving svg circle{ animation:wheelSpin 1.2s linear infinite; }
 @keyframes wheelSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 .van.parsing svg rect:nth-child(1){ fill:#475569; }
 .van.parsing svg rect:nth-child(2){ fill:#334155; }
