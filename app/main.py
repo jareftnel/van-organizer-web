@@ -368,29 +368,51 @@ iframe{{border:0; display:block}}
       var shellWidth = shell.getBoundingClientRect().width || window.innerWidth;
       var availableWidth = Math.max(0, shellWidth - 4);
       var scale = availableWidth > 0 ? (availableWidth / span.width) : 1;
+      var isMobile = window.matchMedia("(max-width: 900px)").matches;
       if (!isFinite(scale) || scale <= 0) scale = 1;
-      if (scale > 2) scale = 2;
+      scale = Math.min(1, scale);
+      if (!isMobile) scale = 1;
 
       // NO template literals here (avoid Python f-string conflicts)
       inner.style.transform = "scale(" + scale.toFixed(4) + ")";
       inner.style.width = span.width + "px";
 
-      frame.style.width = span.width + "px";
+      if (scale < 1) {{
+        frame.style.width = span.width + "px";
+      }} else {{
+        frame.style.width = "100%";
+      }}
       frame.style.height = span.height + "px";
 
       shell.style.height = (span.height * scale) + "px";
     }} catch (e) {{}}
   }}
 
+  var burstTimer = null;
+  function startBurst() {{
+    if (burstTimer) {{
+      clearInterval(burstTimer);
+      burstTimer = null;
+    }}
+    var start = Date.now();
+    burstTimer = setInterval(function () {{
+      sizeAndScale();
+      if (Date.now() - start > 2500) {{
+        clearInterval(burstTimer);
+        burstTimer = null;
+      }}
+    }}, 200);
+  }}
+
   frame.addEventListener("load", function () {{
     sizeAndScale();
-    setTimeout(sizeAndScale, 150);
-    setTimeout(sizeAndScale, 700);
-    setTimeout(sizeAndScale, 1600);
-    setTimeout(sizeAndScale, 3000);
+    startBurst();
   }});
 
-  window.addEventListener("resize", sizeAndScale);
+  window.addEventListener("resize", function () {{
+    sizeAndScale();
+    startBurst();
+  }});
 }})();
 </script>
 </body>
