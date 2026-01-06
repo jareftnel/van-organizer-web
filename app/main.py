@@ -354,9 +354,7 @@ html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:syste
 .topbar{{position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
 .topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
 .wrap{{padding:10px}}
-.scale-shell{{width:100%; overflow:visible}}
-.scale-inner{{transform-origin: top left; will-change: transform}}
-iframe{{border:0; display:block}}
+iframe{{border:0; display:block; width:100%}}
 </style>
 </head>
 <body>
@@ -365,82 +363,32 @@ iframe{{border:0; display:block}}
   </div>
 
   <div class="wrap">
-    <div class="scale-shell" id="shell">
-      <div class="scale-inner" id="inner">
-        <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
-      </div>
-    </div>
+    <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
   </div>
 
 <script>
 (function () {{
   var frame = document.getElementById("orgFrame");
-  var inner = document.getElementById("inner");
-  var shell = document.getElementById("shell");
 
   // cache-bust iframe so it always pulls the newest organizer without manual refresh
   frame.src = "/job/{jid}/organizer_raw?v=" + Date.now();
 
-  function measureSpan(doc) {{
-    var els = Array.from(doc.querySelectorAll("body *"));
-    var minLeft = Infinity;
-    var maxRight = -Infinity;
-    var maxBottom = 0;
-
-    for (var i = 0; i < els.length; i++) {{
-      var el = els[i];
-      if (!el.getBoundingClientRect) continue;
-      var r = el.getBoundingClientRect();
-      if (r.width < 40 || r.height < 40) continue;
-      if (r.left < minLeft) minLeft = r.left;
-      if (r.right > maxRight) maxRight = r.right;
-      if (r.bottom > maxBottom) maxBottom = r.bottom;
-    }}
-
-    if (!isFinite(minLeft) || !isFinite(maxRight)) {{
-      var b = doc.body;
-      var h = doc.documentElement;
-      minLeft = 0;
-      maxRight = Math.max(b.scrollWidth, h.scrollWidth, b.offsetWidth, h.offsetWidth, b.clientWidth, h.clientWidth);
-      maxBottom = Math.max(b.scrollHeight, h.scrollHeight, b.offsetHeight, h.offsetHeight, b.clientHeight, h.clientHeight);
-    }}
-
-    var width = (maxRight - minLeft) + 20;
-    var height = maxBottom + 20;
-    return {{ minLeft: minLeft, width: width, height: height }};
-  }}
-
-  function sizeAndScale() {{
+  function sizeFrame() {{
     try {{
       var doc = frame.contentDocument || frame.contentWindow.document;
       if (!doc) return;
 
-      var span = measureSpan(doc);
-      var shellWidth = shell.getBoundingClientRect().width || window.innerWidth;
-      var availableWidth = Math.max(0, shellWidth - 4);
-      var scale = availableWidth > 0 ? (availableWidth / span.width) : 1;
-      var isMobile = window.matchMedia("(max-width: 900px)").matches;
-      if (!isFinite(scale) || scale <= 0) scale = 1;
-      scale = Math.min(1, scale);
-      if (!isMobile) scale = 1;
-
-      // NO template literals here (avoid Python f-string conflicts)
-      if (isMobile && scale < 1) {{
-        inner.style.transform = "scale(" + scale.toFixed(4) + ")";
-        inner.style.width = span.width + "px";
-      }} else {{
-        inner.style.transform = "none";
-        inner.style.width = "100%";
-      }}
-
-      if (isMobile && scale < 1) {{
-        frame.style.width = span.width + "px";
-      }} else {{
-        frame.style.width = "100%";
-      }}
-      frame.style.height = span.height + "px";
-
-      shell.style.height = (span.height * scale) + "px";
+      var b = doc.body;
+      var h = doc.documentElement;
+      var height = Math.max(
+        b.scrollHeight,
+        h.scrollHeight,
+        b.offsetHeight,
+        h.offsetHeight,
+        b.clientHeight,
+        h.clientHeight
+      );
+      frame.style.height = height + "px";
     }} catch (e) {{}}
   }}
 
@@ -452,7 +400,7 @@ iframe{{border:0; display:block}}
     }}
     var start = Date.now();
     burstTimer = setInterval(function () {{
-      sizeAndScale();
+      sizeFrame();
       if (Date.now() - start > 2500) {{
         clearInterval(burstTimer);
         burstTimer = null;
@@ -461,12 +409,12 @@ iframe{{border:0; display:block}}
   }}
 
   frame.addEventListener("load", function () {{
-    sizeAndScale();
+    sizeFrame();
     startBurst();
   }});
 
   window.addEventListener("resize", function () {{
-    sizeAndScale();
+    sizeFrame();
     startBurst();
   }});
 }})();
