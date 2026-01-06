@@ -81,37 +81,33 @@ body{
   justify-content:center;
   padding:36px 18px 18px;
 }
-.uploadShell{
-  width:min(1100px, 92vw);
+.heroWrap{
+  width:min(1100px, calc(100vw - 80px));
   margin:0 auto;
   display:flex;
   flex-direction:column;
   align-items:stretch;
   gap:0;
 }
-.uploadShell > *{
+.heroWrap > *{
   width:100%;
 }
-.bannerWrap{
-  width:100%;
-  overflow:hidden;
-  border-radius:24px 24px 0 0;
-  box-shadow:0 18px 45px rgba(0,0,0,0.40);
-}
-.bannerWrap img{
+.brandBanner{
   display:block;
   width:100%;
   height:auto;
+  border-radius:22px 22px 0 0;
+  box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
-.transitionBar{
+.tagGlass{
   width:100%;
-  margin-top:-14px;
-  padding:28px 18px 14px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
+  margin-top:-12px;
+  padding:14px 0;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
-  border-radius:0 0 12px 12px;
+  border-radius:0;
   box-shadow:0 16px 40px rgba(0,0,0,0.35);
 }
 .taglineText{
@@ -124,13 +120,11 @@ body{
   width:100%;
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
-  border-radius:0 0 12px 12px;
+  border-radius:0 0 18px 18px;
   padding:22px;
   margin-top:0;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
-.bannerWrap,
-.transitionBar,
 .uploadCard{
   max-width:none !important;
   margin-left:0 !important;
@@ -224,11 +218,9 @@ button{
 </head>
 <body>
   <div class="uploadPage">
-    <div class="uploadShell">
-      <div class="bannerWrap">
-        <img src="/banner.png" alt="Van Organizer Banner" />
-      </div>
-      <div class="transitionBar">
+    <div class="heroWrap">
+      <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
+      <div class="tagGlass">
         <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
       </div>
       <div class="uploadCard">
