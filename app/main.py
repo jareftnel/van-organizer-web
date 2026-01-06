@@ -82,7 +82,8 @@ body{
   padding:36px 18px 18px;
 }
 .heroWrap{
-  width:min(1100px, calc(100vw - 80px));
+  width:100%;
+  max-width:1100px;
   margin:0 auto;
   display:flex;
   flex-direction:column;
@@ -116,8 +117,12 @@ body{
   font-size:13px;
   opacity:0.85;
 }
+.heroWrap, .uploadCard, .fileRow, .fileNameLabel, .fileBtn, .buildBtn{
+  box-sizing:border-box;
+}
 .uploadCard{
   width:100%;
+  max-width:100%;
   background:rgba(10,16,26,0.55);
   border:1px solid var(--glassBorder);
   border-radius:0 0 18px 18px;
@@ -125,17 +130,13 @@ body{
   margin-top:0;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
-.uploadCard{
-  max-width:none !important;
-  margin-left:0 !important;
-  margin-right:0 !important;
-}
 form{display:flex;flex-direction:column;gap:16px}
 .fileRow{
-  display:grid;
-  grid-template-columns:140px 1fr 140px;
+  width:100%;
+  max-width:100%;
+  display:flex;
   align-items:center;
-  gap:12px;
+  gap:16px;
   padding:14px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
@@ -147,7 +148,6 @@ form{display:flex;flex-direction:column;gap:16px}
   fill:currentColor;
 }
 .fileBtn{
-  grid-column:1;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -160,6 +160,7 @@ form{display:flex;flex-direction:column;gap:16px}
   background:rgba(0,0,0,0.18);
   color:#e8eef6;
   font-weight:600;
+  flex:0 0 auto;
   transition:transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 .fileBtn:hover{
@@ -171,19 +172,15 @@ form{display:flex;flex-direction:column;gap:16px}
   outline-offset:2px;
 }
 .fileNameLabel{
-  grid-column:2;
-  justify-self:center;
   color:rgba(255,255,255,0.85);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  flex:1 1 auto;
   min-width:0;
   text-align:center;
   opacity:0.9;
   font-weight:600;
-}
-.fileSpacer{
-  grid-column:3;
 }
 .page, .container, .shell{
   max-width:none !important;
@@ -203,6 +200,8 @@ button{
   cursor:pointer;
 }
 .buildBtn{
+  width:100%;
+  max-width:100%;
   transition:transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
 .buildBtn:hover{
