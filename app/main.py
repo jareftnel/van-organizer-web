@@ -246,14 +246,14 @@ button{
   }
   .heroWrap{
     --hero-scale:min(
-      0.74,
+      0.7,
       calc(
         (
           100dvh
           - 24px
           - env(safe-area-inset-top, 0px)
           - env(safe-area-inset-bottom, 0px)
-        ) / 780
+        ) / 820
       )
     );
     transform:scale(var(--hero-scale));
