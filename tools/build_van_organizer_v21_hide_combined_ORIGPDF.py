@@ -404,7 +404,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 *{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
+.organizerRoot{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
 .layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;max-width:none;margin:0;height:100%}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -431,7 +431,7 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:flex;justify-content:center;width:100%;min-width:0;}
+.toteWrap{display:flex;justify-content:flex-start;width:100%;min-width:0;}
 .toteBoard{
   display:grid;
   grid-auto-flow:column;
@@ -675,18 +675,17 @@ th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
 @media (max-width: 1100px){
-  .wrap{padding:16px;height:auto;min-height:100vh;}
+  .organizerRoot{padding:16px;height:auto;min-height:100vh;}
   .layout{height:auto}
   .layout{grid-template-columns:1fr}
 }
 
 /* FULL-WIDTH OVERRIDE */
-.wrap,
+.organizerRoot,
 .layout{
   width:100% !important;
   max-width:none !important;
-  margin-left:0 !important;
-  margin-right:0 !important;
+  margin:0 !important;
 }
 
 /* Combined tab is shown by default */
@@ -694,7 +693,7 @@ td:last-child,th:last-child{text-align:right}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="organizerRoot">
   <div class="layout">
     <div class="controls">
       <div class="header">
