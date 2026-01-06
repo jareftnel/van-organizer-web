@@ -383,11 +383,12 @@ def organizer_wrapper(jid: str):
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer</title>
 <style>
-html,body{{margin:0;padding:0;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}}
-.topbar{{position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
+html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}}
+body{{display:flex;flex-direction:column;height:100vh}}
+.topbar{{flex:0 0 auto;position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
 .topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
-.wrap{{padding:10px}}
-iframe{{border:0; display:block; width:100%}}
+.wrap{{flex:1 1 auto;padding:10px;min-height:0}}
+iframe{{border:0; display:block; width:100%; height:100%}}
 </style>
 </head>
 <body>
@@ -402,54 +403,8 @@ iframe{{border:0; display:block; width:100%}}
 <script>
 (function () {{
   var frame = document.getElementById("orgFrame");
-
   // cache-bust iframe so it always pulls the newest organizer without manual refresh
   frame.src = "/job/{jid}/organizer_raw?v=" + Date.now();
-
-  function sizeFrame() {{
-    try {{
-      var doc = frame.contentDocument || frame.contentWindow.document;
-      if (!doc) return;
-
-      var b = doc.body;
-      var h = doc.documentElement;
-      var height = Math.max(
-        b.scrollHeight,
-        h.scrollHeight,
-        b.offsetHeight,
-        h.offsetHeight,
-        b.clientHeight,
-        h.clientHeight
-      );
-      frame.style.height = height + "px";
-    }} catch (e) {{}}
-  }}
-
-  var burstTimer = null;
-  function startBurst() {{
-    if (burstTimer) {{
-      clearInterval(burstTimer);
-      burstTimer = null;
-    }}
-    var start = Date.now();
-    burstTimer = setInterval(function () {{
-      sizeFrame();
-      if (Date.now() - start > 2500) {{
-        clearInterval(burstTimer);
-        burstTimer = null;
-      }}
-    }}, 200);
-  }}
-
-  frame.addEventListener("load", function () {{
-    sizeFrame();
-    startBurst();
-  }});
-
-  window.addEventListener("resize", function () {{
-    sizeFrame();
-    startBurst();
-  }});
 }})();
 </script>
 </body>

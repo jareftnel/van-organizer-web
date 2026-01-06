@@ -403,10 +403,10 @@ HTML_TEMPLATE = r"""<!doctype html>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
-body{margin:0;min-height:100vh;overflow-x:auto;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
+body{margin:0;min-height:100vh;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow-y:auto;overflow-x:visible;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:hidden;padding-left:24px;padding-right:24px;padding-top:24px;padding-bottom:24px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -425,7 +425,7 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow:visible}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow:hidden;height:100%;display:flex;flex-direction:column;gap:16px}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -434,29 +434,34 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:block;width:100%;min-width:0;}
+.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0}
 .toteBoard{
   display:grid;
   width:100%;
-  gap:16px;
-  padding:8px 0;
+  height:100%;
+  gap:clamp(12px, 1.5vw, 20px);
+  padding:0;
   min-width:0;
-  grid-template-rows: repeat(3, auto);
-  grid-template-columns: repeat(var(--cols), minmax(240px, 1fr));
-  --cardW: 190px;
-  --cardH: 150px;
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-flow: column;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
 }
-.bagsGrid{width:100%;max-width:100%;overflow:visible}
-@media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
-@media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
-@media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
+.bagsGrid{width:100%;max-width:100%;height:100%;overflow:hidden}
+.toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
 .toteCard{
   position:relative;
   width:100%;
   min-width:0;
-  height:var(--cardH);
+  height:auto;
+  aspect-ratio:4/3;
+  max-width:100%;
+  max-height:100%;
   border-radius:18px;
   background:rgba(10,14,20,.72);
   border:1px solid rgba(255,255,255,.08);
@@ -680,7 +685,7 @@ th{color:var(--muted);font-size:12px;text-align:left}
 td:last-child,th:last-child{text-align:right}
 
 @media (max-width: 1100px){
-  .organizerPage{padding:16px;min-height:100vh;}
+  .organizerPage{padding:16px;height:100vh;}
 }
 
 /* FULL-WIDTH OVERRIDE */
@@ -1081,14 +1086,7 @@ function fitToteText(){
           el.style.fontSize = best+'px';
         }
       }
-      const blockH = stack.scrollHeight;
-      if(blockH > innerH){
-        const scale = Math.max(0.80, innerH / blockH);
-        stack.style.transform = `scale(${scale})`;
-        stack.style.transformOrigin = 'center';
-      } else {
-        stack.style.transform = '';
-      }
+      stack.style.transform = '';
     }
   }
 }
