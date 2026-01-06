@@ -367,8 +367,9 @@ iframe{{border:0; display:block}}
       var span = measureSpan(doc);
       var shellWidth = shell.getBoundingClientRect().width || window.innerWidth;
       var availableWidth = Math.max(0, shellWidth - 4);
-      var scale = availableWidth > 0 ? Math.min(1, availableWidth / span.width) : 1;
+      var scale = availableWidth > 0 ? (availableWidth / span.width) : 1;
       if (!isFinite(scale) || scale <= 0) scale = 1;
+      if (scale > 2) scale = 2;
 
       // NO template literals here (avoid Python f-string conflicts)
       inner.style.transform = "scale(" + scale.toFixed(4) + ")";
