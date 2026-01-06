@@ -117,7 +117,7 @@ body{
   font-size:13px;
   opacity:0.85;
 }
-.heroWrap, .uploadCard, .fileRow, .fileNameLabel, .fileBtn, .buildBtn{
+.heroWrap, .tagGlass, .uploadCard, .fileRow, .fileNameLabel, .fileBtn, .buildBtn{
   box-sizing:border-box;
 }
 .uploadCard{
