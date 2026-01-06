@@ -410,19 +410,19 @@ body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-sys
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
-.topbar{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
-.organizerHeaderRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px}
-.topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+.topbar{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0;overflow-x:auto}
+.organizerHeaderRow{display:flex;align-items:center;gap:16px;flex-wrap:nowrap;min-width:0}
+.topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:nowrap;min-width:0;flex:1 1 auto;overflow:hidden}
 .topbar > *{min-width:0}
 .brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
-.sel{margin-left:10px}
+.sel{margin-left:10px;flex:0 0 auto}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
-select{min-width:240px; color-scheme: dark;}
+select{min-width:0;width:clamp(140px, 22vw, 240px);color-scheme: dark;}
 /* Make native dropdown readable (Chrome/Windows) */
 select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
-input{min-width:260px;flex:1}
+input{min-width:0;flex:1 1 240px;width:clamp(180px, 35vw, 360px)}
 .topCounts{
   display:flex;
   align-items:center;
@@ -674,7 +674,7 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
   padding:6px 12px;border-radius:999px;
   border:1px solid rgba(140,170,200,.6);
   background:#3fa7ff;color:#001018;
-  font-weight:900;text-decoration:none;letter-spacing:.02em;
+  font-weight:900;text-decoration:none;letter-spacing:.02em;white-space:nowrap;flex:0 0 auto;
 }
 .downloadBtn:hover{filter:brightness(1.08)}
 .downloadBtn:active{transform:translateY(1px)}
