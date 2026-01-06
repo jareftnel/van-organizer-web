@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Response
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import (
     HTMLResponse,
     FileResponse,
@@ -19,6 +20,9 @@ JOBS_DIR = Path("/tmp/vanorg_jobs")
 store = JobStore(str(JOBS_DIR))
 
 app = FastAPI()
+
+STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 # ---------------------------
@@ -61,13 +65,24 @@ def home():
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   margin:0;
+  background:#0b0f14;
+  color:#e8eef6;
+}
+.page{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:24px;
-  background:#0b0f14;
-  color:#e8eef6;
+}
+.brandBlock{display:flex;flex-direction:column;align-items:center;gap:16px}
+.siteBanner{
+  width:min(960px, 92vw);
+  height:auto;
+  display:block;
+  object-fit:contain;
+  margin:0 auto;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,.35));
 }
 .card{
   width:100%;
@@ -78,7 +93,6 @@ body{
   padding:32px;
   box-shadow:0 14px 36px rgba(0,0,0,0.35);
 }
-h1{margin:0 0 18px;font-size:24px;letter-spacing:0.2px}
 form{display:flex;flex-direction:column;gap:16px}
 input[type="file"]{
   width:100%;
@@ -108,15 +122,26 @@ button{
   font-size:16px;
   cursor:pointer;
 }
+.helper{
+  text-align:center;
+  font-size:12px;
+  color:#9aa6b2;
+  margin-top:-4px;
+}
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Van Organizer Builder</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file" name="file" accept="application/pdf" required />
-      <button type="submit">Build</button>
-    </form>
+  <div class="page">
+    <div class="brandBlock">
+      <img class="siteBanner" src="/static/amazon-optisheets-banner.svg" alt="Amazon OptiSheets" />
+      <div class="card">
+        <form action="/upload" method="post" enctype="multipart/form-data">
+          <input type="file" name="file" accept="application/pdf" required />
+          <button type="submit">Build</button>
+          <div class="helper">PDF only.</div>
+        </form>
+      </div>
+    </div>
   </div>
 </body>
 </html>
