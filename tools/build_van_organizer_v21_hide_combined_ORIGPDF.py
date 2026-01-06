@@ -404,13 +404,14 @@ HTML_TEMPLATE = r"""<!doctype html>
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;overflow:visible;}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
 .organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:18px 24px 28px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
-.topbar{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
+.topbar{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
+.organizerHeaderRow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px}
 .topbarLeft{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
 .topbar > *{min-width:0}
 .brand{font-weight:900}
@@ -422,27 +423,18 @@ select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
 
 input{min-width:260px;flex:1}
-.topRight{
-  display:grid;
-  grid-template-rows:auto auto;
-  justify-items:end;
-  gap:10px;
-}
-.topRightCounts{
+.topCounts{
   display:flex;
-  gap:14px;
   align-items:center;
+  gap:8px;
   opacity:.9;
+  font-weight:800;
 }
-.topRightControls{
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
+.topCounts .dot{opacity:.75}
 .sectionHeaderRow{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
   gap:16px;
   width:100%;
   margin-top:10px;
@@ -451,7 +443,7 @@ input{min-width:260px;flex:1}
   display:flex;
   flex-direction:column;
   gap:8px;
-  min-width:520px;
+  min-width:0;
 }
 .sectionRight{
   display:flex;
@@ -471,17 +463,16 @@ input{min-width:260px;flex:1}
   gap:10px;
   flex-wrap:wrap;
 }
-.subText{
-  margin-top:6px;
-  text-align:center;
-  opacity:.75;
-  max-width:520px;
+.sectionMeta{
+  text-align:left;
+  opacity:.7;
+  font-size:13px;
 }
 .tabsRow{display:flex;gap:10px;margin:0 !important;}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;height:100%;display:flex;flex-direction:column;gap:16px}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;display:flex;flex-direction:column;gap:16px}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -490,41 +481,31 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0}
+.toteWrap{width:100%;min-width:0;display:block}
 .toteBoard{
-  display:grid;
   width:100%;
-  height:100%;
-  gap:var(--tileGap, 16px);
   padding:0;
   min-width:0;
-  grid-template-rows: repeat(3, var(--tileH, 1fr));
-  grid-template-columns: repeat(var(--cols), var(--tileW, 1fr));
-  grid-auto-flow: column;
-  justify-content: center;
-  align-content: center;
-  justify-items: center;
-  align-items: center;
 }
 .bagsGrid{
   display:grid;
-  grid-template-rows:repeat(3, auto);
-  grid-auto-flow:column;
-  grid-auto-columns:minmax(240px, 1fr);
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-flow:row;
   gap:16px;
   align-items:stretch;
   width:100%;
   max-width:100%;
-  height:100%;
+  height:auto;
+  overflow:visible;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
 .toteCard{
   position:relative;
-  width:var(--tileW, 100%);
+  width:100%;
   min-width:0;
-  height:var(--tileH, auto);
+  height:auto;
   aspect-ratio:4/3;
   max-width:100%;
   max-height:100%;
@@ -540,7 +521,7 @@ input{min-width:260px;flex:1}
   grid-template-rows:auto 1fr auto;
   row-gap:10px;
   padding:14px 16px;
-  min-height:160px;
+  min-height:150px;
 }
 .toteCard *{box-sizing:border-box;}
 .toteCard.draggable{cursor:grab;}
@@ -636,10 +617,10 @@ input{min-width:260px;flex:1}
 }
 .toteBottomRow{
   display:flex;
+  flex-direction:column;
   justify-content:center;
-  gap:10px;
+  gap:4px;
   align-items:center;
-  flex-wrap:wrap;
   line-height:1.1;
   text-align:center;
   font-weight:800;
@@ -647,6 +628,11 @@ input{min-width:260px;flex:1}
   opacity:.92;
   font-size: clamp(11px, 7cqi, 14px);
   position:static !important;
+}
+.toteFooter{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .ovZone{color:inherit;}
 .ovZone99{color:#b46bff;}
@@ -762,34 +748,32 @@ td:last-child,th:last-child{text-align:right}
   <div class="organizerHeader">
     <div class="controls">
       <div class="header">
-        <div class="topbar">
+        <div class="topbar organizerHeaderRow">
           <div class="topbarLeft">
             <div class="brand">__HEADER_TITLE__</div>
             <div class="sel"><select id="routeSel"></select></div>
             <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
           </div>
+          <div class="topCounts">
+            <span class="dot"></span>
+            <span id="bagsCount">0</span>&nbsp;bags
+            <span aria-hidden="true">•</span>
+            <span id="ovCount">0</span>&nbsp;overflow
+          </div>
+          <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
         </div>
 
         <div class="sectionHeaderRow">
           <div class="sectionLeft">
             <div class="routeTitle" id="routeTitle"></div>
+            <div class="sectionMeta" id="subText">Overflow zones + pkgs under each tote.</div>
             <div class="toggleRow" id="toggleRow"></div>
-            <div class="subText" id="subText">Overflow zones + pkgs under each tote.</div>
           </div>
           <div class="sectionRight">
-            <div class="topRight">
-              <div class="topRightCounts">
-                <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
-                <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
-              </div>
-              <div class="topRightControls">
-                <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
-                <div class="tabsRow">
-                  <div class="tab active" data-tab="combined">Bags + Overflow</div>
-                  <div class="tab" data-tab="bags">Bags</div>
-                  <div class="tab" data-tab="overflow">Overflow</div>
-                </div>
-              </div>
+            <div class="tabsRow">
+              <div class="tab active" data-tab="combined">Bags + Overflow</div>
+              <div class="tab" data-tab="bags">Bags</div>
+              <div class="tab" data-tab="overflow">Overflow</div>
             </div>
           </div>
         </div>
@@ -808,50 +792,7 @@ const WAVE_LABEL_BY_TIME = __WAVE_JSON__;
 const organizerRoot = document.querySelector(".organizerRoot");
 const organizerBody = document.querySelector(".organizerBody");
 
-let layoutWidth = 0;
-let measureRaf = 0;
 let renderRaf = 0;
-const TOTE_ASPECT = 4 / 3;
-const TOTE_GAP_PX = 16;
-
-function applyLayoutWidth(nextWidth){
-  if(!nextWidth || !isFinite(nextWidth)) return;
-  if(Math.abs(nextWidth - layoutWidth) < 0.5) return;
-  layoutWidth = nextWidth;
-  document.documentElement.style.setProperty("--layoutWidth", Math.round(layoutWidth) + "px");
-}
-
-function measureLayout(){
-  if(!organizerRoot) return;
-  const w = organizerRoot.getBoundingClientRect().width;
-  applyLayoutWidth(w);
-  if(!organizerBody) return;
-  document.querySelectorAll(".toteWrap").forEach((wrap)=>{
-    const board = wrap.querySelector(".toteBoard");
-    if(!board) return;
-    const colsRaw = getComputedStyle(board).getPropertyValue("--cols");
-    const cols = Math.max(1, parseInt(colsRaw, 10) || 1);
-    const availW = Math.max(0, wrap.clientWidth);
-    const availH = Math.max(0, wrap.clientHeight);
-    const gap = TOTE_GAP_PX;
-    const tileWFromW = (availW - (cols - 1) * gap) / cols;
-    const tileWFromH = ((availH - (TOTE_ROWS - 1) * gap) * TOTE_ASPECT) / TOTE_ROWS;
-    const tileW = Math.floor(Math.min(tileWFromW, tileWFromH));
-    const tileH = Math.floor(tileW / TOTE_ASPECT);
-    if(!isFinite(tileW) || tileW <= 0 || !isFinite(tileH) || tileH <= 0) return;
-    board.style.setProperty("--tileW", `${tileW}px`);
-    board.style.setProperty("--tileH", `${tileH}px`);
-    board.style.setProperty("--tileGap", `${gap}px`);
-  });
-}
-
-function scheduleMeasure(){
-  if(measureRaf) cancelAnimationFrame(measureRaf);
-  measureRaf = requestAnimationFrame(()=>{
-    measureLayout();
-    requestAnimationFrame(measureLayout);
-  });
-}
 
 function scheduleRender(){
   if(renderRaf) return;
@@ -1071,26 +1012,8 @@ function buildDisplayItems(r, q){
   return items;
 }
 
-const TOTE_ROWS = 3;
-
-function getToteColumnCount(itemCount){
-  const count = Math.max(1, itemCount|0);
-  return Math.max(1, Math.ceil(count / TOTE_ROWS));
-}
-
-function orderForToteSweep(items, columns){
-  if(items.length <= 1) return items.slice();
-  return items.slice();
-}
-
-function orderFromToteSweep(items, columns){
-  if(items.length <= 1) return items.slice();
-  return items.slice();
-}
-
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const cols = getToteColumnCount(items.length);
-  const orderedItems = orderForToteSweep(items, cols);
+  const orderedItems = items.slice();
   const cardsHtml = orderedItems.map((it, i)=>{
     const cur = it.cur;
     const second = it.second;
@@ -1102,18 +1025,13 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
     const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
-    const row = (i % TOTE_ROWS) + 1;
-    const colFromRight = Math.floor(i / TOTE_ROWS);
-    const col = cols - colFromRight;
-    const posStyle = `grid-row:${row};grid-column:${col};`;
-
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
       const chip2 = bagColorChip(second.bag);
       const sub = getSubLine(cur, second);
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};${posStyle}">
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
         <div class="toteTopRow">
           ${badgeHtml}
           <div class="toteBar"></div>
@@ -1126,14 +1044,14 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
           <div class="toteBigNumberLine">${topNum}</div>
           <div class="toteBigNumberLine">${botNum}</div>
         </div>
-        ${sub ? `<div class="toteBottomRow">${sub}</div>` : ``}
+        ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
       </div>`;
     }
 
     const sub = getSubLine(cur, null);
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
-    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};${posStyle}">
+    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
       <div class="toteTopRow">
         ${badgeHtml}
         <div class="toteBar"></div>
@@ -1143,11 +1061,11 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
         </div>
       </div>
       <div class="toteBigNumber">${main1}</div>
-      ${sub ? `<div class="toteBottomRow">${sub}</div>` : ``}
+      ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
     </div>`;
   }).join("");
 
-  return { cardsHtml, cols };
+  return { cardsHtml };
 }
 
 function buildOverflowMap(r){
@@ -1327,15 +1245,13 @@ function attachBagHandlers(routeShort, allowDrag){
       const base = baseOrder(r);
       let ord = removeCombinedSecondsFromOrder(routeShort, getCustomOrder(routeShort, base).slice());
 
-      const cols = getToteColumnCount(ord.length);
-      let domOrder = orderForToteSweep(ord, cols);
+      const domOrder = ord.slice();
       const from = domOrder.indexOf(s);
       const to = domOrder.indexOf(t);
       if(from === -1 || to === -1) return;
       domOrder.splice(from, 1);
       domOrder.splice(to, 0, s);
-      const sweepOrder = orderFromToteSweep(domOrder, cols);
-      setCustomOrder(routeShort, sweepOrder);
+      setCustomOrder(routeShort, domOrder);
       setMode(routeShort, "custom");
       render();
     });
@@ -1499,7 +1415,7 @@ function renderBags(r, q){
       <div class="badge"><span class="dot"></span>${items.length} bags</div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
+      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1643,7 +1559,7 @@ function renderCombined(r,q){
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
     <div class="toteWrap">
-      <div class="toteBoard bagsGrid" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
+      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1666,7 +1582,6 @@ function render(){
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
-  scheduleMeasure();
 }
 
 function buildRouteDropdown(){
@@ -1727,26 +1642,21 @@ function init(){
   });
   if(organizerRoot && "ResizeObserver" in window){
     const ro = new ResizeObserver(()=>{
-      measureLayout();
       scheduleRender();
     });
     ro.observe(organizerRoot);
   }
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(()=>{
-      scheduleMeasure();
       scheduleRender();
     });
   }
   window.addEventListener('orientationchange', ()=>{
-    scheduleMeasure();
     scheduleRender();
   });
   window.addEventListener('resize', ()=>{
-    scheduleMeasure();
     scheduleRender();
   });
-  scheduleMeasure();
   render();
 }
 init();
