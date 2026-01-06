@@ -402,8 +402,10 @@ HTML_TEMPLATE = r"""<!doctype html>
 <style>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{max-width:none;width:100%;margin:0;padding:18px 18px 40px;}
+html,body{height:100%}
+body{margin:0;min-height:100vh;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
+.wrap{max-width:none;width:100%;margin:0;padding:18px;min-height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
+.header{display:flex;flex-direction:column;gap:12px}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;}
 .brand{font-weight:900}
 .sel{margin-left:10px}
@@ -418,6 +420,7 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px}
+.content{margin-top:0;overflow:auto;min-height:0}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -668,24 +671,26 @@ td:last-child,th:last-child{text-align:right}
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar">
-    <div class="brand">__HEADER_TITLE__</div>
-    <div class="sel"><select id="routeSel"></select></div>
-    <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
-    <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
-    <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
-    <div class="downloadRow">
-      <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+  <div class="header">
+    <div class="topbar">
+      <div class="brand">__HEADER_TITLE__</div>
+      <div class="sel"><select id="routeSel"></select></div>
+      <input id="q" placeholder="Search bags / overflow (ex: 16.3X)"/>
+      <div class="badge"><span class="dot"></span><span id="bagsCount">0</span>&nbsp;bags</div>
+      <div class="badge"><span class="dot"></span><span id="ovCount">0</span>&nbsp;overflow</div>
+      <div class="downloadRow">
+        <a class="downloadBtn" href="download/STACKED.pdf">DOWNLOAD PDF</a>
+      </div>
+    </div>
+
+    <div class="pills">
+      <div class="tab active" data-tab="combined">Bags + Overflow</div>
+      <div class="tab" data-tab="bags">Bags</div>
+      <div class="tab" data-tab="overflow">Overflow</div>
     </div>
   </div>
 
-  <div class="pills">
-    <div class="tab active" data-tab="combined">Bags + Overflow</div>
-    <div class="tab" data-tab="bags">Bags</div>
-    <div class="tab" data-tab="overflow">Overflow</div>
-  </div>
-
-  <div id="content" class="card"></div>
+  <div id="content" class="card content"></div>
 </div>
 
 <script>
