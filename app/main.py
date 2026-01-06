@@ -69,6 +69,11 @@ body{
   background:#0b0f14;
   color:#e8eef6;
 }
+:root{
+  --r:22px;
+  --glass:rgba(255,255,255,0.06);
+  --glassBorder:rgba(255,255,255,0.10);
+}
 .uploadPage{
   min-height:100vh;
   display:flex;
@@ -77,11 +82,14 @@ body{
   padding:36px 18px 18px;
 }
 .uploadShell{
-  width:min(1100px, calc(100vw - 48px));
+  width:min(1100px, calc(100vw - 96px));
   margin:40px auto 0;
   display:flex;
   flex-direction:column;
   gap:16px;
+}
+.uploadShell > *{
+  width:100%;
 }
 .bannerImg,
 .taglineGlass,
@@ -93,20 +101,20 @@ body{
   max-width:100%;
   object-fit:contain;
   display:block;
-  border-radius:26px;
-  box-shadow:0 18px 60px rgba(0,0,0,0.30);
+  border-radius:var(--r);
+  box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }
 .taglineGlass{
-  border-radius:22px;
-  padding:14px 18px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
+  margin-top:16px;
+  margin-bottom:-12px;
+  padding:12px 18px;
+  text-align:center;
+  background:linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+  border:1px solid var(--glassBorder);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
+  border-radius:var(--r);
   box-shadow:0 12px 30px rgba(0,0,0,0.28);
-  margin-top:-10px;
-  border-top-left-radius:18px;
-  border-top-right-radius:18px;
 }
 .taglineText{
   text-align:center;
@@ -117,10 +125,12 @@ body{
 }
 .uploadCard{
   background:rgba(10,16,26,0.55);
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:26px;
+  border:1px solid var(--glassBorder);
+  border-radius:var(--r);
+  border-top-left-radius:calc(var(--r) - 6px);
+  border-top-right-radius:calc(var(--r) - 6px);
   padding:22px;
-  box-shadow:0 18px 60px rgba(0,0,0,0.35);
+  box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }
 form{display:flex;flex-direction:column;gap:16px}
 .fileRow{
@@ -175,6 +185,7 @@ form{display:flex;flex-direction:column;gap:16px}
   flex:1;
   text-align:center;
   opacity:0.9;
+  font-weight:600;
 }
 button{
   width:100%;
@@ -220,7 +231,7 @@ button{
               Upload
               <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
             </label>
-            <span class="fileName" id="fileName">Choose file</span>
+            <span class="fileName" id="fileName">Choose File</span>
           </div>
           <button class="buildBtn" type="submit">Build</button>
         </form>
@@ -235,7 +246,7 @@ button{
       fileInput.addEventListener("change", () => {
         const name = fileInput.files && fileInput.files.length > 0
           ? fileInput.files[0].name
-          : "Choose file";
+          : "Choose File";
         fileName.textContent = name;
       });
     }
