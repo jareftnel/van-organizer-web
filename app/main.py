@@ -201,6 +201,12 @@ form{display:flex;flex-direction:column;gap:16px}
   padding-left:24px;
   padding-right:24px;
 }
+.uploadBtn,
+.buildBtn{
+  height:clamp(48px, 7vh, 64px);
+  font-size:clamp(16px, 2.4vh, 20px);
+  border-radius:16px;
+}
 button{
   width:100%;
   padding:14px;
@@ -238,7 +244,7 @@ button{
       <div class="uploadCard">
         <form action="/upload" method="post" enctype="multipart/form-data">
           <div class="fileRow">
-            <button class="fileBtn" type="button">
+            <button class="fileBtn uploadBtn" type="button">
               <svg class="fileIcon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
                 <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
               </svg>
