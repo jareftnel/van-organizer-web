@@ -712,8 +712,6 @@ html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-
 body{{display:flex;flex-direction:column;height:100vh}}
 .banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
 .banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}}
-.topbar{{flex:0 0 auto;position:sticky;top:0;z-index:10;background:#101826;border-bottom:1px solid #1c2a3a;padding:10px 12px}}
-.topbar a{{color:#3fa7ff;text-decoration:none;font-weight:800}}
 .wrap{{flex:1 1 auto;padding:10px;min-height:0}}
 iframe{{border:0; display:block; width:100%; height:100%}}
 </style>
@@ -722,10 +720,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   <div class="banner">
     <img src="/banner.png" alt="Van organizer banner" />
   </div>
-  <div class="topbar">
-    <a href="/job/{jid}">← Back</a>
-  </div>
-
   <div class="wrap">
     <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
   </div>
