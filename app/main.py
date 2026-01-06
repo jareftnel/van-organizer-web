@@ -239,34 +239,44 @@ button{
     overflow:hidden;
   }
   .uploadPage{
-    height:100svh;
+    height:100dvh;
     align-items:flex-start;
-    padding-top:10px;
-    padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+    padding-top:8px;
+    padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
-    --hero-scale:min(0.78, calc((100svh - 16px) / 780));
+    --hero-scale:min(
+      0.74,
+      calc(
+        (
+          100dvh
+          - 24px
+          - env(safe-area-inset-top, 0px)
+          - env(safe-area-inset-bottom, 0px)
+        ) / 780
+      )
+    );
     transform:scale(var(--hero-scale));
     transform-origin:top center;
   }
   .tagGlass{
-    padding:8px 0;
+    padding:6px 0;
   }
   .uploadCard{
-    padding:14px;
+    padding:12px;
   }
   form{
-    gap:10px;
+    gap:8px;
   }
   .fileRow{
-    padding:8px;
-    gap:10px;
+    padding:6px;
+    gap:8px;
   }
   .uploadBtn,
   .buildBtn{
-    height:44px;
+    height:42px;
     font-size:15px;
-    border-radius:14px;
+    border-radius:13px;
   }
 }
 @media (orientation: portrait) and (max-height: 560px){
