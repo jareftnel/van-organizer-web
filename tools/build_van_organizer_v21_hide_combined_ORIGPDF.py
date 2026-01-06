@@ -406,7 +406,7 @@ html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;overflow:auto}
+.organizerBody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:auto;padding:24px}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -434,7 +434,7 @@ input{min-width:260px;flex:1}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{display:flex;justify-content:flex-start;width:100%;min-width:0;}
+.toteWrap{display:block;width:100%;min-width:0;}
 .toteBoard{
   display:grid;
   width:100%;
@@ -442,9 +442,7 @@ input{min-width:260px;flex:1}
   padding:8px 0;
   min-width:0;
   grid-template-rows: repeat(3, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(240px, 1fr);
-  direction: rtl;
+  grid-template-columns: repeat(var(--cols), minmax(240px, 1fr));
   --cardW: 190px;
   --cardH: 150px;
 }
@@ -966,7 +964,7 @@ function orderFromToteSweep(items, columns){
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
   const cols = getToteColumnCount(items.length);
   const orderedItems = orderForToteSweep(items, cols);
-  const cardsHtml = orderedItems.map((it)=>{
+  const cardsHtml = orderedItems.map((it, i)=>{
     const cur = it.cur;
     const second = it.second;
     const main1 = (cur.bag_id || cur.bag || "").toString();
@@ -977,6 +975,10 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
     const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
+    const row = (i % TOTE_ROWS) + 1;
+    const colFromRight = Math.floor(i / TOTE_ROWS);
+    const col = cols - colFromRight;
+    const posStyle = `grid-row:${row};grid-column:${col};`;
 
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
@@ -984,7 +986,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const sub = getSubLine(cur, second);
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2}">
+      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};${posStyle}">
         <div class="toteBar"></div>
         ${badgeHtml}
         ${pkgHtml}
@@ -997,7 +999,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const sub = getSubLine(cur, null);
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
-    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1}">
+    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};${posStyle}">
       <div class="toteBar"></div>
       ${badgeHtml}
       ${pkgHtml}
@@ -1007,7 +1009,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     </div>`;
   }).join("");
 
-  return { cardsHtml };
+  return { cardsHtml, cols };
 }
 
 function buildOverflowMap(r){
@@ -1378,7 +1380,7 @@ function renderBags(r, q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard">${layout.cardsHtml}</div>
+      <div class="toteBoard" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
@@ -1536,7 +1538,7 @@ function renderCombined(r,q){
       </div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard">${layout.cardsHtml}</div>
+      <div class="toteBoard" style="--cols:${layout.cols}">${layout.cardsHtml}</div>
     </div>
     <div class="clearRow">
       <button id="clearLoadedBtn" class="clearBtn">Clear</button>
