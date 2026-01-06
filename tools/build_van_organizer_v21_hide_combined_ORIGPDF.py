@@ -405,7 +405,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .wrap{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;height:100vh;}
-.layout{display:grid;grid-template-columns:620px 1fr;gap:24px;align-items:start;min-width:0;height:100%}
+.layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;min-width:0;width:100%;max-width:none;margin:0;height:100%}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
@@ -422,7 +422,7 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:hidden;min-height:0}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:visible;min-height:0}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -610,7 +610,7 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovTable td:nth-child(2){white-space:nowrap}
 .ovTable td:nth-child(4){white-space:nowrap}
 
-.ovWrap{width:100%;max-width:none;margin:0 auto;padding:0 18px;}
+.ovWrap{width:100%;max-width:none;margin:0;padding:0 18px;}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
