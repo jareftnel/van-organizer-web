@@ -232,6 +232,19 @@ button{
   transform:translateY(1px);
   box-shadow:0 8px 18px rgba(0,0,0,0.25);
 }
+@media (max-height: 560px){
+  html, body{
+    height:auto;
+    min-height:100%;
+    overflow:auto;
+  }
+  .uploadPage{
+    height:auto;
+    min-height:100svh;
+    align-items:flex-start;
+    padding-top:20px;
+  }
+}
 </style>
 </head>
 <body>
