@@ -404,7 +404,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 *{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-x:visible;overflow-y:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.wrap{max-width:none;width:100%;min-width:0;margin:0;padding:18px;min-height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
+.wrap{width:100%;max-width:none;min-width:0;margin:0;padding:18px;height:100vh;display:grid;grid-template-rows:auto 1fr;gap:14px;}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:14px;padding:12px 12px;min-width:0}
 .brand{font-weight:900}
@@ -420,7 +420,7 @@ input{min-width:260px;flex:1}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
-.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:visible;min-height:0}
+.content{margin-top:0;width:100%;max-width:none;min-width:0;overflow-y:auto;overflow-x:hidden;min-height:0}
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
@@ -432,7 +432,8 @@ input{min-width:260px;flex:1}
 .toteWrap{display:flex;justify-content:center;width:100%;min-width:0;}
 .toteBoard{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-flow:row;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap:16px;
   padding:8px 0;
   width:100%;
@@ -440,6 +441,9 @@ input{min-width:260px;flex:1}
   --cardW: 190px;
   --cardH: 150px;
 }
+@media (min-width: 900px){  .toteBoard{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px){ .toteBoard{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1500px){ .toteBoard{ grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 @media (max-width: 1200px){ .toteBoard{ --cardW: 175px; --cardH: 145px; } }
 @media (max-width: 980px){  .toteBoard{ --cardW: 160px; --cardH: 140px; } }
 @media (max-width: 760px){  .toteBoard{ --cardW: 150px; --cardH: 136px; gap:12px; } }
