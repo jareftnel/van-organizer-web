@@ -21,6 +21,7 @@ store = JobStore(str(JOBS_DIR))
 
 app = FastAPI()
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
@@ -79,18 +80,21 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:20px;
+  gap:0;
   width:100%;
   max-width:780px;
+}
+.bannerWrap{
+  width:100%;
+  max-width:780px;
+  margin:0 auto 28px;
 }
 .siteBanner{
   width:100%;
   height:auto;
-  display:block;
+  max-width:100%;
   object-fit:contain;
-  margin:0 auto;
-  max-height:150px;
-  border-radius:18px;
+  display:block;
 }
 .card{
   width:100%;
@@ -141,7 +145,9 @@ button{
 <body>
   <div class="page">
     <div class="brandBlock">
-      <img class="siteBanner" src="/static/amazon-optisheets-banner.svg" alt="Amazon OptiSheets" />
+      <div class="bannerWrap">
+        <img class="siteBanner" src="/banner.png" alt="Van Organizer Banner" />
+      </div>
       <div class="card">
         <form action="/upload" method="post" enctype="multipart/form-data">
           <input type="file" name="file" accept="application/pdf" required />
@@ -154,6 +160,12 @@ button{
 </body>
 </html>
 """
+
+
+@app.get("/banner.png")
+def banner_png():
+    banner_path = REPO_ROOT / "banner.png"
+    return FileResponse(str(banner_path))
 
 
 @app.post("/upload")
