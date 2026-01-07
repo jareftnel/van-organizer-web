@@ -579,6 +579,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   column-gap:6px;
   min-height:26px;
   margin:0;
+  position:relative;
 }
 .toteBubble{
   min-width:calc(22px * var(--card-scale));
@@ -594,7 +595,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   text-align:center;
 }
 .toteCornerBadge{
-  position:static;
+  position:relative;
   background:rgba(0,0,0,.72);
   border:1px solid rgba(255,255,255,.16);
   z-index:2;
@@ -607,14 +608,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   align-items:center;
   gap:6px;
-  position:static;
+  position:relative;
   transform:none;
   justify-self:end;
   grid-column:3;
+  z-index:1;
 }
 .toteBar{
-  grid-column:2;
-  width:100%;
+  grid-column:1 / -1;
+  width:calc(100% - (var(--top-gap, 0px) * 2));
   max-width:100%;
   height:8px;
   border-radius:999px;
@@ -623,6 +625,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   pointer-events:none;
   min-width:40px;
   margin:0 auto;
+  justify-self:center;
+  z-index:0;
 }
 
 .toteIdx{
