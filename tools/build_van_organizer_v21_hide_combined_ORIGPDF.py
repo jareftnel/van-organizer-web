@@ -530,7 +530,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
   gap:clamp(6px, 1.2vw, 16px);
-  align-items:start;
+  align-items:stretch;
   width:100%;
   max-width:100%;
   height:auto;
@@ -547,7 +547,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:auto;
+  height:100%;
   min-height:max-content;
   max-width:100%;
   max-height:none;
@@ -1289,7 +1289,6 @@ function getToteRowBuckets(){
 }
 
 function setToteCardScale(){
-function setToteCardScale(){
   const buckets = getToteRowBuckets();
 
   // Find a consistent scale per row so cards align nicely
@@ -1329,7 +1328,7 @@ function setToteCardScale(){
 function fitToteGrid(){
   const buckets = getToteRowBuckets();
   // Clear heights
-  buckets.forEach(row=>{ row.forEach(card=>{ card.style.minHeight = ""; }); });
+  buckets.forEach(row=>{ row.forEach(card=>{ card.style.minHeight = ""; card.style.height = ""; }); });
   // Make each row's cards equal height
   buckets.forEach(row=>{
     let maxH = 0;
@@ -1338,7 +1337,11 @@ function fitToteGrid(){
       if(h > maxH) maxH = h;
     });
     if(!maxH) return;
-    row.forEach(card=>{ card.style.minHeight = `${Math.ceil(maxH)}px`; });
+    const height = `${Math.ceil(maxH)}px`;
+    row.forEach(card=>{
+      card.style.minHeight = height;
+      card.style.height = height;
+    });
   });
 }
 
@@ -1373,8 +1376,6 @@ function autoFitToteGrid(shouldScale){
   wrap.style.overflow = "hidden";
   wrap.style.height = `${Math.ceil(boardHeight * scale)}px`;
   wrap.style.flex   = "0 0 auto";
-}
-
 }
 
 function attachBagHandlers(routeShort, allowDrag){
