@@ -904,6 +904,10 @@ const selectMeasureCanvas = document.createElement("canvas");
 
 let renderRaf = 0;
 
+function isZoomed(){
+  return Math.abs(window.devicePixelRatio - 1) > 0.02;
+}
+
 function scheduleRender(){
   if(renderRaf) return;
   renderRaf = requestAnimationFrame(()=>{
@@ -1726,7 +1730,11 @@ function render(){
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
   if(activeTab==="bags" || activeTab==="combined"){
-    requestAnimationFrame(fitToteText);
+    requestAnimationFrame(()=>{
+      if(isZoomed()) return;
+      fitToteText();
+      if(typeof fitToteGrid === "function") fitToteGrid();
+    });
   }
 }
 

@@ -731,7 +731,7 @@ def organizer_wrapper(jid: str):
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Van Organizer</title>
 <style>
-html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}}
+html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:auto}}
 body{{display:flex;flex-direction:column;height:100dvh}}
 .banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
 .banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}}
