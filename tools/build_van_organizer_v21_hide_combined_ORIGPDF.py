@@ -744,6 +744,16 @@ tr.ovDone td .ovBox{opacity:.85}
   border-radius:999px;
   overflow:hidden;
 }
+.rowActions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:12px;
+}
+.rowActions .ovMode{
+  margin-left:auto;
+}
 .ovMode button{
   padding:8px 12px;border:0;background:transparent;color:var(--muted);font-weight:800;cursor:pointer;
 }
@@ -1547,7 +1557,6 @@ const routeShort = r.short || r.route_short || "";
         </div>
       </div>
       <div class="ovHeaderRight">
-        ${modeHtml}
         <div class="badge"><span class="dot"></span>${r.overflow_total||0} overflow</div>
       </div>
     </div>
@@ -1593,6 +1602,7 @@ const routeShort = r.short || r.route_short || "";
 
     <div class="rowActions">
       <button class="btn" id="ovClear">Clear</button>
+      ${modeHtml}
     </div>
   `;
 
