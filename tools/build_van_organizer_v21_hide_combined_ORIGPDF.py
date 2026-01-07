@@ -1198,13 +1198,14 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const sub = getSubLine(cur, second);
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
+      const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
       return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
         ${badgeHtml}
+        ${minusHtml}
         <div class="toteTopRow">
           <div class="toteBar"></div>
           <div class="toteMetaRight">
             ${pkgHtml}
-            <div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>
           </div>
         </div>
         <div class="toteBigNumber toteBigNumberStack">
@@ -1220,11 +1221,11 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
 
     return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
       ${badgeHtml}
+      ${starHtml}
       <div class="toteTopRow">
         <div class="toteBar"></div>
         <div class="toteMetaRight">
           ${pkgHtml}
-          ${starHtml}
         </div>
       </div>
       <div class="toteBigNumber">${main1}</div>
