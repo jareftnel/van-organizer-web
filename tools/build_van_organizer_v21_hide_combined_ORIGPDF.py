@@ -525,7 +525,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .bagsGrid{
   display:grid;
-  grid-template-rows:repeat(3, auto);
+  grid-template-rows:repeat(3, minmax(clamp(220px, 28vh, 360px), auto));
+  grid-auto-rows:minmax(clamp(220px, 28vh, 360px), auto);
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
   gap:clamp(6px, 1.2vw, 16px);
@@ -546,7 +547,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:100%;
+  height:auto;
   min-height:clamp(210px, 28vh, 360px);
   max-width:100%;
   max-height:100%;
