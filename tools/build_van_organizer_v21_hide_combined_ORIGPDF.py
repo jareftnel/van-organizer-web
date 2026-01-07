@@ -585,11 +585,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .toteCornerBadge{
   position:absolute;
-  top:10px;
-  left:10px;
-  min-width:26px;
-  height:26px;
-  padding:0 8px;
+  top:8px;
+  left:8px;
+  min-width:calc(22px * var(--card-scale));
+  height:calc(22px * var(--card-scale));
+  padding:0 6px;
   display:flex;
   align-items:center;
   justify-content:center;
