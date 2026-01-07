@@ -1086,6 +1086,18 @@ function parseZoneCounts(zones){
 }
 function match(text,q){ return !q || (text||"").toLowerCase().includes(q.toLowerCase()); }
 
+function bagLabel(entry){
+  if(!entry) return "";
+  return String(entry.bag_id || entry.bag || "").trim();
+}
+
+function overflowZonesText(label, ovMap){
+  if(!label || !ovMap) return "";
+  const entry = ovMap.get(label);
+  if(!entry || !entry.length) return "";
+  return entry.map((item)=>`${item.zone||""} ${normZone(item.zone)}`).join(" ");
+}
+
 // Custom order helpers
 function getCustomOrder(routeShort, base){
   const arr = (BAGORDER[routeShort] || []).slice();
@@ -1117,7 +1129,7 @@ function buildOrder(r){
   return ord;
 }
 
-function buildDisplayItems(r, q){
+function buildDisplayItems(r, q, ovMap){
   const routeShort = r.route_short;
   const byIdx = Object.fromEntries((r.bags_detail||[]).map(x=>[x.idx, x]));
   const ord = buildOrder(r);
@@ -1129,7 +1141,12 @@ function buildDisplayItems(r, q){
     const secondIdx = idx + 1;
     const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
     const eligibleCombine = (!cur.sort_zone) && idx > 1;
-    const text = `${cur.idx} ${cur.bag} ${cur.sort_zone||""} ${cur.pkgs||""}` + (second ? ` ${second.bag}` : "");
+    const curLabel = bagLabel(cur);
+    const secondLabel = bagLabel(second);
+    const curOverflow = overflowZonesText(curLabel || cur.bag, ovMap);
+    const secondOverflow = overflowZonesText(secondLabel || (second && second.bag), ovMap);
+    const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${cur.pkgs||""} ${curOverflow}` +
+      (second ? ` ${secondLabel} ${second.bag||""} ${second.sort_zone||""} ${second.pkgs||""} ${secondOverflow}` : "");
     if(!match(text, q)) continue;
     items.push({ idx, cur, secondIdx: second ? secondIdx : null, second, eligibleCombine });
   }
@@ -1477,7 +1494,8 @@ function renderBags(r, q){
   const routeShort = r.route_short;
   const mode = getMode(routeShort);
 
-  const items = buildDisplayItems(r, q);
+  const ovMap = buildOverflowMap(r);
+  const items = buildDisplayItems(r, q, ovMap);
 
   function subLine(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
@@ -1630,8 +1648,8 @@ const routeShort = r.short || r.route_short || "";
 function renderCombined(r,q){
   const routeShort = r.route_short;
   const mode = getMode(routeShort);
-  const items = buildDisplayItems(r, q);
   const ovMap = buildOverflowMap(r);
+  const items = buildDisplayItems(r, q, ovMap);
 
   function combinedBadgeText(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
