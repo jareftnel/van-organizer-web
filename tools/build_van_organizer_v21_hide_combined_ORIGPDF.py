@@ -542,6 +542,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
 .toteCard{
+  --card-scale: 1;
   position:relative;
   width:100%;
   min-width:0;
@@ -598,13 +599,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background:rgba(0,0,0,.72);
   border:1px solid rgba(255,255,255,.16);
   font-weight:900;
-  font-size:12px;
+  font-size:calc(12px * var(--card-scale));
   flex-shrink:0;
 }
 
 .totePkg{
   font-weight:900;
-  font-size:11px;
+  font-size:calc(11px * var(--card-scale));
   color:#ff4b4b;
   flex-shrink:0;
 }
@@ -616,7 +617,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background:rgba(0,0,0,.55);
   border:1px solid rgba(255,255,255,.10);
   font-weight:900;
-  font-size:16px;
+  font-size:calc(16px * var(--card-scale));
   color:#ff4b4b;
   line-height:1;
   user-select:none;
@@ -638,7 +639,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   text-align:center;
   font-weight:800;
   line-height:1;
-  font-size: clamp(44px, 5vw, 64px);
+  font-size:calc(56px * var(--card-scale));
   margin:0;
   letter-spacing:1px;
   white-space:nowrap;
@@ -654,7 +655,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   max-width:100%;
   white-space:nowrap;
-  font-size: clamp(32px, 4.5vw, 56px);
+  font-size:calc(48px * var(--card-scale));
 }
 .toteBottomRow{
   display:flex;
@@ -669,7 +670,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   font-weight:800;
   letter-spacing:.2px;
   opacity:.92;
-  font-size: clamp(11px, 7cqi, 14px);
+  font-size:calc(13px * var(--card-scale));
   position:static !important;
   overflow:visible;
 }
@@ -680,12 +681,6 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .ovZone{color:inherit;}
 .ovZone99{color:#b46bff;}
 .toteBottomRow .ovLine{line-height:1.25;}
-
-@container (max-width: 240px){
-  .toteBigNumber{ font-size: clamp(36px, 6vw, 52px); }
-  .toteBigNumberLine{ font-size: clamp(24px, 5vw, 40px); }
-  .toteBottomRow{ font-size: clamp(10px, 8cqi, 13px); }
-}
 
 /* tables */
 table{width:100%;border-collapse:separate;border-spacing:0}
@@ -1216,66 +1211,12 @@ function overflowSummary(bagLabel, ovMap){
 }
 
 
-function fitToteText(){
+function setToteCardScale(){
   const cards = document.querySelectorAll('.toteCard');
   for(const card of cards){
-    const topRow = card.querySelector('.toteTopRow');
-    const bottomRow = card.querySelector('.toteBottomRow');
-    const cardStyle = getComputedStyle(card);
-    const paddingTop = parseFloat(cardStyle.paddingTop) || 0;
-    const paddingBottom = parseFloat(cardStyle.paddingBottom) || 0;
-    const rowGap = parseFloat(cardStyle.rowGap) || 0;
-    const gapCount = bottomRow ? 2 : 1;
-    const safetyPad = 4;
-    const availableHeight = Math.max(
-      0,
-      card.clientHeight
-        - paddingTop
-        - paddingBottom
-        - (topRow ? topRow.offsetHeight : 0)
-        - (bottomRow ? bottomRow.offsetHeight : 0)
-        - (rowGap * gapCount)
-        - safetyPad
-    );
-    const main = card.querySelector('.toteBigNumber:not(.toteBigNumberStack)');
-    const stack = card.querySelector('.toteBigNumberStack');
-    const innerW = card.clientWidth - 32;
-    if(main){
-      const el = main;
-      const max = parseFloat(getComputedStyle(el).fontSize);
-      let lo = 10, hi = max, best = 10;
-      const fits = (fs)=>{
-        el.style.fontSize = fs+'px';
-        return el.scrollWidth <= innerW + 1 && el.scrollHeight <= availableHeight + 1;
-      };
-      if(fits(max)){ el.style.fontSize=''; }
-      else{
-        while(lo<=hi){
-          const mid=(lo+hi)/2;
-          if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
-        }
-        el.style.fontSize = best+'px';
-      }
-    }
-    if(stack){
-      const lines = stack.querySelectorAll('.toteBigNumberLine');
-      if(!lines.length) continue;
-      const max = parseFloat(getComputedStyle(lines[0]).fontSize);
-      let lo = 10, hi = max, best = 10;
-      const fits = (fs)=>{
-        lines.forEach((el)=>{ el.style.fontSize = fs+'px'; });
-        const widthsOk = Array.from(lines).every(el=>el.scrollWidth <= innerW + 1);
-        return widthsOk && stack.scrollHeight <= availableHeight + 1;
-      };
-      if(fits(max)){ lines.forEach(el=>{ el.style.fontSize=''; }); }
-      else{
-        while(lo<=hi){
-          const mid=(lo+hi)/2;
-          if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
-        }
-        lines.forEach((el)=>{ el.style.fontSize = best+'px'; });
-      }
-    }
+    const w = card.getBoundingClientRect().width;
+    const scale = Math.max(0.85, Math.min(1.15, w / 230));
+    card.style.setProperty('--card-scale', scale.toFixed(3));
   }
 }
 
@@ -1735,7 +1676,7 @@ function render(){
   if(activeTab==="bags" || activeTab==="combined"){
     requestAnimationFrame(()=>{
       if(isZoomed()) return;
-      fitToteText();
+      setToteCardScale();
       if(typeof fitToteGrid === "function") fitToteGrid();
     });
   }
