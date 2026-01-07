@@ -580,6 +580,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:26px;
   position:relative;
   padding:0;
+  padding-left:var(--top-left-gap, 0px);
+  padding-right:var(--top-right-gap, 0px);
 }
 .toteCornerBadge{
   position:absolute;
@@ -611,7 +613,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteBar{
   flex:1 1 auto;
   width:100%;
-  max-width:max(0px, calc(100% - var(--top-left-gap, 0px) - var(--top-right-gap, 0px)));
+  max-width:100%;
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
@@ -1276,8 +1278,11 @@ function setToteCardScale(){
     const scale = Math.max(0.85, Math.min(1.15, w / 230));
     card.style.setProperty('--card-scale', scale.toFixed(3));
     const badge = card.querySelector('.toteCornerBadge');
+    const combine = card.querySelector('.toteStar.combine');
     const meta = card.querySelector('.toteMetaRight');
-    const leftGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
+    const badgeGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
+    const combineGap = combine ? combine.getBoundingClientRect().width + 12 : 0;
+    const leftGap = Math.max(badgeGap, combineGap);
     const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
     card.style.setProperty('--top-left-gap', `${Math.ceil(leftGap)}px`);
     card.style.setProperty('--top-right-gap', `${Math.ceil(rightGap)}px`);
