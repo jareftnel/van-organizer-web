@@ -574,7 +574,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteTopRow{
   display:flex;
-  justify-content:center;
+  justify-content:stretch;
   align-items:center;
   gap:10px;
   min-height:26px;
@@ -606,9 +606,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:center;
   gap:6px;
   position:absolute;
-  right:calc(var(--top-right-gap, 0px) / 2);
+  right:0;
   top:50%;
-  transform:translate(50%, -50%);
+  transform:translateY(-50%);
 }
 .toteBar{
   flex:1 1 auto;
@@ -620,7 +620,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
   pointer-events:none;
   min-width:40px;
-  margin:0 auto;
+  margin:0;
 }
 
 .toteIdx{
@@ -687,7 +687,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .toteBigNumberStack{
   flex-direction:column;
-  gap: clamp(0px, 0.6cqi, 4px);
+  gap: clamp(0px, 0.4cqi, 2px);
 }
 .toteBigNumberLine{
   font-weight:900;
