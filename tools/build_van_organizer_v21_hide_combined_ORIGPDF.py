@@ -404,9 +404,10 @@ HTML_TEMPLATE = r"""<!doctype html>
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;display:flex;flex-direction:column;}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;height:100dvh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:18px 24px 28px}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:18px 24px 28px;display:flex;flex-direction:column}
+.content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
 .header{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -502,6 +503,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   flex-direction:column;
   gap:clamp(10px, 2vh, 18px);
   padding:clamp(12px, 3vh, 24px);
+  flex:1 1 auto;
+  min-height:0;
 }
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
@@ -511,11 +514,14 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{width:100%;min-width:0;display:block}
+.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0}
 .toteBoard{
   width:100%;
   padding:0;
   min-width:0;
+  display:flex;
+  flex:1 1 auto;
+  min-height:0;
 }
 .bagsGrid{
   display:grid;
@@ -526,9 +532,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:stretch;
   width:100%;
   max-width:100%;
-  height:auto;
+  height:100%;
+  min-height:0;
   overflow:visible;
   direction:rtl;
+  flex:1 1 auto;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
@@ -537,7 +545,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:auto;
+  height:100%;
   aspect-ratio:4/3;
   max-width:100%;
   max-height:100%;
@@ -553,7 +561,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-template-rows:auto 1fr auto;
   row-gap:10px;
   padding:14px 16px;
-  min-height:150px;
+  min-height:0;
 }
 .toteCard *{box-sizing:border-box;}
 .toteCard.draggable{cursor:grab;}
