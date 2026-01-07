@@ -544,6 +544,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteCard{
   --card-scale: 1;
+  --tote-badge-width: calc(44px * var(--card-scale));
   position:relative;
   width:100%;
   min-width:0;
@@ -599,6 +600,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   z-index:2;
   justify-self:start;
   grid-column:1;
+  width:var(--tote-badge-width);
+  padding:0;
 }
 .toteMetaRight{
   display:flex;
@@ -639,6 +642,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   color:#ff4b4b;
   flex-shrink:0;
   z-index:2;
+  width:var(--tote-badge-width);
+  padding:0;
 }
 
 .toteStar{
