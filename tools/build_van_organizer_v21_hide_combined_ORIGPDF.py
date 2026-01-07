@@ -572,20 +572,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCard.loaded{filter:grayscale(.85) brightness(.72);}
 
 .toteTopRow{
-  display:flex;
-  justify-content:center;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
   align-items:center;
-  gap:10px;
+  column-gap:6px;
   min-height:26px;
-  position:relative;
-  padding:1px 2px;
-  padding-left:calc(var(--top-left-gap, 0px) + 2px);
-  padding-right:calc(var(--top-right-gap, 0px) + 2px);
+  margin:0;
 }
 .toteCornerBadge{
-  position:absolute;
-  top:8px;
-  left:8px;
+  position:static;
   min-width:calc(22px * var(--card-scale));
   height:calc(22px * var(--card-scale));
   padding:0 6px;
@@ -599,20 +594,22 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   font-size:calc(12px * var(--card-scale));
   line-height:1;
   z-index:2;
+  justify-self:start;
+  grid-column:1;
 }
 .toteMetaRight{
   display:flex;
   align-items:center;
   gap:6px;
-  position:absolute;
-  right:8px;
-  top:8px;
+  position:static;
   transform:none;
+  justify-self:end;
+  grid-column:3;
 }
 .toteBar{
-  flex:1 1 auto;
-  width:calc(100% - (var(--top-left-gap, 0px) + var(--top-right-gap, 0px)));
-  max-width:calc(100% - (var(--top-left-gap, 0px) + var(--top-right-gap, 0px)));
+  grid-column:2;
+  width:calc(100% - (2 * var(--top-gap, 0px)));
+  max-width:calc(100% - (2 * var(--top-gap, 0px)));
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
@@ -1215,9 +1212,9 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const botNum = (cur.sort_zone ? main2 : main1);
       const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
       return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
-        ${badgeHtml}
         ${minusHtml}
         <div class="toteTopRow">
+          ${badgeHtml}
           <div class="toteBar"></div>
           <div class="toteMetaRight">
             ${pkgHtml}
@@ -1235,9 +1232,9 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
     return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
-      ${badgeHtml}
       ${starHtml}
       <div class="toteTopRow">
+        ${badgeHtml}
         <div class="toteBar"></div>
         <div class="toteMetaRight">
           ${pkgHtml}
@@ -1292,58 +1289,59 @@ function getToteRowBuckets(){
 }
 
 function setToteCardScale(){
+function setToteCardScale(){
   const buckets = getToteRowBuckets();
+
+  // Find a consistent scale per row so cards align nicely
   const rowScales = buckets.map((row)=>{
     if(!row.length) return 1;
     let scale = 1.15;
     row.forEach(card=>{
       const w = card.getBoundingClientRect().width;
-      const nextScale = Math.max(0.85, Math.min(1.15, w / 230));
-      scale = Math.min(scale, nextScale);
+      const next = Math.max(0.85, Math.min(1.15, w / 230));
+      scale = Math.min(scale, next);
     });
     return scale;
   });
 
+  // Apply scale and compute a single --top-gap (what your CSS uses)
   buckets.forEach((row, rowIndex)=>{
     const scale = rowScales[rowIndex] || 1;
     row.forEach(card=>{
       card.style.setProperty('--card-scale', scale.toFixed(3));
-    });
-  });
 
-  buckets.forEach(row=>{
-    row.forEach(card=>{
       const badge = card.querySelector('.toteCornerBadge');
       const combine = card.querySelector('.toteStar.combine');
       const meta = card.querySelector('.toteMetaRight');
+
       const badgeGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
       const combineGap = combine ? combine.getBoundingClientRect().width + 12 : 0;
       const leftGap = Math.max(badgeGap, combineGap);
       const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
-      card.style.setProperty('--top-left-gap', `${Math.ceil(leftGap)}px`);
-      card.style.setProperty('--top-right-gap', `${Math.ceil(rightGap)}px`);
+
+      // Your CSS uses --top-gap to shrink the top bar from both sides
+      const topGap = Math.max(leftGap, rightGap);
+      card.style.setProperty('--top-gap', `${Math.ceil(topGap)}px`);
     });
   });
 }
 
 function fitToteGrid(){
   const buckets = getToteRowBuckets();
+  // Clear heights
+  buckets.forEach(row=>{ row.forEach(card=>{ card.style.minHeight = ""; }); });
+  // Make each row's cards equal height
   buckets.forEach(row=>{
-    row.forEach(card=>{
-      card.style.minHeight = "";
-    });
-  });
-  buckets.forEach(row=>{
-    let maxHeight = 0;
+    let maxH = 0;
     row.forEach(card=>{
       const h = card.getBoundingClientRect().height;
-      if(h > maxHeight) maxHeight = h;
+      if(h > maxH) maxH = h;
     });
-    if(!maxHeight) return;
-    row.forEach(card=>{
-      card.style.minHeight = `${Math.ceil(maxHeight)}px`;
-    });
+    if(!maxH) return;
+    row.forEach(card=>{ card.style.minHeight = `${Math.ceil(maxH)}px`; });
   });
+}
+
 }
 
 function attachBagHandlers(routeShort, allowDrag){
