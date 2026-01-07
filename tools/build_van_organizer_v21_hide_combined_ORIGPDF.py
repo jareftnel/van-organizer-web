@@ -548,6 +548,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-width:0;
   height:auto;
   min-height:150px;
+  --card-scale: 1;
   max-width:100%;
   max-height:100%;
   border-radius:18px;
@@ -599,13 +600,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background:rgba(0,0,0,.72);
   border:1px solid rgba(255,255,255,.16);
   font-weight:900;
-  font-size:12px;
+  font-size:calc(12px * var(--card-scale));
   flex-shrink:0;
 }
 
 .totePkg{
   font-weight:900;
-  font-size:11px;
+  font-size:calc(11px * var(--card-scale));
   color:#ff4b4b;
   flex-shrink:0;
 }
@@ -639,7 +640,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   text-align:center;
   font-weight:800;
   line-height:1;
-  font-size:56px;
+  font-size:calc(56px * var(--card-scale));
+  flex:1;
   margin:0;
   letter-spacing:1px;
   white-space:nowrap;
@@ -655,7 +657,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   max-width:100%;
   white-space:nowrap;
-  font-size:44px;
+  font-size:calc(44px * var(--card-scale));
 }
 .toteBottomRow{
   display:flex;
@@ -664,13 +666,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:4px;
   align-items:center;
   line-height:1.2;
-  margin-top:8px;
+  margin-top:auto;
   padding-bottom:2px;
   text-align:center;
   font-weight:800;
   letter-spacing:.2px;
   opacity:.92;
-  font-size:12px;
+  font-size:calc(12px * var(--card-scale));
   position:static !important;
   overflow:visible;
 }
@@ -1215,66 +1217,16 @@ function overflowSummary(bagLabel, ovMap){
 }
 
 
-function fitToteText(){
+function setToteCardScale(){
   const cards = document.querySelectorAll('.toteCard');
   for(const card of cards){
-    const topRow = card.querySelector('.toteTopRow');
-    const bottomRow = card.querySelector('.toteBottomRow');
-    const cardStyle = getComputedStyle(card);
-    const paddingTop = parseFloat(cardStyle.paddingTop) || 0;
-    const paddingBottom = parseFloat(cardStyle.paddingBottom) || 0;
-    const rowGap = parseFloat(cardStyle.rowGap) || 0;
-    const gapCount = bottomRow ? 2 : 1;
-    const safetyPad = 4;
-    const availableHeight = Math.max(
-      0,
-      card.clientHeight
-        - paddingTop
-        - paddingBottom
-        - (topRow ? topRow.offsetHeight : 0)
-        - (bottomRow ? bottomRow.offsetHeight : 0)
-        - (rowGap * gapCount)
-        - safetyPad
-    );
-    const main = card.querySelector('.toteBigNumber:not(.toteBigNumberStack)');
-    const stack = card.querySelector('.toteBigNumberStack');
-    const innerW = card.clientWidth - 32;
-    if(main){
-      const el = main;
-      const max = parseFloat(getComputedStyle(el).fontSize);
-      let lo = 10, hi = max, best = 10;
-      const fits = (fs)=>{
-        el.style.fontSize = fs+'px';
-        return el.scrollWidth <= innerW + 1 && el.scrollHeight <= availableHeight + 1;
-      };
-      if(fits(max)){ el.style.fontSize=''; }
-      else{
-        while(lo<=hi){
-          const mid=(lo+hi)/2;
-          if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
-        }
-        el.style.fontSize = best+'px';
-      }
-    }
-    if(stack){
-      const lines = stack.querySelectorAll('.toteBigNumberLine');
-      if(!lines.length) continue;
-      const max = parseFloat(getComputedStyle(lines[0]).fontSize);
-      let lo = 10, hi = max, best = 10;
-      const fits = (fs)=>{
-        lines.forEach((el)=>{ el.style.fontSize = fs+'px'; });
-        const widthsOk = Array.from(lines).every(el=>el.scrollWidth <= innerW + 1);
-        return widthsOk && stack.scrollHeight <= availableHeight + 1;
-      };
-      if(fits(max)){ lines.forEach(el=>{ el.style.fontSize=''; }); }
-      else{
-        while(lo<=hi){
-          const mid=(lo+hi)/2;
-          if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
-        }
-        lines.forEach((el)=>{ el.style.fontSize = best+'px'; });
-      }
-    }
+    const baseWidth = 240;
+    const baseHeight = 160;
+    const scaleW = card.clientWidth / baseWidth;
+    const scaleH = card.clientHeight / baseHeight;
+    let scale = Math.min(scaleW, scaleH);
+    scale = Math.max(0.8, Math.min(1.15, scale || 1));
+    card.style.setProperty("--card-scale", scale.toFixed(3));
   }
 }
 
@@ -1734,7 +1686,7 @@ function render(){
   if(activeTab==="bags" || activeTab==="combined"){
     requestAnimationFrame(()=>{
       if(isPinchZooming()) return;
-      fitToteText();
+      setToteCardScale();
       if(typeof fitToteGrid === "function") fitToteGrid();
     });
   }
