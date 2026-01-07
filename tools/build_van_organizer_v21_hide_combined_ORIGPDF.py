@@ -579,8 +579,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:26px;
   margin:0;
 }
-.toteCornerBadge{
-  position:static;
+.toteBubble{
   min-width:calc(22px * var(--card-scale));
   height:calc(22px * var(--card-scale));
   padding:0 6px;
@@ -588,11 +587,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:center;
   justify-content:center;
   border-radius:999px;
-  background:rgba(0,0,0,.72);
-  border:1px solid rgba(255,255,255,.16);
   font-weight:900;
   font-size:calc(12px * var(--card-scale));
   line-height:1;
+  text-align:center;
+}
+.toteCornerBadge{
+  position:static;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.16);
   z-index:2;
   justify-self:start;
   grid-column:1;
@@ -631,20 +634,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 
 .totePkg{
-  min-width:calc(22px * var(--card-scale));
-  height:calc(22px * var(--card-scale));
-  padding:0 6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:999px;
   background:rgba(0,0,0,.72);
   border:1px solid rgba(255,255,255,.16);
-  font-weight:900;
-  font-size:calc(12px * var(--card-scale));
   color:#ff4b4b;
   flex-shrink:0;
-  line-height:1;
   z-index:2;
 }
 
@@ -1201,8 +1194,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
     const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
     const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-    const badgeHtml = badgeText ? `<div class="toteCornerBadge">${badgeText}</div>` : ``;
-    const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
+    const badgeHtml = badgeText ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>` : ``;
+    const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
