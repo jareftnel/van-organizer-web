@@ -696,6 +696,15 @@ def organizer_raw(jid: str):
             ".pills{display:flex;gap:8px;margin-top:12px}",
             ".pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}",
         )
+    if "</style>" in html and "tab-align-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tab-align-patch */"
+            ".sectionRight{display:contents !important;}"
+            ".tabsRow{grid-column:1 !important;grid-row:1 !important;justify-self:start !important;}"
+            ".topCounts{grid-column:3 !important;grid-row:1 !important;justify-self:end !important;}"
+            "</style>",
+        )
 
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
