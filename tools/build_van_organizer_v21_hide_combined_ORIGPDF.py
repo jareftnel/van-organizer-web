@@ -606,9 +606,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:center;
   gap:6px;
   position:absolute;
-  right:calc(var(--top-right-gap, 0px) / 2);
-  top:50%;
-  transform:translate(50%, -50%);
+  right:8px;
+  top:8px;
+  transform:none;
 }
 .toteBar{
   flex:1 1 auto;
@@ -635,10 +635,21 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 
 .totePkg{
+  min-width:calc(22px * var(--card-scale));
+  height:calc(22px * var(--card-scale));
+  padding:0 6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.16);
   font-weight:900;
   font-size:calc(12px * var(--card-scale));
   color:#ff4b4b;
   flex-shrink:0;
+  line-height:1;
+  z-index:2;
 }
 
 .toteStar{
