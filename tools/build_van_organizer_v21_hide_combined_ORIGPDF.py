@@ -800,7 +800,6 @@ td:last-child,th:last-child{text-align:right}
         <div class="sectionHeaderRow">
           <div class="sectionLeft">
             <div class="routeTitle" id="routeTitle"></div>
-            <div class="sectionMeta" id="subText">Overflow zones + pkgs under each tote.</div>
             <div class="toggleRow" id="toggleRow"></div>
           </div>
           <div class="sectionRight">
@@ -939,7 +938,6 @@ const ovCount = document.getElementById("ovCount");
 const content = document.getElementById("content");
 const routeTitleEl = document.getElementById("routeTitle");
 const toggleRow = document.getElementById("toggleRow");
-const subText = document.getElementById("subText");
 
 function updateSearchPlaceholder(){
   if(!qBox) return;
@@ -964,7 +962,6 @@ function updateSubHeader(r){
   if(activeTab === "overflow"){
     toggleRow.innerHTML = "";
     toggleRow.style.display = "none";
-    if(subText) subText.style.display = "none";
     return;
   }
   const mode = getMode(r.route_short);
@@ -976,7 +973,6 @@ function updateSubHeader(r){
       <button class="modeBtn ${mode==="custom" ? "active":""}" data-bagmode="custom">Custom</button>
     </div>
   `;
-  if(subText) subText.style.display = activeTab === "combined" ? "block" : "none";
 }
 
 // Saturated chips (high-contrast)
