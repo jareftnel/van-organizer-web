@@ -563,7 +563,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   flex-direction:column;
   gap:10px;
-  padding:14px 16px 12px;
+  padding:6px 8px 12px;
 }
 .toteCard *{box-sizing:border-box;}
 .toteCard.draggable{cursor:grab;}
