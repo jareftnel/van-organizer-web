@@ -205,6 +205,7 @@ form{display:flex;flex-direction:column;gap:16px}
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  font-size:clamp(12px, 1.8vh, 14px);
   flex:1 1 auto;
   min-width:0;
   text-align:center;
