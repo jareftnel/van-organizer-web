@@ -792,17 +792,22 @@ td:last-child,th:last-child{text-align:right}
   .downloadLabelFull{display:none;}
   .downloadLabelShort{display:inline;}
   .downloadBtn{padding:6px 10px;font-size:12px;}
+  .topbar{padding:8px;}
+  .organizerHeaderRow{flex-wrap:wrap;gap:10px;row-gap:8px;}
+  .filterRow{flex:1 1 100%;gap:8px;min-width:0;}
+  .topbar .sel{flex:1 1 140px;min-width:0;}
+  .topbar .sel select{width:100%;}
+  .topbar #q{min-width:0;font-size:12px;}
 }
 
 @media (max-width: 720px) and (orientation: portrait){
-  .organizerHeaderRow{flex-wrap:wrap;align-items:center;gap:10px;row-gap:0;column-gap:10px;}
+  .organizerHeaderRow{align-items:center;row-gap:0;}
   .topbar .brand{order:1;}
   .topbar .downloadBtn{order:2;}
   .topbarBreak{display:block;flex-basis:100%;height:0;order:3;}
   .topbar .filterRow{order:4;flex:1 1 100%;min-width:0;}
-  .topbar .sel{flex:0 1 45%;min-width:0;}
-  .topbar .sel select{width:100%;}
-  .topbar #q{flex:1 1 55%;min-width:0;font-size:12px;}
+  .topbar .sel{flex:0 1 45%;}
+  .topbar #q{flex:1 1 55%;}
 }
 
 /* FULL-WIDTH OVERRIDE */
