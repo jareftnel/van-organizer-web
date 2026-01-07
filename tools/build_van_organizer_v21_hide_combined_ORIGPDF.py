@@ -456,13 +456,17 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:10px;
 }
 .routeTitle{
-  height:34px;
+  min-height:40px;
   display:flex;
   align-items:center;
   font-weight:900;
   justify-content:center;
   width:100%;
   text-align:center;
+  font-size:clamp(18px, 2.2vw, 26px);
+  letter-spacing:.6px;
+  line-height:1.2;
+  padding:4px 0;
 }
 .toggleRow{
   display:flex;
