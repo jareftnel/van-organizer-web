@@ -579,8 +579,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:10px;
   min-height:26px;
   position:relative;
-  padding-left:var(--top-left-gap, 0px);
-  padding-right:var(--top-right-gap, 0px);
+  padding:0;
 }
 .toteCornerBadge{
   position:absolute;
@@ -612,13 +611,14 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteBar{
   flex:1 1 auto;
   width:100%;
-  max-width:100%;
+  max-width:max(0px, calc(100% - var(--top-left-gap, 0px) - var(--top-right-gap, 0px)));
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
   pointer-events:none;
   min-width:40px;
+  margin:0 auto;
 }
 
 .toteIdx{
