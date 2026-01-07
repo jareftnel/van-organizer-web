@@ -1280,22 +1280,70 @@ function overflowSummary(bagLabel, ovMap){
 }
 
 
+const TOTE_ROW_COUNT = 3;
+
+function getToteRowBuckets(){
+  const cards = Array.from(document.querySelectorAll('.toteCard'));
+  const buckets = Array.from({length: TOTE_ROW_COUNT}, ()=>[]);
+  cards.forEach((card, index)=>{
+    buckets[index % TOTE_ROW_COUNT].push(card);
+  });
+  return buckets;
+}
+
 function setToteCardScale(){
-  const cards = document.querySelectorAll('.toteCard');
-  for(const card of cards){
-    const w = card.getBoundingClientRect().width;
-    const scale = Math.max(0.85, Math.min(1.15, w / 230));
-    card.style.setProperty('--card-scale', scale.toFixed(3));
-    const badge = card.querySelector('.toteCornerBadge');
-    const combine = card.querySelector('.toteStar.combine');
-    const meta = card.querySelector('.toteMetaRight');
-    const badgeGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
-    const combineGap = combine ? combine.getBoundingClientRect().width + 12 : 0;
-    const leftGap = Math.max(badgeGap, combineGap);
-    const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
-    card.style.setProperty('--top-left-gap', `${Math.ceil(leftGap)}px`);
-    card.style.setProperty('--top-right-gap', `${Math.ceil(rightGap)}px`);
-  }
+  const buckets = getToteRowBuckets();
+  const rowScales = buckets.map((row)=>{
+    if(!row.length) return 1;
+    let scale = 1.15;
+    row.forEach(card=>{
+      const w = card.getBoundingClientRect().width;
+      const nextScale = Math.max(0.85, Math.min(1.15, w / 230));
+      scale = Math.min(scale, nextScale);
+    });
+    return scale;
+  });
+
+  buckets.forEach((row, rowIndex)=>{
+    const scale = rowScales[rowIndex] || 1;
+    row.forEach(card=>{
+      card.style.setProperty('--card-scale', scale.toFixed(3));
+    });
+  });
+
+  buckets.forEach(row=>{
+    row.forEach(card=>{
+      const badge = card.querySelector('.toteCornerBadge');
+      const combine = card.querySelector('.toteStar.combine');
+      const meta = card.querySelector('.toteMetaRight');
+      const badgeGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
+      const combineGap = combine ? combine.getBoundingClientRect().width + 12 : 0;
+      const leftGap = Math.max(badgeGap, combineGap);
+      const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
+      card.style.setProperty('--top-left-gap', `${Math.ceil(leftGap)}px`);
+      card.style.setProperty('--top-right-gap', `${Math.ceil(rightGap)}px`);
+    });
+  });
+}
+
+function fitToteGrid(){
+  const buckets = getToteRowBuckets();
+  buckets.forEach(row=>{
+    row.forEach(card=>{
+      card.style.minHeight = "";
+    });
+  });
+  buckets.forEach(row=>{
+    let maxHeight = 0;
+    row.forEach(card=>{
+      const h = card.getBoundingClientRect().height;
+      if(h > maxHeight) maxHeight = h;
+    });
+    if(!maxHeight) return;
+    row.forEach(card=>{
+      card.style.minHeight = `${Math.ceil(maxHeight)}px`;
+    });
+  });
 }
 
 function attachBagHandlers(routeShort, allowDrag){
