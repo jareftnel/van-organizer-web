@@ -746,14 +746,14 @@ td:last-child,th:last-child{text-align:right}
 }
 
 @media (max-width: 720px) and (orientation: portrait){
-  .organizerHeaderRow{flex-wrap:wrap;align-items:center;gap:10px;}
+  .organizerHeaderRow{flex-wrap:wrap;align-items:center;gap:10px;row-gap:0;column-gap:10px;}
   .topbar .brand{order:1;}
   .topbar .downloadBtn{order:2;}
   .topbarBreak{display:block;flex-basis:100%;height:0;order:3;}
   .topbar .filterRow{order:4;flex:1 1 100%;min-width:0;}
   .topbar .sel{flex:0 1 45%;min-width:0;}
   .topbar .sel select{width:100%;}
-  .topbar #q{flex:1 1 55%;min-width:0;}
+  .topbar #q{flex:1 1 55%;min-width:0;font-size:12px;}
 }
 
 /* FULL-WIDTH OVERRIDE */
@@ -788,7 +788,7 @@ td:last-child,th:last-child{text-align:right}
           </div>
           <div class="filterRow">
             <div class="sel"><select id="routeSel"></select></div>
-            <input id="q" placeholder="Search Bag / Overflow Info."/>
+            <input id="q" placeholder="Search Bag / Overflow Info"/>
           </div>
           <a class="downloadBtn" href="download/STACKED.pdf">
             <span class="downloadLabelFull">DOWNLOAD PDF</span>
