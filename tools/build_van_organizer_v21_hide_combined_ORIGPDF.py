@@ -618,7 +618,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .toteBar{
   grid-column:2;
-  width:100%;
+  width:calc(100% - (var(--top-gap, 0px) * 2));
   max-width:100%;
   height:8px;
   border-radius:999px;
@@ -627,6 +627,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   pointer-events:none;
   min-width:40px;
   margin:0 auto;
+  justify-self:center;
 }
 
 .toteIdx{
