@@ -574,7 +574,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteTopRow{
   display:grid;
-  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns:auto minmax(0, 1fr) auto;
   align-items:center;
   column-gap:6px;
   min-height:26px;
@@ -614,8 +614,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .toteBar{
   grid-column:2;
-  width:calc(100% - (2 * var(--top-gap, 0px)));
-  max-width:calc(100% - (2 * var(--top-gap, 0px)));
+  width:100%;
+  max-width:100%;
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
