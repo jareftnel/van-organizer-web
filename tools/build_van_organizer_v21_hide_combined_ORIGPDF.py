@@ -525,14 +525,14 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .bagsGrid{
   display:grid;
-  grid-template-rows:repeat(3, minmax(0, 1fr));
+  grid-template-rows:repeat(3, auto);
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
   gap:clamp(6px, 1.2vw, 16px);
-  align-items:stretch;
+  align-items:start;
   width:100%;
   max-width:100%;
-  height:100%;
+  height:auto;
   min-height:0;
   overflow:visible;
   direction:rtl;
@@ -545,7 +545,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:100%;
+  height:auto;
   aspect-ratio:4/3;
   max-width:100%;
   max-height:100%;
