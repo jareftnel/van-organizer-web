@@ -612,6 +612,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-self:end;
   grid-column:3;
 }
+.toteCard.noSortZone .toteMetaRight{
+  min-width:var(--tote-badge-width);
+  justify-content:flex-end;
+}
 .toteBar{
   grid-column:2;
   width:100%;
@@ -1202,6 +1206,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const badgeHtml = badgeText ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>` : ``;
     const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
+    const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
       const chip2 = bagColorChip(second.bag);
@@ -1209,7 +1214,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
       const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
-      return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
+      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
         ${minusHtml}
         <div class="toteTopRow">
           ${badgeHtml}
@@ -1229,7 +1234,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const sub = getSubLine(cur, null);
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
-    return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
+    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
       ${starHtml}
       <div class="toteTopRow">
         ${badgeHtml}
