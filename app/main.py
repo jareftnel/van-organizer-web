@@ -202,9 +202,9 @@ form{display:flex;flex-direction:column;gap:16px}
 }
 .fileNameLabel{
   color:rgba(255,255,255,0.85);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
   flex:1 1 auto;
   min-width:0;
   text-align:center;
@@ -358,7 +358,7 @@ button{
         fileLabel.textContent = name;
         if (uploadText) {
           uploadText.textContent = fileInput.files && fileInput.files.length > 0
-            ? fileInput.files[0].name
+            ? "Change"
             : "Upload";
         }
       });
