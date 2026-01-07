@@ -633,6 +633,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background: rgba(255,75,75,.08);
 }
 .toteBigNumber{
+  flex: 1 1 auto;
+  min-height: 0;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -664,8 +666,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:4px;
   align-items:center;
   line-height:1.2;
-  margin-top:8px;
-  padding-bottom:2px;
+  margin-top:auto;
+  padding-bottom:0;
   text-align:center;
   font-weight:800;
   letter-spacing:.2px;
