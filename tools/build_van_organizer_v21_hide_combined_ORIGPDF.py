@@ -1342,6 +1342,39 @@ function fitToteGrid(){
   });
 }
 
+function autoFitToteGrid(shouldScale){
+  const wrap  = document.querySelector('.toteWrap');
+  const board = wrap ? wrap.querySelector('.toteBoard') : null;
+  if(!wrap || !board) return;
+
+  // reset
+  board.style.transform = "";
+  board.style.transformOrigin = "";
+  wrap.style.height = "";
+  wrap.style.flex = "";
+  wrap.style.overflow = "";
+
+  if(!shouldScale) return;
+
+  // optional: avoid scaling while user is zoomed
+  if (typeof isZoomed === 'function' && isZoomed()) return;
+
+  // fit height
+  const wrapHeight  = wrap.clientHeight;
+  const boardHeight = board.scrollHeight;
+  if(!wrapHeight || !boardHeight) return;
+  if(boardHeight <= wrapHeight) return;
+
+  const scale = Math.max(0.6, Math.min(1, wrapHeight / boardHeight));
+  board.style.transformOrigin = "top center";
+  board.style.transform = `scale(${scale.toFixed(3)})`;
+
+  // lock container to the scaled height and hide overflow
+  wrap.style.overflow = "hidden";
+  wrap.style.height = `${Math.ceil(boardHeight * scale)}px`;
+  wrap.style.flex   = "0 0 auto";
+}
+
 }
 
 function attachBagHandlers(routeShort, allowDrag){
@@ -1803,7 +1836,10 @@ function render(){
       if(isZoomed()) return;
       setToteCardScale();
       if(typeof fitToteGrid === "function") fitToteGrid();
+      autoFitToteGrid(activeTab==="combined");
     });
+  } else {
+    autoFitToteGrid(false);
   }
 }
 
