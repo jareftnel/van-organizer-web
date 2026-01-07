@@ -669,14 +669,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   font-size:calc(56px * var(--card-scale));
   margin:0;
-  padding-top:clamp(6px, 1.2cqi, 12px);
+  padding-top:clamp(2px, 0.6cqi, 4px);
+  padding-bottom:clamp(2px, 0.6cqi, 4px);
   letter-spacing:1px;
   white-space:nowrap;
   position:static !important;
 }
 .toteBigNumberStack{
   flex-direction:column;
-  gap: clamp(2px, 1.2cqi, 10px);
+  gap: clamp(0px, 0.6cqi, 4px);
 }
 .toteBigNumberLine{
   font-weight:900;
