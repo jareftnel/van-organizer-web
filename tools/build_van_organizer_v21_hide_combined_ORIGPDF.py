@@ -553,14 +553,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background:rgba(10,14,20,.72);
   border:1px solid rgba(255,255,255,.08);
   box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 2px 0 rgba(0,0,0,.10);
-  overflow:hidden;
+  box-sizing:border-box;
+  overflow:visible;
   cursor:pointer;
   container-type:inline-size;
   direction:ltr;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  row-gap:10px;
-  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px 16px 22px;
   min-height:0;
 }
 .toteCard *{box-sizing:border-box;}
@@ -661,18 +662,20 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:center;
   gap:4px;
   align-items:center;
-  line-height:1.1;
+  line-height:1.2;
+  margin-top:8px;
+  padding-bottom:2px;
   text-align:center;
   font-weight:800;
   letter-spacing:.2px;
   opacity:.92;
   font-size: clamp(11px, 7cqi, 14px);
   position:static !important;
+  overflow:visible;
 }
 .toteFooter{
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  overflow:visible;
 }
 .ovZone{color:inherit;}
 .ovZone99{color:#b46bff;}
