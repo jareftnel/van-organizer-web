@@ -576,7 +576,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:space-between;
   align-items:center;
   gap:10px;
-  padding-left:0;
+  padding-left:44px;
 }
 .toteCornerBadge{
   position:absolute;
