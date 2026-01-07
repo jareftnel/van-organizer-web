@@ -606,9 +606,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:center;
   gap:6px;
   position:absolute;
-  right:0;
+  right:calc(var(--top-right-gap, 0px) / 2);
   top:50%;
-  transform:translateY(-50%);
+  transform:translate(50%, -50%);
 }
 .toteBar{
   flex:1 1 auto;
