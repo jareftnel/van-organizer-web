@@ -562,7 +562,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   flex-direction:column;
   gap:10px;
-  padding:14px 16px 28px;
+  padding:14px 16px 12px;
   min-height:0;
 }
 .toteCard *{box-sizing:border-box;}
