@@ -1219,6 +1219,7 @@ function fitToteText(){
     const paddingBottom = parseFloat(cardStyle.paddingBottom) || 0;
     const rowGap = parseFloat(cardStyle.rowGap) || 0;
     const gapCount = bottomRow ? 2 : 1;
+    const safetyPad = 4;
     const availableHeight = Math.max(
       0,
       card.clientHeight
@@ -1227,6 +1228,7 @@ function fitToteText(){
         - (topRow ? topRow.offsetHeight : 0)
         - (bottomRow ? bottomRow.offsetHeight : 0)
         - (rowGap * gapCount)
+        - safetyPad
     );
     const main = card.querySelector('.toteBigNumber:not(.toteBigNumberStack)');
     const stack = card.querySelector('.toteBigNumberStack');
