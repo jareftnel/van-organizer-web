@@ -437,23 +437,24 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .topCounts .dot{opacity:.75}
 .sectionHeaderRow{
   display:grid;
-  grid-template-columns:1fr auto;
+  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows:auto auto;
   align-items:center;
   gap:16px;
   width:100%;
   margin-top:10px;
 }
 .sectionLeft{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  min-width:0;
+  display:contents;
 }
 .sectionRight{
   display:flex;
   flex-direction:column;
   align-items:flex-end;
   gap:10px;
+  grid-column:3;
+  grid-row:1 / 3;
+  justify-self:end;
 }
 .routeTitle{
   min-height:40px;
@@ -467,12 +468,18 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   letter-spacing:.6px;
   line-height:1.2;
   padding:4px 0;
+  grid-column:2;
+  grid-row:1;
+  justify-self:center;
 }
 .toggleRow{
   display:flex;
   align-items:center;
   gap:10px;
   flex-wrap:wrap;
+  grid-column:1 / 3;
+  grid-row:2;
+  justify-self:start;
 }
 .sectionMeta{
   text-align:left;
