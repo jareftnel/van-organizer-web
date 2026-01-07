@@ -430,14 +430,22 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .topCounts{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:14px;
   opacity:.9;
-  font-weight:800;
+  font-weight:700;
   grid-column:3;
   grid-row:1;
   justify-self:end;
+  padding:8px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:rgba(255,255,255,.03);
+  min-height:40px;
 }
 .topCounts .dot{opacity:.75}
+.topCounts .dot.dot-muted{background:#97a7bd}
+.topCounts .countGroup{display:inline-flex;align-items:center;gap:6px}
+.topCounts .countLabel{margin-left:2px}
 .sectionHeaderRow{
   display:grid;
   grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
@@ -852,10 +860,16 @@ td:last-child,th:last-child{text-align:right}
           </div>
           <div class="sectionRight">
             <div class="topCounts">
-              <span class="dot"></span>
-              <span id="bagsCount">0</span>&nbsp;bags
-              <span aria-hidden="true">•</span>
-              <span id="ovCount">0</span>&nbsp;overflow
+              <span class="countGroup">
+                <span class="dot"></span>
+                <span id="bagsCount">0</span>
+                <span class="countLabel">bags</span>
+              </span>
+              <span class="countGroup">
+                <span class="dot dot-muted"></span>
+                <span id="ovCount">0</span>
+                <span class="countLabel">overflow</span>
+              </span>
             </div>
             <div class="tabsRow">
               <div class="tab active" data-tab="combined">Bags + Overflow</div>
