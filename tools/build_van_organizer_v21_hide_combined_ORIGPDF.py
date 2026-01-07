@@ -678,8 +678,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   font-size:calc(56px * var(--card-scale));
   margin:0;
-  padding-top:clamp(2px, 0.6cqi, 4px);
-  padding-bottom:clamp(2px, 0.6cqi, 4px);
+  padding-top:0;
+  padding-bottom:0;
   letter-spacing:1px;
   white-space:nowrap;
   position:static !important;
