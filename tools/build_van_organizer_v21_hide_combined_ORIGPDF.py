@@ -1210,8 +1210,24 @@ function overflowSummary(bagLabel, ovMap){
 
 
 function fitToteText(){
-  const cards = document.querySelectorAll('#bagsBoard .toteCard');
+  const cards = document.querySelectorAll('.toteCard');
   for(const card of cards){
+    const topRow = card.querySelector('.toteTopRow');
+    const bottomRow = card.querySelector('.toteBottomRow');
+    const cardStyle = getComputedStyle(card);
+    const paddingTop = parseFloat(cardStyle.paddingTop) || 0;
+    const paddingBottom = parseFloat(cardStyle.paddingBottom) || 0;
+    const rowGap = parseFloat(cardStyle.rowGap) || 0;
+    const gapCount = bottomRow ? 2 : 1;
+    const availableHeight = Math.max(
+      0,
+      card.clientHeight
+        - paddingTop
+        - paddingBottom
+        - (topRow ? topRow.offsetHeight : 0)
+        - (bottomRow ? bottomRow.offsetHeight : 0)
+        - (rowGap * gapCount)
+    );
     const main = card.querySelector('.toteBigNumber:not(.toteBigNumberStack)');
     const stack = card.querySelector('.toteBigNumberStack');
     const innerW = card.clientWidth - 32;
@@ -1221,7 +1237,7 @@ function fitToteText(){
       let lo = 10, hi = max, best = 10;
       const fits = (fs)=>{
         el.style.fontSize = fs+'px';
-        return el.scrollWidth <= innerW + 1;
+        return el.scrollWidth <= innerW + 1 && el.scrollHeight <= availableHeight + 1;
       };
       if(fits(max)){ el.style.fontSize=''; }
       else{
@@ -1234,18 +1250,21 @@ function fitToteText(){
     }
     if(stack){
       const lines = stack.querySelectorAll('.toteBigNumberLine');
-      for(const el of lines){
-        const max = parseFloat(getComputedStyle(el).fontSize);
-        let lo = 10, hi = max, best = 10;
-        const fits = (fs)=>{ el.style.fontSize = fs+'px'; return el.scrollWidth <= innerW + 1; };
-        if(fits(max)){ el.style.fontSize=''; }
-        else{
-          while(lo<=hi){
-            const mid=(lo+hi)/2;
-            if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
-          }
-          el.style.fontSize = best+'px';
+      if(!lines.length) continue;
+      const max = parseFloat(getComputedStyle(lines[0]).fontSize);
+      let lo = 10, hi = max, best = 10;
+      const fits = (fs)=>{
+        lines.forEach((el)=>{ el.style.fontSize = fs+'px'; });
+        const widthsOk = Array.from(lines).every(el=>el.scrollWidth <= innerW + 1);
+        return widthsOk && stack.scrollHeight <= availableHeight + 1;
+      };
+      if(fits(max)){ lines.forEach(el=>{ el.style.fontSize=''; }); }
+      else{
+        while(lo<=hi){
+          const mid=(lo+hi)/2;
+          if(fits(mid)){ best=mid; lo=mid+0.5; } else hi=mid-0.5;
         }
+        lines.forEach((el)=>{ el.style.fontSize = best+'px'; });
       }
     }
   }
@@ -1704,6 +1723,9 @@ function render(){
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
+  if(activeTab==="bags" || activeTab==="combined"){
+    requestAnimationFrame(fitToteText);
+  }
 }
 
 function buildRouteDropdown(){
