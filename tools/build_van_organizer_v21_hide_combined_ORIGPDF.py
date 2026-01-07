@@ -576,6 +576,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:space-between;
   align-items:center;
   gap:10px;
+  padding-left:28px;
 }
 .toteMetaRight{
   display:flex;
@@ -622,15 +623,21 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   user-select:none;
   flex-shrink:0;
+  position:absolute;
+  z-index:2;
 }
 .toteStar.combine{
   color:#FFD400;
   border-color: rgba(255,212,0,.45);
   background: rgba(255,212,0,.12);
+  top:10px;
+  left:10px;
 }
 .toteStar.on{
   border-color: rgba(255,75,75,.45);
   background: rgba(255,75,75,.08);
+  bottom:10px;
+  right:10px;
 }
 .toteBigNumber{
   flex: 1 1 auto;
