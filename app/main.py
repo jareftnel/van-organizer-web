@@ -344,6 +344,7 @@ button{
     const fileInput = document.getElementById("fileInput");
     const fileLabel = document.getElementById("fileLabel");
     const fileBtn = document.querySelector(".fileBtn");
+    const uploadText = document.querySelector(".uploadText");
 
     if (fileBtn && fileInput) {
       fileBtn.addEventListener("click", () => fileInput.click());
@@ -355,6 +356,11 @@ button{
           ? fileInput.files[0].name
           : "Choose file";
         fileLabel.textContent = name;
+        if (uploadText) {
+          uploadText.textContent = fileInput.files && fileInput.files.length > 0
+            ? fileInput.files[0].name
+            : "Upload";
+        }
       });
     }
   </script>
