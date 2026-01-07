@@ -650,6 +650,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   font-size:calc(56px * var(--card-scale));
   margin:0;
+  padding-top:clamp(6px, 1.2cqi, 12px);
   letter-spacing:1px;
   white-space:nowrap;
   position:static !important;
