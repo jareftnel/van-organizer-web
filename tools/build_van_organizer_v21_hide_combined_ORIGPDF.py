@@ -547,7 +547,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:100%;
   min-width:0;
   height:auto;
-  aspect-ratio:4/3;
+  min-height:clamp(210px, 28vh, 360px);
   max-width:100%;
   max-height:100%;
   border-radius:18px;
@@ -562,7 +562,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   flex-direction:column;
   gap:10px;
-  padding:14px 16px 22px;
+  padding:14px 16px 28px;
   min-height:0;
 }
 .toteCard *{box-sizing:border-box;}
@@ -667,6 +667,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:center;
   line-height:1.2;
   margin-top:auto;
+  min-height:calc(28px * var(--card-scale));
   padding-bottom:0;
   text-align:center;
   font-weight:800;
