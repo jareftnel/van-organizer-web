@@ -469,15 +469,6 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-row:1;
   justify-self:center;
 }
-.toggleRow{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  grid-column:1 / 3;
-  grid-row:2;
-  justify-self:start;
-}
 .sectionMeta{
   text-align:left;
   opacity:.7;
@@ -693,6 +684,43 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovHeader > *{min-width:0}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bagFooter{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.clearRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.bagModeDock{
+  display:flex;
+  justify-content:flex-end;
+  flex:1 1 auto;
+}
+.modeToggle{
+  display:inline-flex;
+  align-items:center;
+  gap:0;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;
+  overflow:hidden;
+}
+.modeBtn{
+  padding:8px 12px;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  font-weight:800;
+  cursor:pointer;
+}
+.modeBtn.active{background:rgba(255,255,255,.10);color:var(--fg)}
 .downloadRow{flex-basis:100%;display:flex;justify-content:flex-end}
 .downloadBtn{
   display:inline-flex;align-items:center;justify-content:center;
@@ -821,7 +849,6 @@ td:last-child,th:last-child{text-align:right}
         <div class="sectionHeaderRow">
           <div class="sectionLeft">
             <div class="routeTitle" id="routeTitle"></div>
-            <div class="toggleRow" id="toggleRow"></div>
           </div>
           <div class="sectionRight">
             <div class="topCounts">
@@ -958,7 +985,6 @@ const bagsCount = document.getElementById("bagsCount");
 const ovCount = document.getElementById("ovCount");
 const content = document.getElementById("content");
 const routeTitleEl = document.getElementById("routeTitle");
-const toggleRow = document.getElementById("toggleRow");
 
 function updateSearchPlaceholder(){
   if(!qBox) return;
@@ -979,15 +1005,11 @@ function subHeaderTitle(r){
 }
 function updateSubHeader(r){
   if(routeTitleEl) routeTitleEl.textContent = subHeaderTitle(r);
-  if(!toggleRow) return;
-  if(activeTab === "overflow"){
-    toggleRow.innerHTML = "";
-    toggleRow.style.display = "none";
-    return;
-  }
-  const mode = getMode(r.route_short);
-  toggleRow.style.display = "flex";
-  toggleRow.innerHTML = `
+}
+
+function bagModeHtml(routeShort){
+  const mode = getMode(routeShort);
+  return `
     <div class="modeToggle" role="tablist" aria-label="Bag order mode">
       <button class="modeBtn ${mode==="normal" ? "active":""}" data-bagmode="normal">Normal</button>
       <button class="modeBtn ${mode==="reversed" ? "active":""}" data-bagmode="reversed">Reversed</button>
@@ -1485,9 +1507,14 @@ function renderBags(r, q){
     <div class="toteWrap">
       <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
-    <div class="clearRow">
-      <button id="clearLoadedBtn" class="clearBtn">Clear</button>
-      <button id="resetBagsBtn" class="clearBtn">Reset</button>
+    <div class="bagFooter">
+      <div class="clearRow">
+        <button id="clearLoadedBtn" class="clearBtn">Clear</button>
+        <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      </div>
+      <div class="bagModeDock">
+        ${bagModeHtml(routeShort)}
+      </div>
     </div>
   `;
 
@@ -1629,9 +1656,14 @@ function renderCombined(r,q){
     <div class="toteWrap">
       <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
-    <div class="clearRow">
-      <button id="clearLoadedBtn" class="clearBtn">Clear</button>
-      <button id="resetBagsBtn" class="clearBtn">Reset</button>
+    <div class="bagFooter">
+      <div class="clearRow">
+        <button id="clearLoadedBtn" class="clearBtn">Clear</button>
+        <button id="resetBagsBtn" class="clearBtn">Reset</button>
+      </div>
+      <div class="bagModeDock">
+        ${bagModeHtml(routeShort)}
+      </div>
     </div>
   `;
 
