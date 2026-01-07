@@ -192,6 +192,13 @@ form{display:flex;flex-direction:column;gap:16px}
   transform:translateY(-50%);
   pointer-events:none;
 }
+.uploadText{
+  font-size:clamp(10px, 1.6vh, 12px);
+  max-width:160px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 .fileBtn:hover{
   transform:translateY(-1px);
   box-shadow:0 8px 18px rgba(0,0,0,0.25);
