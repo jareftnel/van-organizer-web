@@ -573,10 +573,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteTopRow{
   display:flex;
-  justify-content:space-between;
+  justify-content:center;
   align-items:center;
   gap:10px;
-  padding-left:44px;
+  min-height:26px;
+  position:relative;
 }
 .toteCornerBadge{
   position:absolute;
@@ -600,9 +601,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   align-items:center;
   gap:6px;
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
 }
 .toteBar{
-  flex:1;
+  flex:0 0 clamp(80px, 45%, 180px);
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
