@@ -547,10 +547,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:100%;
+  height:auto;
   min-height:0;
   max-width:100%;
-  max-height:100%;
+  max-height:none;
   border-radius:18px;
   background:rgba(10,14,20,.72);
   border:1px solid rgba(255,255,255,.08);
