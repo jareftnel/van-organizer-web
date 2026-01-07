@@ -219,6 +219,13 @@ form{display:flex;flex-direction:column;gap:16px}
   opacity:0.9;
   font-weight:600;
 }
+.fileSpacer{
+  flex:1 1 auto;
+  min-width:0;
+}
+.fileInput{
+  max-width:100%;
+}
 .page, .container, .shell{
   max-width:none !important;
   width:100% !important;
@@ -319,6 +326,29 @@ button{
     min-height:100svh;
     align-items:flex-start;
     padding-top:20px;
+  }
+}
+@media (max-width: 640px){
+  .fileRow{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+  .fileBtn{
+    width:100%;
+    justify-content:center;
+    padding-left:16px;
+  }
+  .fileBtn .fileIcon{
+    position:static;
+    transform:none;
+    margin-right:8px;
+  }
+  .fileNameLabel{
+    text-align:left;
+  }
+  .fileSpacer{
+    display:none;
   }
 }
 </style>
