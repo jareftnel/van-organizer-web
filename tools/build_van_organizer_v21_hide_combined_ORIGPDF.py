@@ -941,6 +941,16 @@ const routeTitleEl = document.getElementById("routeTitle");
 const toggleRow = document.getElementById("toggleRow");
 const subText = document.getElementById("subText");
 
+function updateSearchPlaceholder(){
+  if(!qBox) return;
+  const portraitMatch = window.matchMedia("(orientation: portrait) and (max-width: 720px)").matches;
+  qBox.placeholder = portraitMatch ? "Search Bag / Overflow" : "Search Bag / Overflow Info";
+}
+
+updateSearchPlaceholder();
+window.addEventListener("resize", updateSearchPlaceholder);
+window.addEventListener("orientationchange", updateSearchPlaceholder);
+
 function routeTitle(r){ return (r.route_short||"") + (r.cx ? ` (${r.cx})` : ""); }
 function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
 function subHeaderTitle(r){
