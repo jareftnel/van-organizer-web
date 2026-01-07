@@ -526,11 +526,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .bagsGrid{
   display:grid;
   grid-template-rows:repeat(3, auto);
-  grid-auto-rows:auto;
+  grid-auto-rows:minmax(max-content, auto);
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
   gap:clamp(6px, 1.2vw, 16px);
-  align-items:stretch;
+  align-items:start;
   width:100%;
   max-width:100%;
   height:auto;
@@ -548,7 +548,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:100%;
   min-width:0;
   height:auto;
-  min-height:0;
+  min-height:max-content;
   max-width:100%;
   max-height:none;
   border-radius:18px;
@@ -564,7 +564,6 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   flex-direction:column;
   gap:10px;
   padding:14px 16px 12px;
-  min-height:0;
 }
 .toteCard *{box-sizing:border-box;}
 .toteCard.draggable{cursor:grab;}
