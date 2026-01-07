@@ -529,7 +529,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:grid;
   grid-template-rows:repeat(3, auto);
   grid-auto-flow:column;
-  grid-auto-columns:minmax(0, 1fr);
+  grid-auto-columns:var(--tote-col-width, minmax(0, 1fr));
   gap:clamp(6px, 1.2vw, 16px);
   align-items:start;
   width:100%;
@@ -1266,13 +1266,23 @@ function fitToteGrid(){
   scaleBox.style.width = "";
   scaleBox.style.height = "";
 
+  const cardCount = board.querySelectorAll(".toteCard").length;
+  const rows = 3;
+  const columns = Math.max(1, Math.ceil(cardCount / rows));
+  const zoomRatio = window.visualViewport ? (window.visualViewport.scale / BASE_VIEWPORT_SCALE) : 1;
+  const zoomed = Math.abs(zoomRatio - 1) > 0.01;
+  const wrapWidth = wrap.clientWidth;
+  const wrapHeight = wrap.clientHeight;
+  if(columns && wrapWidth){
+    const baseWrapWidth = zoomed ? (wrapWidth * zoomRatio) : wrapWidth;
+    const columnWidth = baseWrapWidth / columns;
+    board.style.setProperty("--tote-col-width", `${columnWidth}px`);
+  }
+
   const baseWidth = board.scrollWidth;
   const baseHeight = board.scrollHeight;
   if(!baseWidth || !baseHeight) return;
 
-  const zoomed = window.visualViewport && window.visualViewport.scale > BASE_VIEWPORT_SCALE + 0.01;
-  const wrapWidth = wrap.clientWidth;
-  const wrapHeight = wrap.clientHeight;
   let scale = 1;
   if(!zoomed && wrapWidth && wrapHeight){
     scale = Math.min(1, wrapWidth / baseWidth, wrapHeight / baseHeight);
