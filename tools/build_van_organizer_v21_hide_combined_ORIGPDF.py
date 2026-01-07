@@ -527,8 +527,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:grid;
   grid-template-rows:repeat(3, minmax(0, 1fr));
   grid-auto-flow:column;
-  grid-auto-columns:minmax(240px, 1fr);
-  gap:16px;
+  grid-auto-columns:minmax(0, 1fr);
+  gap:clamp(6px, 1.2vw, 16px);
   align-items:stretch;
   width:100%;
   max-width:100%;
