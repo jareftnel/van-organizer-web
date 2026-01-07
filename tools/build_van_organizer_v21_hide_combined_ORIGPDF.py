@@ -460,6 +460,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   align-items:center;
   font-weight:900;
+  justify-content:center;
+  width:100%;
+  text-align:center;
 }
 .toggleRow{
   display:flex;
@@ -954,7 +957,7 @@ function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
 function subHeaderTitle(r){
   if(activeTab==="bags") return `${routeTitle(r)} — Bags`;
   if(activeTab==="overflow") return `${routeTitle(r)} — Overflow`;
-  return `${routeTitle(r)} — Bags + Overflow`;
+  return `${routeTitle(r)}`;
 }
 function updateSubHeader(r){
   if(routeTitleEl) routeTitleEl.textContent = subHeaderTitle(r);
