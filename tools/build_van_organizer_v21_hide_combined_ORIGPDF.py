@@ -579,9 +579,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:10px;
   min-height:26px;
   position:relative;
-  padding:0;
-  padding-left:var(--top-left-gap, 0px);
-  padding-right:var(--top-right-gap, 0px);
+  padding:2px 4px;
+  padding-left:calc(var(--top-left-gap, 0px) + 4px);
+  padding-right:calc(var(--top-right-gap, 0px) + 4px);
 }
 .toteCornerBadge{
   position:absolute;
@@ -620,7 +620,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
   pointer-events:none;
   min-width:40px;
-  margin:0 auto;
+  margin:0;
 }
 
 .toteIdx{
