@@ -576,7 +576,25 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:space-between;
   align-items:center;
   gap:10px;
-  padding-left:28px;
+  padding-left:0;
+}
+.toteCornerBadge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  min-width:26px;
+  height:26px;
+  padding:0 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.16);
+  font-weight:900;
+  font-size:calc(12px * var(--card-scale));
+  line-height:1;
+  z-index:2;
 }
 .toteMetaRight{
   display:flex;
@@ -1164,7 +1182,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
     const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
     const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-    const badgeHtml = badgeText ? `<div class="toteIdx">${badgeText}</div>` : ``;
+    const badgeHtml = badgeText ? `<div class="toteCornerBadge">${badgeText}</div>` : ``;
     const pkgHtml = pkgText ? `<div class="totePkg">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
     if(second){
@@ -1174,8 +1192,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
       return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
+        ${badgeHtml}
         <div class="toteTopRow">
-          ${badgeHtml}
           <div class="toteBar"></div>
           <div class="toteMetaRight">
             ${pkgHtml}
@@ -1194,8 +1212,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
     return `<div class="toteCard ${loadedClass} ${pkgClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
+      ${badgeHtml}
       <div class="toteTopRow">
-        ${badgeHtml}
         <div class="toteBar"></div>
         <div class="toteMetaRight">
           ${pkgHtml}
@@ -1510,7 +1528,7 @@ function renderBags(r, q){
 
   function bagBadgeText(anchor, other, idx){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
-    return src.sort_zone ? idx : "";
+    return normZone(src.sort_zone);
   }
 
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
