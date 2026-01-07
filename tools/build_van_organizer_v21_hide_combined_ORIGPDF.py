@@ -397,7 +397,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"/>
 <title>__HEADER_TITLE__</title>
 <style>
 :root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
@@ -470,7 +470,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:center;
   width:100%;
   text-align:center;
-  font-size:clamp(18px, 2.2vw, 26px);
+  font-size:22px;
   letter-spacing:.6px;
   line-height:1.2;
   padding:4px 0;
@@ -501,10 +501,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .cardContent{
   display:flex;
   flex-direction:column;
-  gap:clamp(10px, 2vh, 18px);
-  padding:clamp(12px, 3vh, 24px);
+  gap:16px;
+  padding:20px 24px;
   flex:1 1 auto;
   min-height:0;
+  overflow:visible;
 }
 .card.plain{background:transparent;border:none;padding:0;}
 .hint{color:var(--muted);font-size:12px;margin-top:4px}
@@ -528,7 +529,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-template-rows:repeat(3, auto);
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
-  gap:clamp(6px, 1.2vw, 16px);
+  gap:12px;
   align-items:start;
   width:100%;
   max-width:100%;
@@ -546,7 +547,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:100%;
   min-width:0;
   height:auto;
-  aspect-ratio:4/3;
+  min-height:150px;
   max-width:100%;
   max-height:100%;
   border-radius:18px;
@@ -638,7 +639,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   text-align:center;
   font-weight:800;
   line-height:1;
-  font-size: clamp(44px, 5vw, 64px);
+  font-size:56px;
   margin:0;
   letter-spacing:1px;
   white-space:nowrap;
@@ -646,7 +647,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .toteBigNumberStack{
   flex-direction:column;
-  gap: clamp(2px, 1.2cqi, 10px);
+  gap:6px;
 }
 .toteBigNumberLine{
   font-weight:900;
@@ -654,7 +655,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   line-height:1;
   max-width:100%;
   white-space:nowrap;
-  font-size: clamp(32px, 4.5vw, 56px);
+  font-size:44px;
 }
 .toteBottomRow{
   display:flex;
@@ -669,7 +670,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   font-weight:800;
   letter-spacing:.2px;
   opacity:.92;
-  font-size: clamp(11px, 7cqi, 14px);
+  font-size:12px;
   position:static !important;
   overflow:visible;
 }
@@ -680,12 +681,6 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .ovZone{color:inherit;}
 .ovZone99{color:#b46bff;}
 .toteBottomRow .ovLine{line-height:1.25;}
-
-@container (max-width: 240px){
-  .toteBigNumber{ font-size: clamp(36px, 6vw, 52px); }
-  .toteBigNumberLine{ font-size: clamp(24px, 5vw, 40px); }
-  .toteBottomRow{ font-size: clamp(10px, 8cqi, 13px); }
-}
 
 /* tables */
 table{width:100%;border-collapse:separate;border-spacing:0}
@@ -907,11 +902,14 @@ const selectMeasureCanvas = document.createElement("canvas");
 
 let renderRaf = 0;
 
-function isZoomed(){
-  return Math.abs(window.devicePixelRatio - 1) > 0.02;
+function isPinchZooming(){
+  if(!window.visualViewport) return false;
+  const scale = window.visualViewport.scale;
+  return typeof scale === "number" && Math.abs(scale - 1) > 0.01;
 }
 
 function scheduleRender(){
+  if(isPinchZooming()) return;
   if(renderRaf) return;
   renderRaf = requestAnimationFrame(()=>{
     renderRaf = 0;
@@ -1017,6 +1015,7 @@ const routeTitleEl = document.getElementById("routeTitle");
 
 function updateSearchPlaceholder(){
   if(!qBox) return;
+  if(isPinchZooming()) return;
   const portraitMatch = window.matchMedia("(orientation: portrait) and (max-width: 720px)").matches;
   qBox.placeholder = portraitMatch ? "Search Bag / Overflow" : "Search Bag / Overflow Info";
 }
@@ -1734,7 +1733,7 @@ function render(){
   if(activeTab==="combined") renderCombined(r,q);
   if(activeTab==="bags" || activeTab==="combined"){
     requestAnimationFrame(()=>{
-      if(isZoomed()) return;
+      if(isPinchZooming()) return;
       fitToteText();
       if(typeof fitToteGrid === "function") fitToteGrid();
     });
@@ -1818,6 +1817,7 @@ function init(){
   });
   if(organizerRoot && "ResizeObserver" in window){
     const ro = new ResizeObserver(()=>{
+      if(isPinchZooming()) return;
       scheduleRender();
     });
     ro.observe(organizerRoot);
@@ -1831,6 +1831,7 @@ function init(){
     scheduleRender();
   });
   window.addEventListener('resize', ()=>{
+    if(isPinchZooming()) return;
     scheduleRender();
     adjustRouteSelectWidth();
   });

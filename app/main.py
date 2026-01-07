@@ -73,7 +73,7 @@ def home():
 <!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"/>
 <title>Van Organizer Builder</title>
 <style>
 html, body{
@@ -193,7 +193,7 @@ form{display:flex;flex-direction:column;gap:16px}
   pointer-events:none;
 }
 .uploadText{
-  font-size:clamp(10px, 1.6vh, 12px);
+  font-size:12px;
   max-width:160px;
   white-space:nowrap;
   overflow:hidden;
@@ -212,7 +212,7 @@ form{display:flex;flex-direction:column;gap:16px}
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  font-size:clamp(12px, 1.8vh, 14px);
+  font-size:14px;
   flex:1 1 auto;
   min-width:0;
   text-align:center;
@@ -227,8 +227,8 @@ form{display:flex;flex-direction:column;gap:16px}
 }
 .uploadBtn,
 .buildBtn{
-  height:clamp(48px, 7vh, 64px);
-  font-size:clamp(16px, 2.4vh, 20px);
+  height:56px;
+  font-size:18px;
   border-radius:16px;
 }
 button{
@@ -274,19 +274,7 @@ button{
     padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
-    --hero-scale:min(
-      0.82,
-      calc(
-        (
-          100svh
-          - 24px
-          - env(safe-area-inset-top, 0px)
-          - env(safe-area-inset-bottom, 0px)
-        ) / 760
-      )
-    );
-    transform:scale(var(--hero-scale));
-    transform-origin:top center;
+    transform:none;
   }
   .tagGlass{
     padding:6px 0;
@@ -453,7 +441,7 @@ def job_page(jid: str):
 
     html = """<!doctype html><html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"/>
 <title>Building…</title>
 <style>
 html, body{
@@ -474,13 +462,13 @@ body{
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .card{
-  width:min(92vw, 760px);
+  width:min(92%, 760px);
   max-height:100svh;
   display:flex;
   flex-direction:column;
   gap:16px;
   border-radius:22px;
-  overflow:hidden;
+  overflow:visible;
   background:#101826;
   border:1px solid #1c2a3a;
   padding:26px 24px;
@@ -728,7 +716,7 @@ def organizer_wrapper(jid: str):
 <!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"/>
 <title>Van Organizer</title>
 <style>
 html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:auto}}
