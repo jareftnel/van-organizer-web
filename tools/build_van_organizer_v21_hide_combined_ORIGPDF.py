@@ -514,7 +514,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0}
+.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0;justify-content:center;align-items:flex-start;overflow:auto}
+.toteBoardScale{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:center}
 .toteBoard{
   width:100%;
   padding:0;
@@ -522,6 +523,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   flex:1 1 auto;
   min-height:0;
+  transform-origin: top center;
 }
 .bagsGrid{
   display:grid;
@@ -901,6 +903,7 @@ const WAVE_LABEL_BY_TIME = __WAVE_JSON__;
 const organizerRoot = document.querySelector(".organizerRoot");
 const organizerBody = document.querySelector(".organizerBody");
 const selectMeasureCanvas = document.createElement("canvas");
+const BASE_VIEWPORT_SCALE = window.visualViewport ? window.visualViewport.scale : 1;
 
 let renderRaf = 0;
 
@@ -1251,6 +1254,37 @@ function fitToteText(){
   }
 }
 
+function fitToteGrid(){
+  const wrap = document.querySelector(".toteWrap");
+  const scaleBox = document.querySelector(".toteBoardScale");
+  const board = document.querySelector(".toteBoard.bagsGrid");
+  if(!wrap || !scaleBox || !board) return;
+
+  board.style.transform = "scale(1)";
+  board.style.width = "";
+  board.style.height = "";
+  scaleBox.style.width = "";
+  scaleBox.style.height = "";
+
+  const baseWidth = board.scrollWidth;
+  const baseHeight = board.scrollHeight;
+  if(!baseWidth || !baseHeight) return;
+
+  const zoomed = window.visualViewport && window.visualViewport.scale > BASE_VIEWPORT_SCALE + 0.01;
+  const wrapWidth = wrap.clientWidth;
+  const wrapHeight = wrap.clientHeight;
+  let scale = 1;
+  if(!zoomed && wrapWidth && wrapHeight){
+    scale = Math.min(1, wrapWidth / baseWidth, wrapHeight / baseHeight);
+  }
+
+  board.style.width = `${baseWidth}px`;
+  board.style.height = `${baseHeight}px`;
+  board.style.transform = `scale(${scale})`;
+  scaleBox.style.width = `${baseWidth * scale}px`;
+  scaleBox.style.height = `${baseHeight * scale}px`;
+}
+
 function attachBagHandlers(routeShort, allowDrag){
   // click to mark loaded (ignore star clicks)
   document.querySelectorAll('.toteCard[data-idx]').forEach(el=>{
@@ -1527,7 +1561,9 @@ function renderBags(r, q){
       <div class="badge"><span class="dot"></span>${items.length} bags</div>
     </div>
     <div class="toteWrap">
-      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      <div class="toteBoardScale">
+        <div id="bagsBoard" class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      </div>
     </div>
     <div class="bagFooter">
       <div class="clearRow">
@@ -1676,7 +1712,9 @@ function renderCombined(r,q){
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
     <div class="toteWrap">
-      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      <div class="toteBoardScale">
+        <div id="bagsBoard" class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      </div>
     </div>
     <div class="bagFooter">
       <div class="clearRow">
@@ -1704,6 +1742,12 @@ function render(){
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
+  if(activeTab==="bags" || activeTab==="combined"){
+    requestAnimationFrame(()=>{
+      fitToteText();
+      fitToteGrid();
+    });
+  }
 }
 
 function buildRouteDropdown(){
