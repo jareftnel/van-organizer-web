@@ -530,7 +530,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-auto-flow:column;
   grid-auto-columns:minmax(0, 1fr);
   gap:clamp(6px, 1.2vw, 16px);
-  align-items:start;
+  align-items:stretch;
   width:100%;
   max-width:100%;
   height:auto;
@@ -547,7 +547,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   position:relative;
   width:100%;
   min-width:0;
-  height:auto;
+  height:100%;
   min-height:0;
   max-width:100%;
   max-height:100%;
