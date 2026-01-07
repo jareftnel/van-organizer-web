@@ -433,6 +433,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:8px;
   opacity:.9;
   font-weight:800;
+  grid-column:3;
+  grid-row:1;
+  justify-self:end;
 }
 .topCounts .dot{opacity:.75}
 .sectionHeaderRow{
@@ -448,14 +451,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:contents;
 }
 .sectionRight{
-  display:grid;
-  grid-template-rows:auto auto;
-  align-items:center;
-  justify-items:start;
-  gap:10px;
-  grid-column:3;
-  grid-row:1 / 3;
-  justify-self:stretch;
+  display:contents;
 }
 .routeTitle{
   min-height:40px;
@@ -487,8 +483,17 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   opacity:.7;
   font-size:13px;
 }
-.topCounts{grid-row:2;}
-.tabsRow{display:flex;gap:10px;margin:0 !important;min-height:40px;align-items:center;justify-content:flex-start;grid-row:1;}
+.tabsRow{
+  display:flex;
+  gap:10px;
+  margin:0 !important;
+  min-height:40px;
+  align-items:center;
+  justify-content:flex-start;
+  grid-column:1;
+  grid-row:1;
+  justify-self:start;
+}
 .tab{padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;user-select:none}
 .tab.active{background:rgba(255,255,255,.10)}
 .card{margin-top:14px;border:1px solid var(--border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;min-width:0}
