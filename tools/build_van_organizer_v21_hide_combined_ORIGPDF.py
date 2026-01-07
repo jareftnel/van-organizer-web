@@ -579,6 +579,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:10px;
   min-height:26px;
   position:relative;
+  padding-left:var(--top-left-gap, 0px);
+  padding-right:var(--top-right-gap, 0px);
 }
 .toteCornerBadge{
   position:absolute;
@@ -608,7 +610,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   transform:translateY(-50%);
 }
 .toteBar{
-  flex:0 0 clamp(80px, 45%, 180px);
+  flex:1 1 auto;
+  width:100%;
+  max-width:100%;
   height:8px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
@@ -630,7 +634,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .totePkg{
   font-weight:900;
-  font-size:calc(11px * var(--card-scale));
+  font-size:calc(12px * var(--card-scale));
   color:#ff4b4b;
   flex-shrink:0;
 }
@@ -1270,6 +1274,12 @@ function setToteCardScale(){
     const w = card.getBoundingClientRect().width;
     const scale = Math.max(0.85, Math.min(1.15, w / 230));
     card.style.setProperty('--card-scale', scale.toFixed(3));
+    const badge = card.querySelector('.toteCornerBadge');
+    const meta = card.querySelector('.toteMetaRight');
+    const leftGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
+    const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
+    card.style.setProperty('--top-left-gap', `${Math.ceil(leftGap)}px`);
+    card.style.setProperty('--top-right-gap', `${Math.ceil(rightGap)}px`);
   }
 }
 
