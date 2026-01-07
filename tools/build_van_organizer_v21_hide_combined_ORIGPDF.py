@@ -555,7 +555,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   border:1px solid rgba(255,255,255,.08);
   box-shadow: 0 10px 28px rgba(0,0,0,.35), 0 2px 0 rgba(0,0,0,.10);
   box-sizing:border-box;
-  overflow:visible;
+  overflow:hidden;
   cursor:pointer;
   container-type:inline-size;
   direction:ltr;
