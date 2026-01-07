@@ -508,7 +508,7 @@ body{
   overflow:visible;
 }
 .lane{
-  position:absolute; left:0; right:0; top:50%;
+  position:absolute; left:6px; right:6px; top:50%;
   height:3px; transform:translateY(-50%);
   background:repeating-linear-gradient(90deg,#f6c945 0 12px,transparent 12px 24px);
   background-size:24px 100%;
