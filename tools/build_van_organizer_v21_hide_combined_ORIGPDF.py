@@ -1220,8 +1220,10 @@ function buildDisplayItems(r, q, ovMap){
     const secondLabel = bagLabel(second);
     const curOverflow = overflowZonesText(curLabel || cur.bag, ovMap);
     const secondOverflow = overflowZonesText(secondLabel || (second && second.bag), ovMap);
-    const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${cur.pkgs||""} ${curOverflow}` +
-      (second ? ` ${secondLabel} ${second.bag||""} ${second.sort_zone||""} ${second.pkgs||""} ${secondOverflow}` : "");
+    const curSort = normZone(cur.sort_zone);
+    const secondSort = second ? normZone(second.sort_zone) : "";
+    const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${curSort} ${cur.pkgs||""} ${curOverflow}` +
+      (second ? ` ${secondLabel} ${second.bag||""} ${second.sort_zone||""} ${secondSort} ${second.pkgs||""} ${secondOverflow}` : "");
     if(!match(text, q)) continue;
     items.push({ idx, cur, secondIdx: second ? secondIdx : null, second, eligibleCombine });
   }
