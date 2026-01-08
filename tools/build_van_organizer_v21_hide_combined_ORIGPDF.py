@@ -574,7 +574,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteTopRow{
   display:grid;
-  grid-template-columns:auto minmax(0, 1fr) auto;
+  grid-template-columns:auto minmax(0, 1fr);
   align-items:center;
   column-gap:6px;
   min-height:26px;
@@ -610,31 +610,49 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:var(--tote-badge-width);
   padding:0;
 }
-.toteMetaRight{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  position:static;
-  transform:none;
-  justify-self:end;
-  grid-column:3;
-}
-.toteCard.noSortZone .toteMetaRight{
-  min-width:var(--tote-badge-width);
-  justify-content:flex-end;
-}
-.toteBar{
+.card-bar{
   grid-column:2;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
   width:calc(100% - (var(--top-gap, 0px) * 2));
   max-width:100%;
-  height:8px;
-  border-radius:999px;
-  background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
-  pointer-events:none;
-  min-width:40px;
   margin:0 auto;
   justify-self:center;
+  min-width:40px;
+}
+.bar-left-icon,
+.bar-count{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:1px;
+}
+.bar-track{
+  position:relative;
+  height:6px;
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+}
+.bar-fill{
+  height:100%;
+  border-radius:999px;
+  width:100%;
+  background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
+}
+.bar-fill.yellow{
+  background: linear-gradient(
+    90deg,
+    #FFD84D,
+    #FFC400
+  );
+}
+.bar-track,
+.bar-fill{
+  pointer-events:none;
 }
 
 .toteIdx{
@@ -1223,7 +1241,12 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const pkgClass = pkgText ? "hasPkg" : "";
     const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
     const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-    const badgeGroupHtml = `<div class="toteBadgeGroup">${starHtml}${badgeHtml}</div>`;
+    const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}</div>`;
+    const barHtml = `<div class="card-bar">
+      <span class="bar-left-icon">${starHtml}</span>
+      <div class="bar-track"><div class="bar-fill"></div></div>
+      <span class="bar-count">${pkgHtml}</span>
+    </div>`;
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
       const chip2 = bagColorChip(second.bag);
@@ -1235,10 +1258,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
         ${minusHtml}
         <div class="toteTopRow">
           ${badgeGroupHtml}
-          <div class="toteBar"></div>
-          <div class="toteMetaRight">
-            ${pkgHtml}
-          </div>
+          ${barHtml}
         </div>
         <div class="toteBigNumber toteBigNumberStack">
           <div class="toteBigNumberLine">${topNum}</div>
@@ -1253,10 +1273,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
       <div class="toteTopRow">
         ${badgeGroupHtml}
-        <div class="toteBar"></div>
-        <div class="toteMetaRight">
-          ${pkgHtml}
-        </div>
+        ${barHtml}
       </div>
       <div class="toteBigNumber">${main1}</div>
       ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
@@ -1329,7 +1346,7 @@ function setToteCardScale(){
 
       const badge = card.querySelector('.toteCornerBadge');
       const combine = card.querySelector('.toteStar.combine');
-      const meta = card.querySelector('.toteMetaRight');
+      const meta = card.querySelector('.bar-count');
       const cardRect = card.getBoundingClientRect();
       const gapPad = 12;
       let leftInset = 0;
