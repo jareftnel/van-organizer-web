@@ -400,13 +400,13 @@ HTML_TEMPLATE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>__HEADER_TITLE__</title>
 <style>
-:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;}
+:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;--page-pad-x:clamp(16px, 2.5vw, 24px);--page-pad-y:clamp(12px, 2vh, 18px);}
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
-.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:16px 24px;min-height:100vh;height:100dvh;display:flex;flex-direction:column;}
+.organizerPage{width:100%;max-width:none;min-width:0;margin:0;padding:calc(var(--page-pad-y) + env(safe-area-inset-top, 0px)) calc(var(--page-pad-x) + env(safe-area-inset-right, 0px)) calc(var(--page-pad-y) + env(safe-area-inset-bottom, 0px)) calc(var(--page-pad-x) + env(safe-area-inset-left, 0px));min-height:100vh;height:100dvh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:18px 24px 28px;display:flex;flex-direction:column}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:clamp(12px, 2vh, 18px) 0 0;display:flex;flex-direction:column}
 .content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
@@ -525,18 +525,16 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .bagsGrid{
   display:grid;
-  grid-template-rows:repeat(3, auto);
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
   grid-auto-rows:minmax(max-content, auto);
-  grid-auto-flow:column;
-  grid-auto-columns:minmax(0, 1fr);
-  gap:clamp(6px, 1.2vw, 16px);
+  grid-auto-flow:row;
+  gap:clamp(8px, 1.4vw, 16px);
   align-items:stretch;
   width:100%;
   max-width:100%;
   height:auto;
   min-height:0;
   overflow:visible;
-  direction:rtl;
   flex:1 1 auto;
 }
 .toteBoard{flex:1 1 auto}
@@ -984,10 +982,6 @@ const selectMeasureCanvas = document.createElement("canvas");
 
 let renderRaf = 0;
 
-function isZoomed(){
-  return Math.abs(window.devicePixelRatio - 1) > 0.02;
-}
-
 function scheduleRender(){
   if(renderRaf) return;
   renderRaf = requestAnimationFrame(()=>{
@@ -1312,125 +1306,6 @@ function overflowSummary(bagLabel, ovMap){
   }).filter(Boolean).join("");
 }
 
-
-const TOTE_ROW_COUNT = 3;
-
-function getToteRowBuckets(){
-  const cards = Array.from(document.querySelectorAll('.toteCard'));
-  const buckets = Array.from({length: TOTE_ROW_COUNT}, ()=>[]);
-  cards.forEach((card, index)=>{
-    buckets[index % TOTE_ROW_COUNT].push(card);
-  });
-  return buckets;
-}
-
-function setToteCardScale(){
-  const buckets = getToteRowBuckets();
-
-  // Find a consistent scale per row so cards align nicely
-  const rowScales = buckets.map((row)=>{
-    if(!row.length) return 1;
-    let scale = 1.15;
-    row.forEach(card=>{
-      const w = card.getBoundingClientRect().width;
-      const next = Math.max(0.85, Math.min(1.15, w / 230));
-      scale = Math.min(scale, next);
-    });
-    return scale;
-  });
-
-  // Apply scale and compute a single --top-gap per row (what your CSS uses)
-  buckets.forEach((row, rowIndex)=>{
-    const scale = rowScales[rowIndex] || 1;
-    row.forEach(card=>{
-      card.style.setProperty('--card-scale', scale.toFixed(3));
-    });
-
-    const gapPad = 12;
-    let rowTopGap = 0;
-    row.forEach(card=>{
-      const badge = card.querySelector('.toteCornerBadge');
-      const combine = card.querySelector('.toteStar.combine');
-      const meta = card.querySelector('.bar-count');
-      const cardRect = card.getBoundingClientRect();
-      let leftInset = 0;
-      if(badge){
-        const rect = badge.getBoundingClientRect();
-        leftInset = Math.max(leftInset, rect.right - cardRect.left);
-      }
-      if(combine){
-        const rect = combine.getBoundingClientRect();
-        leftInset = Math.max(leftInset, rect.right - cardRect.left);
-      }
-      let rightInset = 0;
-      if(meta){
-        const rect = meta.getBoundingClientRect();
-        rightInset = Math.max(rightInset, cardRect.right - rect.left);
-      }
-      const leftGap = leftInset + gapPad;
-      const rightGap = rightInset + gapPad;
-      rowTopGap = Math.max(rowTopGap, Math.max(leftGap, rightGap));
-    });
-
-    row.forEach(card=>{
-      // Your CSS uses --top-gap to shrink the top bar from both sides
-      card.style.setProperty('--top-gap', `${Math.ceil(rowTopGap)}px`);
-    });
-  });
-}
-
-function fitToteGrid(){
-  const buckets = getToteRowBuckets();
-  // Clear heights
-  buckets.forEach(row=>{ row.forEach(card=>{ card.style.minHeight = ""; card.style.height = ""; }); });
-  // Make each row's cards equal height
-  buckets.forEach(row=>{
-    let maxH = 0;
-    row.forEach(card=>{
-      const h = card.getBoundingClientRect().height;
-      if(h > maxH) maxH = h;
-    });
-    if(!maxH) return;
-    const height = `${Math.ceil(maxH)}px`;
-    row.forEach(card=>{
-      card.style.minHeight = height;
-      card.style.height = height;
-    });
-  });
-}
-
-function autoFitToteGrid(shouldScale){
-  const wrap  = document.querySelector('.toteWrap');
-  const board = wrap ? wrap.querySelector('.toteBoard') : null;
-  if(!wrap || !board) return;
-
-  // reset
-  board.style.transform = "";
-  board.style.transformOrigin = "";
-  wrap.style.height = "";
-  wrap.style.flex = "";
-  wrap.style.overflow = "";
-
-  if(!shouldScale) return;
-
-  // optional: avoid scaling while user is zoomed
-  if (typeof isZoomed === 'function' && isZoomed()) return;
-
-  // fit height
-  const wrapHeight  = wrap.clientHeight;
-  const boardHeight = board.scrollHeight;
-  if(!wrapHeight || !boardHeight) return;
-  if(boardHeight <= wrapHeight) return;
-
-  const scale = Math.max(0.6, Math.min(1, wrapHeight / boardHeight));
-  board.style.transformOrigin = "top center";
-  board.style.transform = `scale(${scale.toFixed(3)})`;
-
-  // lock container to the scaled height and hide overflow
-  wrap.style.overflow = "hidden";
-  wrap.style.height = `${Math.ceil(boardHeight * scale)}px`;
-  wrap.style.flex   = "0 0 auto";
-}
 
 function attachBagHandlers(routeShort, allowDrag){
   // click to mark loaded (ignore star clicks)
@@ -1886,16 +1761,6 @@ function render(){
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
-  if(activeTab==="bags" || activeTab==="combined"){
-    requestAnimationFrame(()=>{
-      if(isZoomed()) return;
-      setToteCardScale();
-      if(typeof fitToteGrid === "function") fitToteGrid();
-      autoFitToteGrid(activeTab==="combined");
-    });
-  } else {
-    autoFitToteGrid(false);
-  }
 }
 
 function buildRouteDropdown(){

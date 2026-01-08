@@ -274,19 +274,7 @@ button{
     padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
-    --hero-scale:min(
-      0.82,
-      calc(
-        (
-          100svh
-          - 24px
-          - env(safe-area-inset-top, 0px)
-          - env(safe-area-inset-bottom, 0px)
-        ) / 760
-      )
-    );
-    transform:scale(var(--hero-scale));
-    transform-origin:top center;
+    width:100%;
   }
   .tagGlass{
     padding:6px 0;
@@ -735,7 +723,7 @@ html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-
 body{{display:flex;flex-direction:column;height:100dvh}}
 .banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
 .banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}}
-.wrap{{flex:1 1 auto;padding:0 10px 10px;min-height:0}}
+.wrap{{flex:1 1 auto;padding:0 calc(10px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));min-height:0}}
 iframe{{border:0; display:block; width:100%; height:100%}}
 
 @media (max-width: 900px){{
