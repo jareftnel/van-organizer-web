@@ -603,6 +603,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:var(--tote-badge-width);
   padding:0;
 }
+.toteCornerBadgePlaceholder{
+  background:transparent;
+  border-color:transparent;
+}
 .toteMetaRight{
   display:flex;
   align-items:center;
@@ -1204,7 +1208,9 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
     const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
     const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-    const badgeHtml = badgeText ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>` : ``;
+    const badgeHtml = badgeText
+      ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>`
+      : (cur.sort_zone ? `` : `<div class="toteCornerBadge toteBubble toteCornerBadgePlaceholder" aria-hidden="true"></div>`);
     const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
     const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
