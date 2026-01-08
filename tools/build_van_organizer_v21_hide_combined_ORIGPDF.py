@@ -1578,7 +1578,7 @@ function renderBags(r, q){
   }
 
   function bagBadgeText(anchor, other, idx){
-    return String(idx);
+    return String(anchor.idx || idx);
   }
 
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
