@@ -406,7 +406,7 @@ html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow:visible;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
 .organizerPage{width:100%;max-width:100%;min-width:0;margin:0 auto;box-sizing:border-box;padding-block:calc(var(--page-pad-y) + env(safe-area-inset-top, 0px)) calc(var(--page-pad-y) + env(safe-area-inset-bottom, 0px));padding-inline:calc(clamp(12px, 2vw, 24px) + env(safe-area-inset-left, 0px)) calc(clamp(12px, 2vw, 24px) + env(safe-area-inset-right, 0px));min-height:100vh;height:100dvh;display:flex;flex-direction:column;}
 .organizerHeader{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;min-width:0}
-.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow:auto;padding:clamp(12px, 2vh, 18px) 0 0;display:flex;flex-direction:column}
+.organizerBody{flex:1 1 auto;min-height:0;width:100%;max-width:100%;overflow-y:auto;overflow-x:visible;padding:clamp(12px, 2vh, 18px) 0 0;display:flex;flex-direction:column}
 .content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .organizerRoot{width:100%;max-width:none;min-width:0;margin:0}
 .controls{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
