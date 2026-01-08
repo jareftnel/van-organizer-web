@@ -580,6 +580,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:26px;
   margin:0;
 }
+.toteBadgeGroup{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  justify-self:start;
+  grid-column:1;
+}
 .toteBubble{
   min-width:calc(22px * var(--card-scale));
   height:calc(22px * var(--card-scale));
@@ -671,15 +678,16 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   z-index:2;
 }
 .toteStar.combine{
-  color:#FFD400;
-  border-color: rgba(255,212,0,.45);
-  background: rgba(255,212,0,.12);
-  width:var(--tote-badge-width);
+  color:#e3c056;
+  border-color: rgba(227,192,86,.35);
+  background: rgba(227,192,86,.16);
+  width:auto;
+  min-width:calc(22px * var(--card-scale));
   height:calc(22px * var(--card-scale));
   border-radius:999px;
   font-size:calc(12px * var(--card-scale));
-  top:10px;
-  left:10px;
+  padding:0 6px;
+  position:static;
 }
 .toteStar.on{
   border-color: rgba(255,75,75,.45);
@@ -1218,6 +1226,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
     const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
+    const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+    const badgeGroupHtml = `<div class="toteBadgeGroup">${starHtml}${badgeHtml}</div>`;
     if(second){
       const main2 = (second.bag_id || second.bag || "").toString();
       const chip2 = bagColorChip(second.bag);
@@ -1228,7 +1238,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
         ${minusHtml}
         <div class="toteTopRow">
-          ${badgeHtml}
+          ${badgeGroupHtml}
           <div class="toteBar"></div>
           <div class="toteMetaRight">
             ${pkgHtml}
@@ -1243,12 +1253,10 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     }
 
     const sub = getSubLine(cur, null);
-    const starHtml = it.eligibleCombine ? `<div class="toteStar combine" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
 
     return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
-      ${starHtml}
       <div class="toteTopRow">
-        ${badgeHtml}
+        ${badgeGroupHtml}
         <div class="toteBar"></div>
         <div class="toteMetaRight">
           ${pkgHtml}
