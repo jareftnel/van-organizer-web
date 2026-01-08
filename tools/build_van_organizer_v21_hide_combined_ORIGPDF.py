@@ -640,7 +640,8 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   border-radius:999px;
   width:100%;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
-  box-shadow:0 0 0 1px rgba(0,0,0,.18);
+  border:1px solid var(--chipBorder, #000);
+  box-sizing:border-box;
 }
 .bar-fill.yellow{
   background: linear-gradient(
@@ -1128,6 +1129,10 @@ function bagColorChip(label){
   if (s.includes("black"))  return "#0B0B0B";
   return "#34B3FF";
 }
+function chipBorderColor(chip1, chip2){
+  const isBlack = (chip)=> (chip || "").toLowerCase() === "#0b0b0b";
+  return (isBlack(chip1) || isBlack(chip2)) ? "#FFFFFF" : "#000000";
+}
 
 function normZone(z){
   if(!z) return "";
@@ -1249,7 +1254,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const topNum = (cur.sort_zone ? main1 : main2);
       const botNum = (cur.sort_zone ? main2 : main1);
       const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
-      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};">
+      const chipBorder = chipBorderColor(chip1, chip2);
+      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
         ${minusHtml}
         <div class="toteTopRow">
           ${badgeGroupHtml}
@@ -1265,7 +1271,8 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
 
     const sub = getSubLine(cur, null);
 
-    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};">
+    const chipBorder = chipBorderColor(chip1, chip1);
+    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
       <div class="toteTopRow">
         ${badgeGroupHtml}
         ${barHtml}
