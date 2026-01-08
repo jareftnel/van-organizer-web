@@ -1316,11 +1316,24 @@ function setToteCardScale(){
       const badge = card.querySelector('.toteCornerBadge');
       const combine = card.querySelector('.toteStar.combine');
       const meta = card.querySelector('.toteMetaRight');
-
-      const badgeGap = badge ? badge.getBoundingClientRect().width + 12 : 0;
-      const combineGap = combine ? combine.getBoundingClientRect().width + 12 : 0;
-      const leftGap = Math.max(badgeGap, combineGap);
-      const rightGap = meta ? meta.getBoundingClientRect().width + 12 : 0;
+      const cardRect = card.getBoundingClientRect();
+      const gapPad = 12;
+      let leftInset = 0;
+      if(badge){
+        const rect = badge.getBoundingClientRect();
+        leftInset = Math.max(leftInset, rect.right - cardRect.left);
+      }
+      if(combine){
+        const rect = combine.getBoundingClientRect();
+        leftInset = Math.max(leftInset, rect.right - cardRect.left);
+      }
+      let rightInset = 0;
+      if(meta){
+        const rect = meta.getBoundingClientRect();
+        rightInset = Math.max(rightInset, cardRect.right - rect.left);
+      }
+      const leftGap = leftInset + gapPad;
+      const rightGap = rightInset + gapPad;
 
       // Your CSS uses --top-gap to shrink the top bar from both sides
       const topGap = Math.max(leftGap, rightGap);
