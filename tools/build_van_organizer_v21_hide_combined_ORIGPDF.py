@@ -1338,17 +1338,20 @@ function setToteCardScale(){
     return scale;
   });
 
-  // Apply scale and compute a single --top-gap (what your CSS uses)
+  // Apply scale and compute a single --top-gap per row (what your CSS uses)
   buckets.forEach((row, rowIndex)=>{
     const scale = rowScales[rowIndex] || 1;
     row.forEach(card=>{
       card.style.setProperty('--card-scale', scale.toFixed(3));
+    });
 
+    const gapPad = 12;
+    let rowTopGap = 0;
+    row.forEach(card=>{
       const badge = card.querySelector('.toteCornerBadge');
       const combine = card.querySelector('.toteStar.combine');
       const meta = card.querySelector('.bar-count');
       const cardRect = card.getBoundingClientRect();
-      const gapPad = 12;
       let leftInset = 0;
       if(badge){
         const rect = badge.getBoundingClientRect();
@@ -1365,10 +1368,12 @@ function setToteCardScale(){
       }
       const leftGap = leftInset + gapPad;
       const rightGap = rightInset + gapPad;
+      rowTopGap = Math.max(rowTopGap, Math.max(leftGap, rightGap));
+    });
 
+    row.forEach(card=>{
       // Your CSS uses --top-gap to shrink the top bar from both sides
-      const topGap = Math.max(leftGap, rightGap);
-      card.style.setProperty('--top-gap', `${Math.ceil(topGap)}px`);
+      card.style.setProperty('--top-gap', `${Math.ceil(rowTopGap)}px`);
     });
   });
 }
