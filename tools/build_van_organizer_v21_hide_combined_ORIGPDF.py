@@ -674,6 +674,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   color:#FFD400;
   border-color: rgba(255,212,0,.45);
   background: rgba(255,212,0,.12);
+  width:var(--tote-badge-width);
+  height:calc(22px * var(--card-scale));
+  border-radius:999px;
+  font-size:calc(12px * var(--card-scale));
   top:10px;
   left:10px;
 }
