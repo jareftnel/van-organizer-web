@@ -529,6 +529,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-auto-flow:column;
   grid-auto-columns:clamp(170px, 12vw, 240px);
   gap:clamp(8px, 1.4vw, 16px);
+  justify-content:center;
   align-items:stretch;
   width:100%;
   max-width:100%;
