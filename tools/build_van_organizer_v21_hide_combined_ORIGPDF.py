@@ -632,16 +632,17 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .bar-track{
   position:relative;
   height:6px;
-  background:rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.22);
   border-radius:999px;
   overflow:hidden;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
 }
 .bar-fill{
   height:100%;
   border-radius:999px;
   width:100%;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.18);
 }
 .bar-fill.yellow{
   background: linear-gradient(
