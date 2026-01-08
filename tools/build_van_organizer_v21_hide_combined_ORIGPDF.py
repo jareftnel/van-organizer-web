@@ -525,9 +525,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .bagsGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-  grid-auto-rows:minmax(max-content, auto);
-  grid-auto-flow:row;
+  grid-template-rows:repeat(3, minmax(max-content, auto));
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(220px, 1fr);
   gap:clamp(8px, 1.4vw, 16px);
   align-items:stretch;
   width:100%;
@@ -536,6 +536,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:0;
   overflow:visible;
   flex:1 1 auto;
+  direction:rtl;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
@@ -1575,8 +1576,7 @@ function renderBags(r, q){
   }
 
   function bagBadgeText(anchor, other, idx){
-    const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
-    return normZone(src.sort_zone);
+    return String(idx);
   }
 
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
