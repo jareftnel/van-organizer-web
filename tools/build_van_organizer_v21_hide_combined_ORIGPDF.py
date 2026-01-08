@@ -522,6 +522,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   flex:1 1 auto;
   min-height:0;
+  justify-content:center;
 }
 .bagsGrid{
   display:grid;
@@ -532,6 +533,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   align-items:stretch;
   width:100%;
   max-width:100%;
+  margin:0 auto;
   box-sizing:border-box;
   height:auto;
   min-height:0;
