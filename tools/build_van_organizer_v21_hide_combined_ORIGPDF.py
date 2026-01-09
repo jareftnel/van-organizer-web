@@ -529,7 +529,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-auto-flow:column;
   grid-auto-columns:clamp(170px, 12vw, 240px);
   gap:clamp(8px, 1.4vw, 16px);
-  justify-content:flex-end;
+  justify-content:center;
   align-items:stretch;
   width:max-content;
   min-width:100%;
@@ -539,7 +539,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:0;
   overflow:visible;
   flex:1 1 auto;
-  direction:ltr;
+  direction:rtl;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
@@ -1774,12 +1774,57 @@ function renderCombined(r,q){
   scrollTotesToRight();
 }
 
+let rtlScrollType = null;
+
+function detectRtlScrollType(){
+  if(rtlScrollType) return rtlScrollType;
+  const probe = document.createElement("div");
+  probe.dir = "rtl";
+  probe.style.width = "100px";
+  probe.style.height = "100px";
+  probe.style.overflow = "scroll";
+  probe.style.position = "absolute";
+  probe.style.top = "-9999px";
+  probe.style.visibility = "hidden";
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "1px";
+  probe.appendChild(inner);
+  document.body.appendChild(probe);
+  probe.scrollLeft = 0;
+  const start = probe.scrollLeft;
+  probe.scrollLeft = 1;
+  const after = probe.scrollLeft;
+  document.body.removeChild(probe);
+  if(start === 0 && after === 0){
+    rtlScrollType = "negative";
+  }else if(start === 0 && after === 1){
+    rtlScrollType = "default";
+  }else{
+    rtlScrollType = "reverse";
+  }
+  return rtlScrollType;
+}
+
+function setRtlAwareScrollLeft(el, logicalLeft){
+  const type = detectRtlScrollType();
+  if(type === "default"){
+    el.scrollLeft = logicalLeft;
+    return;
+  }
+  if(type === "negative"){
+    el.scrollLeft = -logicalLeft;
+    return;
+  }
+  el.scrollLeft = el.scrollWidth - el.clientWidth - logicalLeft;
+}
+
 function scrollTotesToRight(){
   const wrap = document.querySelector(".toteWrap");
   if(!wrap) return;
   const maxScroll = wrap.scrollWidth - wrap.clientWidth;
   if(maxScroll > 0){
-    wrap.scrollLeft = maxScroll;
+    setRtlAwareScrollLeft(wrap, maxScroll);
   }
 }
 
