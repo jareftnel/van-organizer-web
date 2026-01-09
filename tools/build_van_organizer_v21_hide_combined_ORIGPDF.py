@@ -514,7 +514,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0}
+.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0;overflow-x:auto;overflow-y:hidden}
 .toteBoard{
   width:100%;
   padding:0;
@@ -531,8 +531,9 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:clamp(8px, 1.4vw, 16px);
   justify-content:center;
   align-items:stretch;
-  width:100%;
-  max-width:100%;
+  width:max-content;
+  min-width:100%;
+  max-width:none;
   box-sizing:border-box;
   height:auto;
   min-height:0;
@@ -1618,6 +1619,7 @@ function renderBags(r, q){
 
   const allowDrag = (mode === "custom") && !q;
   attachBagHandlers(routeShort, allowDrag);
+  scrollTotesToRight();
 }
 
 function renderOverflow(r,q){
@@ -1769,6 +1771,16 @@ function renderCombined(r,q){
 
   const allowDrag = (mode === "custom") && !q;
   attachBagHandlers(routeShort, allowDrag);
+  scrollTotesToRight();
+}
+
+function scrollTotesToRight(){
+  const wrap = document.querySelector(".toteWrap");
+  if(!wrap) return;
+  const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+  if(maxScroll > 0){
+    wrap.scrollLeft = maxScroll;
+  }
 }
 
 function render(){
