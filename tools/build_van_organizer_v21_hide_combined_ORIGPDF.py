@@ -1602,14 +1602,6 @@ function renderBags(r, q){
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
 
   content.innerHTML = `
-    <div class="controlsRow">
-      <div class="hint">Tap to mark loaded. ${
-        mode==="custom" ? "Drag to reorder (badge numbers stay the same)." :
-        mode==="reversed" ? "Showing last bag → first bag." :
-        "Showing first bag → last bag."
-      }</div>
-      <div class="badge"><span class="dot"></span>${items.length} bags</div>
-    </div>
     <div class="toteWrap">
       <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
