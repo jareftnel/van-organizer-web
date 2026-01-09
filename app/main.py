@@ -685,6 +685,11 @@ def organizer_raw(jid: str):
             ".pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}",
         )
     html = html.replace("overflow-x:visible", "overflow-x:auto")
+    html = html.replace(
+        "  justify-content:center;\n  align-items:stretch;\n  width:max-content;\n",
+        "  justify-content:flex-end;\n  align-items:stretch;\n  width:max-content;\n",
+    )
+    html = html.replace("direction:rtl;", "direction:ltr;")
     if "</style>" in html and "tab-align-patch" not in html:
         html = html.replace(
             "</style>",

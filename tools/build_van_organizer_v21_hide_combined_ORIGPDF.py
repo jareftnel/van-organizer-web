@@ -529,7 +529,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-auto-flow:column;
   grid-auto-columns:clamp(170px, 12vw, 240px);
   gap:clamp(8px, 1.4vw, 16px);
-  justify-content:center;
+  justify-content:flex-end;
   align-items:stretch;
   width:max-content;
   min-width:100%;
@@ -539,7 +539,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:0;
   overflow:visible;
   flex:1 1 auto;
-  direction:rtl;
+  direction:ltr;
 }
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
