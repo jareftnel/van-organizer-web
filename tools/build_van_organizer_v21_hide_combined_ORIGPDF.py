@@ -1774,12 +1774,57 @@ function renderCombined(r,q){
   scrollTotesToRight();
 }
 
+let rtlScrollType = null;
+
+function detectRtlScrollType(){
+  if(rtlScrollType) return rtlScrollType;
+  const probe = document.createElement("div");
+  probe.dir = "rtl";
+  probe.style.width = "100px";
+  probe.style.height = "100px";
+  probe.style.overflow = "scroll";
+  probe.style.position = "absolute";
+  probe.style.top = "-9999px";
+  probe.style.visibility = "hidden";
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "1px";
+  probe.appendChild(inner);
+  document.body.appendChild(probe);
+  probe.scrollLeft = 0;
+  const start = probe.scrollLeft;
+  probe.scrollLeft = 1;
+  const after = probe.scrollLeft;
+  document.body.removeChild(probe);
+  if(start === 0 && after === 0){
+    rtlScrollType = "negative";
+  }else if(start === 0 && after === 1){
+    rtlScrollType = "default";
+  }else{
+    rtlScrollType = "reverse";
+  }
+  return rtlScrollType;
+}
+
+function setRtlAwareScrollLeft(el, logicalLeft){
+  const type = detectRtlScrollType();
+  if(type === "default"){
+    el.scrollLeft = logicalLeft;
+    return;
+  }
+  if(type === "negative"){
+    el.scrollLeft = -logicalLeft;
+    return;
+  }
+  el.scrollLeft = el.scrollWidth - el.clientWidth - logicalLeft;
+}
+
 function scrollTotesToRight(){
   const wrap = document.querySelector(".toteWrap");
   if(!wrap) return;
   const maxScroll = wrap.scrollWidth - wrap.clientWidth;
   if(maxScroll > 0){
-    wrap.scrollLeft = maxScroll;
+    setRtlAwareScrollLeft(wrap, maxScroll);
   }
 }
 

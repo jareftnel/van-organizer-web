@@ -685,6 +685,51 @@ def organizer_raw(jid: str):
             ".pills{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}",
         )
     html = html.replace("overflow-x:visible", "overflow-x:auto")
+    if "function scrollTotesToRight()" in html and "detectRtlScrollType" not in html:
+        html = html.replace(
+            "function scrollTotesToRight(){",
+            "let rtlScrollType = null;\n\n"
+            "function detectRtlScrollType(){\n"
+            "  if(rtlScrollType) return rtlScrollType;\n"
+            "  const probe = document.createElement(\"div\");\n"
+            "  probe.dir = \"rtl\";\n"
+            "  probe.style.width = \"100px\";\n"
+            "  probe.style.height = \"100px\";\n"
+            "  probe.style.overflow = \"scroll\";\n"
+            "  probe.style.position = \"absolute\";\n"
+            "  probe.style.top = \"-9999px\";\n"
+            "  probe.style.visibility = \"hidden\";\n"
+            "  const inner = document.createElement(\"div\");\n"
+            "  inner.style.width = \"200px\";\n"
+            "  inner.style.height = \"1px\";\n"
+            "  probe.appendChild(inner);\n"
+            "  document.body.appendChild(probe);\n"
+            "  probe.scrollLeft = 0;\n"
+            "  const start = probe.scrollLeft;\n"
+            "  probe.scrollLeft = 1;\n"
+            "  const after = probe.scrollLeft;\n"
+            "  document.body.removeChild(probe);\n"
+            "  if(start === 0 && after === 0){\n"
+            "    rtlScrollType = \"negative\";\n"
+            "  }else if(start === 0 && after === 1){\n"
+            "    rtlScrollType = \"default\";\n"
+            "  }else{\n"
+            "    rtlScrollType = \"reverse\";\n"
+            "  }\n"
+            "  return rtlScrollType;\n"
+            "}\n\n"
+            "function setRtlAwareScrollLeft(el, logicalLeft){\n"
+            "  const type = detectRtlScrollType();\n"
+            "  if(type === \"default\"){ el.scrollLeft = logicalLeft; return; }\n"
+            "  if(type === \"negative\"){ el.scrollLeft = -logicalLeft; return; }\n"
+            "  el.scrollLeft = el.scrollWidth - el.clientWidth - logicalLeft;\n"
+            "}\n\n"
+            "function scrollTotesToRight(){",
+        )
+        html = html.replace(
+            "    wrap.scrollLeft = maxScroll;",
+            "    setRtlAwareScrollLeft(wrap, maxScroll);",
+        )
     if "</style>" in html and "tab-align-patch" not in html:
         html = html.replace(
             "</style>",
