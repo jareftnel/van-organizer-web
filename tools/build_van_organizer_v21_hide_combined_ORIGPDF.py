@@ -1178,6 +1178,15 @@ function overflowZonesText(label, ovMap){
   if(!entry || !entry.length) return "";
   return entry.map((item)=>`${item.zone||""} ${normZone(item.zone)}`).join(" ");
 }
+function overflowSearchText(label, ovMap){
+  if(!label || !ovMap) return "";
+  const entry = ovMap.get(label);
+  if(!entry || !entry.length) return "";
+  return entry.map((item)=>{
+    const count = (item.count === 0 || item.count) ? String(item.count) : "";
+    return `${item.zone||""} ${normZone(item.zone)} ${count}`.trim();
+  }).join(" ");
+}
 
 // Custom order helpers
 function getCustomOrder(routeShort, base){
@@ -1224,8 +1233,8 @@ function buildDisplayItems(r, q, ovMap){
     const eligibleCombine = (!cur.sort_zone) && idx > 1;
     const curLabel = bagLabel(cur);
     const secondLabel = bagLabel(second);
-    const curOverflow = overflowZonesText(curLabel || cur.bag, ovMap);
-    const secondOverflow = overflowZonesText(secondLabel || (second && second.bag), ovMap);
+    const curOverflow = overflowSearchText(curLabel || cur.bag, ovMap);
+    const secondOverflow = overflowSearchText(secondLabel || (second && second.bag), ovMap);
     const curSort = normZone(cur.sort_zone);
     const secondSort = second ? normZone(second.sort_zone) : "";
     const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${curSort} ${cur.pkgs||""} ${curOverflow}` +
