@@ -1159,7 +1159,13 @@ function parseZoneCounts(zones){
       return { zone: p, count: 0 };
     });
 }
-function match(text,q){ return !q || (text||"").toLowerCase().includes(q.toLowerCase()); }
+function match(text,q){
+  if(!q) return true;
+  const tokens = String(q).toLowerCase().split(/\s+/).filter(Boolean);
+  if(!tokens.length) return true;
+  const hay = (text||"").toLowerCase();
+  return tokens.every(t=>hay.includes(t));
+}
 
 function bagLabel(entry){
   if(!entry) return "";
