@@ -771,11 +771,11 @@ table{width:100%;border-collapse:separate;border-spacing:0}
 th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 
 /* Overflow layout */
-.ovTable{width:100%;table-layout:fixed}
+.ovTable{width:max-content;min-width:100%;table-layout:auto}
 .ovTable td:nth-child(2){white-space:nowrap}
 .ovTable td:nth-child(4){white-space:nowrap}
 
-.ovWrap{width:100%;max-width:none;margin:0;padding:0 18px;}
+.ovWrap{width:100%;max-width:100%;margin:0;padding:0 18px;overflow-x:auto}
 .controlsRow{min-width:0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .controlsRow > *{min-width:0}
 .ovHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
