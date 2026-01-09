@@ -939,7 +939,7 @@ td:last-child,th:last-child{text-align:right}
             <input id="q" placeholder="Search Bag / Overflow Info"/>
           </div>
           <a class="downloadBtn" href="download/STACKED.pdf">
-            <span class="downloadLabelFull">DOWNLOAD PDF</span>
+            <span class="downloadLabelFull">PDF</span>
             <span class="downloadLabelShort">PDF</span>
           </a>
           <span class="topbarBreak" aria-hidden="true"></span>
