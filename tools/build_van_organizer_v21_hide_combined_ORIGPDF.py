@@ -1616,12 +1616,14 @@ function renderBags(r, q){
 function renderOverflow(r,q){
 const routeShort = r.short || r.route_short || "";
   const mode = getOvMode(routeShort);
+  const bagMeta = new Map((r.bags_detail || []).map(x=>[x.idx, x]));
 
   // Build ordered list (same order as Excel by default)
   const base = (r.overflow_seq || []).map((x,i)=>({
     zone: x.zone,
     count: x.count||0,
     bag_idx: x.bag_idx || 0,
+    sort_zone: (bagMeta.get(x.bag_idx || 0) || {}).sort_zone || "",
     _i: i,
     _id: `${x.bag_idx||0}|${normZone(x.zone)}|${i}`
   }));
@@ -1643,7 +1645,7 @@ const routeShort = r.short || r.route_short || "";
   }
 
   // Search filter keeps current order
-  if(q) ordered = ordered.filter(x=>match(`${x.bag_idx} ${x.zone} ${x.count}`, q));
+  if(q) ordered = ordered.filter(x=>match(`${x.bag_idx} ${x.zone} ${x.count} ${x.sort_zone||""} ${normZone(x.sort_zone||"")}`, q));
 
   const allowDrag = (mode==="custom") && !q;
 
