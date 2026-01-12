@@ -890,7 +890,9 @@ def organizer_wrapper(jid: str):
 html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:auto}}
 body{{display:flex;flex-direction:column;height:100dvh}}
 .banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
-.banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain}}
+.banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain;transition:max-height 220ms ease, opacity 220ms ease}}
+.bannerMin .banner img{{max-height:46px;opacity:0.95}}
+.bannerMin .banner{{border-bottom:1px solid rgba(28,42,58,0.7)}}
 .wrap{{flex:1 1 auto;padding:0 calc(10px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));min-height:0}}
 iframe{{border:0; display:block; width:100%; height:100%}}
 
@@ -902,6 +904,9 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 }}
 @media (max-width: 600px) and (orientation: portrait){{
   .banner img{{max-height:130px}}
+}}
+@media (prefers-reduced-motion: reduce){{
+  .banner img{{ transition:none; }}
 }}
 </style>
 </head>
@@ -924,6 +929,19 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     src += "&route=" + encodeURIComponent(routeParam);
   }}
   frame.src = src;
+}})();
+(function(){{
+  var root = document.documentElement;
+  var banner = document.querySelector(".banner");
+  setTimeout(function(){{
+    root.classList.add("bannerMin");
+  }}, 3000);
+  if(banner){{
+    banner.style.cursor = "pointer";
+    banner.addEventListener("click", function(){{
+      root.classList.toggle("bannerMin");
+    }});
+  }}
 }})();
 </script>
 </body>
