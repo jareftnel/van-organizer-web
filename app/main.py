@@ -1034,6 +1034,326 @@ def toc_data(jid: str):
     )
 
 
+@app.get("/job/{jid}/summary-data")
+def summary_data(jid: str):
+    j = store.get(jid)
+    if j.get("status") == "missing":
+        return JSONResponse({"status": "missing"}, status_code=404)
+
+    summary = j.get("summary") or {}
+    return JSONResponse(
+        {
+            "status": "ok",
+            "mismatches": summary.get("mismatches") or [],
+            "routes_over_30": summary.get("routes_over_30") or [],
+            "routes_over_50_overflow": summary.get("routes_over_50_overflow") or [],
+            "top10_heavy_totals": summary.get("top10_heavy_totals") or [],
+            "top10_commercial": summary.get("top10_commercial") or [],
+        }
+    )
+
+
+@app.get("/job/{jid}/verification", response_class=HTMLResponse)
+def verification_page(jid: str):
+    return HTMLResponse(f"""
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Verification Summary</title>
+<style>
+html, body{{
+  height:100%;
+  overflow:auto;
+}}
+body{{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin:0;
+  background:#0b0f14;
+  color:#e8eef6;
+}}
+:root{{
+  --r:22px;
+  --glass:rgba(255,255,255,0.06);
+  --glassBorder:rgba(255,255,255,0.10);
+}}
+.page{{
+  min-height:100svh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:36px 18px 28px;
+  box-sizing:border-box;
+}}
+.card{{
+  width:100%;
+  max-width:1100px;
+  background:rgba(10,16,26,0.55);
+  border:1px solid var(--glassBorder);
+  border-radius:var(--r);
+  padding:22px;
+  box-shadow:0 18px 45px rgba(0,0,0,0.35);
+}}
+.headerRow{{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:14px;
+}}
+.titleBlock{{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}}
+.title{{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:0.6px;
+}}
+.subtitle{{
+  font-size:14px;
+  opacity:0.75;
+}}
+.backBtn{{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:40px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.18);
+  color:#e8eef6;
+  background:rgba(255,255,255,0.04);
+  text-decoration:none;
+  font-weight:700;
+}}
+.section{{
+  margin-top:18px;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+  padding:16px;
+  background:rgba(255,255,255,0.03);
+}}
+.sectionTitle{{
+  font-size:16px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-weight:700;
+  opacity:0.8;
+  margin-bottom:12px;
+}}
+.routeList{{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}}
+.routeRow{{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:10px 12px;
+  text-align:left;
+  color:inherit;
+  cursor:pointer;
+}}
+.routeRow:focus-visible{{
+  outline:2px solid rgba(63,167,255,0.6);
+  outline-offset:2px;
+}}
+.routeName{{
+  font-weight:700;
+}}
+.routeMetric{{
+  font-weight:700;
+  opacity:0.8;
+  white-space:nowrap;
+}}
+.emptyState{{
+  font-size:13px;
+  opacity:0.7;
+}}
+.alertRow{{
+  color:#ffb4b4;
+  border-color:rgba(248,113,113,0.4);
+  background:rgba(248,113,113,0.08);
+}}
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="headerRow">
+        <div class="titleBlock">
+          <div class="title">Verification Summary</div>
+          <div class="subtitle">Review routes with the heaviest counts and overflow.</div>
+        </div>
+        <a class="backBtn" href="/job/{jid}/toc">Back to routes</a>
+      </div>
+
+      <section class="section" id="verificationSection">
+        <div class="sectionTitle">Verification</div>
+        <div class="routeList" id="verificationList"></div>
+      </section>
+
+      <section class="section" id="bagsSection">
+        <div class="sectionTitle">Routes with 30+ Bags</div>
+        <div class="routeList" id="bagsList"></div>
+        <div class="emptyState" id="bagsEmpty" hidden>No routes with 30+ bags.</div>
+      </section>
+
+      <section class="section" id="overflowSection">
+        <div class="sectionTitle">Routes with 50+ Overflow</div>
+        <div class="routeList" id="overflowList"></div>
+        <div class="emptyState" id="overflowEmpty" hidden>No routes with 50+ overflow.</div>
+      </section>
+
+      <section class="section" id="totalSection">
+        <div class="sectionTitle">Routes with Heaviest Package Counts</div>
+        <div class="routeList" id="totalList"></div>
+        <div class="emptyState" id="totalEmpty" hidden>No route totals available.</div>
+      </section>
+
+      <section class="section" id="commercialSection">
+        <div class="sectionTitle">Routes with Heaviest Commercial</div>
+        <div class="routeList" id="commercialList"></div>
+        <div class="emptyState" id="commercialEmpty" hidden>No commercial counts available.</div>
+      </section>
+    </div>
+  </div>
+
+<script>
+(function(){{
+  var jid = "{jid}";
+  var verificationList = document.getElementById("verificationList");
+  var bagsSection = document.getElementById("bagsSection");
+  var bagsList = document.getElementById("bagsList");
+  var bagsEmpty = document.getElementById("bagsEmpty");
+  var overflowSection = document.getElementById("overflowSection");
+  var overflowList = document.getElementById("overflowList");
+  var overflowEmpty = document.getElementById("overflowEmpty");
+  var totalList = document.getElementById("totalList");
+  var totalEmpty = document.getElementById("totalEmpty");
+  var commercialList = document.getElementById("commercialList");
+  var commercialEmpty = document.getElementById("commercialEmpty");
+
+  function openRoute(routeName){{
+    if(!routeName) return;
+    var url = "/job/" + jid + "/organizer?route=" + encodeURIComponent(routeName);
+    window.location.href = url;
+  }}
+
+  function makeRow(routeName, metric, isAlert){{
+    var row = document.createElement("button");
+    row.type = "button";
+    row.className = "routeRow" + (isAlert ? " alertRow" : "");
+    row.addEventListener("click", function(){{ openRoute(routeName); }});
+    var nameSpan = document.createElement("span");
+    nameSpan.className = "routeName";
+    nameSpan.textContent = routeName || "Route";
+    var metricSpan = document.createElement("span");
+    metricSpan.className = "routeMetric";
+    metricSpan.textContent = metric || "";
+    row.appendChild(nameSpan);
+    row.appendChild(metricSpan);
+    return row;
+  }}
+
+  function renderVerification(mismatches){{
+    verificationList.innerHTML = "";
+    if(!mismatches || !mismatches.length){{
+      verificationList.appendChild(makeRow("All routes verified", "No mismatches", false));
+      return;
+    }}
+    mismatches.forEach(function(item){{
+      var parts = [];
+      if(item.overflow_mismatch){{
+        parts.push("Overflow " + item.declared_overflow + "→" + item.computed_overflow);
+      }}
+      if(item.total_mismatch){{
+        parts.push("Total " + item.declared_total + "→" + item.computed_total);
+      }}
+      var metric = parts.length ? parts.join(" | ") : "Mismatch";
+      verificationList.appendChild(makeRow(item.title || "Route", metric, true));
+    }});
+  }}
+
+  function renderList(listEl, items, metricLabel, emptyEl, sectionEl, hideWhenEmpty){{
+    listEl.innerHTML = "";
+    if(!items || !items.length){{
+      if(hideWhenEmpty && sectionEl){{
+        sectionEl.hidden = true;
+        return;
+      }}
+      if(emptyEl) emptyEl.hidden = false;
+      return;
+    }}
+    if(emptyEl) emptyEl.hidden = true;
+    if(sectionEl) sectionEl.hidden = false;
+    items.forEach(function(item){{
+      listEl.appendChild(makeRow(item.route || item.title || "Route", item.metric || metricLabel(item), false));
+    }});
+  }}
+
+  function adaptItems(items, formatter){{
+    return (items || []).map(function(raw){{
+      return formatter(raw);
+    }});
+  }}
+
+  fetch("/job/" + jid + "/summary-data", {{ cache: "no-store" }})
+    .then(function(r){{ return r.json(); }})
+    .then(function(data){{
+      if(!data || data.status !== "ok") return;
+
+      renderVerification(data.mismatches || []);
+
+      var bagsItems = adaptItems(data.routes_over_30, function(row){{
+        return {{
+          route: row[1],
+          metric: row[0] + " bags"
+        }};
+      }});
+      renderList(bagsList, bagsItems, function(item){{ return item.metric; }}, bagsEmpty, bagsSection, true);
+
+      var overflowItems = adaptItems(data.routes_over_50_overflow, function(row){{
+        return {{
+          route: row[1],
+          metric: row[0] + " overflow"
+        }};
+      }});
+      renderList(overflowList, overflowItems, function(item){{ return item.metric; }}, overflowEmpty, overflowSection, true);
+
+      var totalItems = adaptItems(data.top10_heavy_totals, function(row){{
+        return {{
+          route: row[1],
+          metric: row[0] + " total"
+        }};
+      }});
+      renderList(totalList, totalItems, function(item){{ return item.metric; }}, totalEmpty, null, false);
+
+      var commercialItems = adaptItems(data.top10_commercial, function(row){{
+        return {{
+          route: row[1],
+          metric: row[0] + " commercial"
+        }};
+      }});
+      renderList(commercialList, commercialItems, function(item){{ return item.metric; }}, commercialEmpty, null, false);
+    }})
+    .catch(function(){{}});
+}})();
+</script>
+</body>
+</html>
+""")
+
+
 @app.get("/job/{jid}/toc", response_class=HTMLResponse)
 def toc_page(jid: str):
     return HTMLResponse(f"""
@@ -1173,6 +1493,11 @@ body{{
   position:absolute;
   top:16px;
   right:16px;
+  cursor:pointer;
+}}
+.mismatchIndicator:focus-visible{{
+  outline:2px solid rgba(255,255,255,0.7);
+  outline-offset:2px;
 }}
 .mismatchIndicator--ok{{
   background:rgba(22, 185, 78, 0.16);
@@ -1316,7 +1641,7 @@ body{{
             <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
           </div>
         </div>
-        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
+        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported" hidden>✓</span>
         <div class="divider"></div>
         <div class="selectRow selectRow--dual">
           <div class="selectGroup">
@@ -1354,10 +1679,22 @@ body{{
   var routeIndex = {{}};
   var waveColors = {{}};
   var stackedUrl = "/job/" + jid + "/download/STACKED.pdf";
+  var verificationUrl = "/job/" + jid + "/verification";
 
   tocCount.addEventListener("click", function(){{
     window.open(stackedUrl, "_blank", "noopener");
   }});
+  if(mismatchIndicator){{
+    mismatchIndicator.addEventListener("click", function(){{
+      window.location.href = verificationUrl;
+    }});
+    mismatchIndicator.addEventListener("keydown", function(event){{
+      if(event.key === "Enter" || event.key === " "){{
+        event.preventDefault();
+        window.location.href = verificationUrl;
+      }}
+    }});
+  }}
 
   function timeKey(timeLabel){{
     if(!timeLabel) return "";
