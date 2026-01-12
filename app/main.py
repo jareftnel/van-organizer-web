@@ -927,7 +927,11 @@ body{{
 }}
 .tocHeader{{
   text-align:center;
-  padding:6px 0 10px;
+  padding:6px 0 12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
 }}
 .tocTitle{{
   font-size:26px;
@@ -935,14 +939,20 @@ body{{
   letter-spacing:1px;
 }}
 .tocDate{{
-  margin-top:6px;
+  margin-top:0;
   font-size:16px;
   opacity:0.85;
 }}
 .tocCount{{
-  margin-top:6px;
-  font-size:14px;
-  opacity:0.7;
+  margin-top:0;
+  font-size:12px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  opacity:0.8;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:4px 12px;
+  border-radius:999px;
 }}
 .divider{{
   height:1px;
@@ -1043,7 +1053,7 @@ body{{
       <div class="uploadCard">
         <div class="tocHeader">
           <div class="tocTitle" id="tocDate">Date</div>
-          <div class="tocDate" id="tocCount">0 Routes</div>
+          <div class="tocCount" id="tocCount">0 Routes</div>
         </div>
         <div class="divider"></div>
         <div class="selectRow">
