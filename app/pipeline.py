@@ -180,11 +180,16 @@ def _pick_distinct_colors_from_images(image_paths: list[Path], needed: int) -> l
 def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> dict[str, str]:
     if not image_paths or not toc_entries:
         return {}
-    time_labels = sorted(
-        {_time_key(entry.get("time_label", "")) for entry in toc_entries},
-        key=_time_sort_key,
-    )
-    time_labels = [label for label in time_labels if label]
+
+    time_labels: list[str] = []
+    seen: set[str] = set()
+    for entry in toc_entries:
+        label = _time_key(entry.get("time_label", ""))
+        if not label or label in seen:
+            continue
+        time_labels.append(label)
+        seen.add(label)
+
     if not time_labels:
         return {}
 
