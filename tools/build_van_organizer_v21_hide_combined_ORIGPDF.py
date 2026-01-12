@@ -482,12 +482,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-row:1;
   justify-self:center;
 }
-#routeTitle{
-  text-decoration-line: underline;
-  text-decoration-color: var(--waveColor);
-  text-decoration-thickness: 3px;
-  text-underline-offset: 6px;
-}
+#routeTitle{ text-decoration: none !important; }
 .sectionMeta{
   text-align:left;
   opacity:.7;
