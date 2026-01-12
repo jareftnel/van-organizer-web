@@ -917,8 +917,14 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 <script>
 (function () {{
   var frame = document.getElementById("orgFrame");
+  var params = new URLSearchParams(window.location.search);
+  var routeParam = params.get("route");
   // cache-bust iframe so it always pulls the newest organizer without manual refresh
-  frame.src = "/job/{jid}/organizer_raw?v=" + Date.now();
+  var src = "/job/{jid}/organizer_raw?v=" + Date.now();
+  if(routeParam){{
+    src += "&route=" + encodeURIComponent(routeParam);
+  }}
+  frame.src = src;
 }})();
 </script>
 </body>
@@ -1314,9 +1320,9 @@ body{{
   openRoute.addEventListener("click", function(){{
     var key = routeSelect.value;
     if(!key || !routeIndex[key]) return;
-    var page = routeIndex[key].output_page;
-    var url = "/job/" + jid + "/download/STACKED.pdf#page=" + page;
-    window.open(url, "_blank", "noopener");
+    var routeTitle = routeIndex[key].title || "";
+    var url = "/job/" + jid + "/organizer?route=" + encodeURIComponent(routeTitle);
+    window.location.href = url;
   }});
 
   fetch("/job/" + jid + "/toc-data", {{ cache: "no-store" }})

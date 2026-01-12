@@ -1116,6 +1116,32 @@ function updateSubHeader(r){
   if(routeTitleEl) routeTitleEl.textContent = subHeaderTitle(r);
 }
 
+function normalizeRouteToken(val){
+  return String(val || "").trim().toLowerCase();
+}
+
+function findRouteIndexFromParam(param){
+  const needle = normalizeRouteToken(param);
+  if(!needle) return null;
+  for(let i = 0; i < ROUTES.length; i++){
+    if(normalizeRouteToken(ROUTES[i].route_short) === needle) return i;
+  }
+  for(let i = 0; i < ROUTES.length; i++){
+    if(normalizeRouteToken(routeTitle(ROUTES[i])) === needle) return i;
+  }
+  for(let i = 0; i < ROUTES.length; i++){
+    const shortToken = normalizeRouteToken(ROUTES[i].route_short);
+    if(shortToken && needle.includes(shortToken)) return i;
+  }
+  return null;
+}
+
+const routeParam = new URLSearchParams(window.location.search).get("route");
+const routeParamIndex = findRouteIndexFromParam(routeParam);
+if(routeParamIndex !== null){
+  activeRouteIndex = routeParamIndex;
+}
+
 function bagModeHtml(routeShort){
   const mode = getMode(routeShort);
   return `
@@ -1909,6 +1935,9 @@ function adjustRouteSelectWidth(){
 
 function init(){
   buildRouteDropdown();
+  if(routeSel){
+    routeSel.value = String(activeRouteIndex);
+  }
   routeSel.addEventListener("change", ()=>{ activeRouteIndex=parseInt(routeSel.value,10)||0; render(); });
   qBox.addEventListener("input", ()=>render());
   document.querySelectorAll(".tab").forEach(t=>{
