@@ -1042,9 +1042,8 @@ body{{
       </div>
       <div class="uploadCard">
         <div class="tocHeader">
-          <div class="tocTitle">Route Sheets</div>
-          <div class="tocDate" id="tocDate">Date</div>
-          <div class="tocCount" id="tocCount"># of routes</div>
+          <div class="tocTitle" id="tocDate">Date</div>
+          <div class="tocDate" id="tocCount">0 Routes</div>
         </div>
         <div class="divider"></div>
         <div class="selectRow">
@@ -1149,7 +1148,7 @@ body{{
         return;
       }}
       tocDate.textContent = data.date_label || "Date";
-      tocCount.textContent = "# of routes: " + (data.route_count || 0);
+      tocCount.textContent = (data.route_count || 0) + " Routes";
       var routes = data.routes || [];
       groupedRoutes = {{}};
       routeIndex = {{}};
