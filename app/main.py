@@ -1206,7 +1206,6 @@ body{{
         </div>
         <div class="actionRow">
           <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
-          <a class="secondaryBtn" id="openOrganizer" href="/job/{jid}/organizer" target="_blank" rel="noopener">Open Organizer</a>
           <a class="ghostBtn" id="openStacked" href="/job/{jid}/download/STACKED.pdf" target="_blank" rel="noopener">Open Stacked PDF</a>
         </div>
         <div class="statusLine" id="statusLine">Loading table of contents…</div>
