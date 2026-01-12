@@ -1074,6 +1074,21 @@ body{{
   margin-bottom:14px;
   align-items:center;
 }}
+.selectRow--dual{{
+  flex-direction:row;
+  align-items:flex-end;
+  gap:16px;
+}}
+.selectGroup{{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+  flex:1;
+}}
+.selectGroup[hidden]{{
+  display:none;
+}}
 .selectLabel{{
   font-size:clamp(12px, 1.6vw, 13px);
   letter-spacing:1px;
@@ -1169,17 +1184,19 @@ body{{
           <div class="tocCount" id="tocCount">0 Routes</div>
         </div>
         <div class="divider"></div>
-        <div class="selectRow">
-          <label class="selectLabel" for="waveSelect">Wave</label>
-          <select id="waveSelect" class="selectInput">
-            <option value="">Loading…</option>
-          </select>
-        </div>
-        <div class="selectRow">
-          <label class="selectLabel" for="routeSelect">Route</label>
-          <select id="routeSelect" class="selectInput" disabled>
-            <option value="">Select a wave first</option>
-          </select>
+        <div class="selectRow selectRow--dual">
+          <div class="selectGroup">
+            <label class="selectLabel" for="waveSelect">Wave</label>
+            <select id="waveSelect" class="selectInput">
+              <option value="">Loading…</option>
+            </select>
+          </div>
+          <div class="selectGroup" id="routeGroup" hidden>
+            <label class="selectLabel" for="routeSelect">Route</label>
+            <select id="routeSelect" class="selectInput" disabled>
+              <option value="">Select a wave first</option>
+            </select>
+          </div>
         </div>
         <div class="actionRow">
           <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
@@ -1195,6 +1212,7 @@ body{{
   var jid = "{jid}";
   var waveSelect = document.getElementById("waveSelect");
   var routeSelect = document.getElementById("routeSelect");
+  var routeGroup = document.getElementById("routeGroup");
   var openRoute = document.getElementById("openRoute");
   var tocDate = document.getElementById("tocDate");
   var tocCount = document.getElementById("tocCount");
@@ -1261,8 +1279,10 @@ body{{
     if(!label || !groupedRoutes[label]){{
       routeSelect.appendChild(new Option("Select a wave first", ""));
       routeSelect.disabled = true;
+      if(routeGroup) routeGroup.hidden = true;
       return;
     }}
+    if(routeGroup) routeGroup.hidden = false;
     routeSelect.disabled = false;
     routeSelect.appendChild(new Option("Select route", ""));
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
@@ -1333,7 +1353,14 @@ body{{
 
       Object.keys(groupedRoutes).forEach(function(label){{
         groupedRoutes[label].sort(function(a, b){{
-          return a.title.localeCompare(b.title);
+          var numberA = String(a.title || "").match(/(\d+)/);
+          var numberB = String(b.title || "").match(/(\d+)/);
+          if(numberA && numberB){{
+            var intA = parseInt(numberA[1], 10);
+            var intB = parseInt(numberB[1], 10);
+            if(intA !== intB) return intA - intB;
+          }}
+          return String(a.title || "").localeCompare(String(b.title || ""), undefined, {{ numeric: true }});
         }});
       }});
 
