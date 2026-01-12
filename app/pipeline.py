@@ -149,6 +149,34 @@ def _extract_color_bands(image_path: Path) -> list[str]:
     return cleaned
 
 
+def _pick_distinct_colors_from_images(image_paths: list[Path], needed: int) -> list[str]:
+    used: set[str] = set()
+    picked: list[str] = []
+    for path in image_paths:
+        bands = _extract_color_bands(path)
+        if not bands:
+            continue
+        color = next((band for band in bands if band not in used), bands[0])
+        picked.append(color)
+        used.add(color)
+        if len(picked) >= needed:
+            return picked
+
+    if len(picked) >= needed:
+        return picked
+
+    for path in image_paths:
+        for color in _extract_color_bands(path):
+            if color in used:
+                continue
+            picked.append(color)
+            used.add(color)
+            if len(picked) >= needed:
+                return picked
+
+    return picked
+
+
 def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> dict[str, str]:
     if not image_paths or not toc_entries:
         return {}
@@ -160,10 +188,17 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
     if not time_labels:
         return {}
 
-    colors: list[str] = []
     sorted_images = sorted(image_paths, key=lambda p: p.name)
-    for path in sorted_images:
-        colors.extend(_extract_color_bands(path))
+    if len(sorted_images) >= len(time_labels):
+        colors = _pick_distinct_colors_from_images(sorted_images, len(time_labels))
+    else:
+        colors: list[str] = []
+        for path in sorted_images:
+            colors.extend(_extract_color_bands(path))
+        if len(colors) < len(time_labels):
+            fallback = _pick_distinct_colors_from_images(sorted_images, len(time_labels))
+            if len(fallback) > len(colors):
+                colors = fallback
 
     if not colors:
         return {}
