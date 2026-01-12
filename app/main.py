@@ -1002,6 +1002,7 @@ def toc_data(jid: str):
             "routes": routes,
             "route_count": len(routes),
             "wave_colors": toc.get("wave_colors") or {},
+            "mismatch_count": toc.get("mismatch_count"),
         }
     )
 
@@ -1097,6 +1098,12 @@ body{{
   align-items:center;
   gap:6px;
 }}
+.tocMetaRow{{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}}
 .tocTitle{{
   font-size:26px;
   font-weight:800;
@@ -1124,6 +1131,20 @@ body{{
 .tocCount--button{{
   cursor:pointer;
   transition:opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}}
+.mismatchIndicator{{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  background:rgba(22, 185, 78, 0.16);
+  border:1px solid rgba(22, 185, 78, 0.7);
+  color:#16b94e;
+  font-size:18px;
+  font-weight:800;
+  box-shadow:0 6px 16px rgba(0,0,0,0.18);
 }}
 .tocCount--button:hover{{
   opacity:1;
@@ -1253,7 +1274,10 @@ body{{
       <div class="uploadCard">
         <div class="tocHeader">
           <div class="tocTitle" id="tocDate">Date</div>
-          <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+          <div class="tocMetaRow">
+            <span class="mismatchIndicator" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
+            <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+          </div>
         </div>
         <div class="divider"></div>
         <div class="selectRow selectRow--dual">
@@ -1286,6 +1310,7 @@ body{{
   var openRoute = document.getElementById("openRoute");
   var tocDate = document.getElementById("tocDate");
   var tocCount = document.getElementById("tocCount");
+  var mismatchIndicator = document.getElementById("mismatchIndicator");
   var statusLine = document.getElementById("statusLine");
   var groupedRoutes = {{}};
   var routeIndex = {{}};
@@ -1312,6 +1337,15 @@ body{{
 
   function setStatus(msg){{
     if(statusLine) statusLine.textContent = msg;
+  }}
+
+  function setMismatchIndicator(count){{
+    if(!mismatchIndicator) return;
+    if(count === 0){{
+      mismatchIndicator.hidden = false;
+    }} else {{
+      mismatchIndicator.hidden = true;
+    }}
   }}
 
   function ordinalize(num){{
@@ -1405,6 +1439,7 @@ body{{
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
       waveColors = data.wave_colors ?? {{}};
+      setMismatchIndicator(data.mismatch_count);
 
       var routes = data.routes || [];
       groupedRoutes = {{}};

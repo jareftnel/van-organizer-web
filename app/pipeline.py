@@ -466,6 +466,7 @@ def process_job(store: JobStore, jid: str) -> None:
                 "date_label": (stack_results or {}).get("date_label", date_label),
                 "routes": toc_entries,
                 "wave_colors": wave_colors,
+                "mismatch_count": (stack_results or {}).get("mismatch_count"),
             },
         )
     except Exception as e:
