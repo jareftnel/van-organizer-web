@@ -252,12 +252,11 @@ form{display:flex;flex-direction:column;gap:16px}
   box-shadow:0 10px 18px rgba(0,0,0,0.3);
   transition:transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
-.waveBadge svg{
-  width:16px;
-  height:16px;
-  fill:#111111;
-  stroke:#111111;
-  stroke-width:1.25;
+.waveBadge .plusIcon{
+  font-size:18px;
+  font-weight:700;
+  line-height:1;
+  color:#111111;
 }
 .waveBadge:hover{
   transform:translateY(-1px);
@@ -381,9 +380,7 @@ button{
               <div class="fileHint" id="waveLabel">Wave images (optional)</div>
             </div>
             <button class="waveBadge" type="button" id="waveBtn" aria-label="Add wave images">
-              <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
-                <path d="M12 5a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2h-5v5a1 1 0 1 1-2 0v-5H6a1 1 0 1 1 0-2h5V6a1 1 0 0 1 1-1z"/>
-              </svg>
+              <span class="plusIcon" aria-hidden="true">+</span>
             </button>
             <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
             <input id="waveInput" class="fileInput" type="file" name="wave_images" accept="image/*" multiple hidden />
