@@ -1542,6 +1542,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         "top10_heavy_totals": top10_heavy_totals,
         "top10_commercial": top10_commercial,
         "combined_routes": combined_routes,
+        "toc_entries": toc_entries,
+        "date_label": date_label,
     }
 
 

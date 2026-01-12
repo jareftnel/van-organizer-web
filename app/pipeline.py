@@ -298,7 +298,7 @@ def process_job(store: JobStore, jid: str) -> None:
             payload["pct"] = mapped
             store.set_progress(jid, payload)
 
-        run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
+        stack_results = run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
 
         store.set(
             jid,
@@ -308,7 +308,11 @@ def process_job(store: JobStore, jid: str) -> None:
                 "xlsx": "Bags_with_Overflow.xlsx",
                 "html": "van_organizer.html",
                 "stacked": "STACKED.pdf",
-            }
+            },
+            toc={
+                "date_label": (stack_results or {}).get("date_label", date_label),
+                "routes": (stack_results or {}).get("toc_entries", []),
+            },
         )
     except Exception as e:
         store.set(jid, status="error", error=str(e), progress={"pct": 100, "stage": "error", "msg": "Error"})

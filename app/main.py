@@ -405,10 +405,12 @@ def job_status(jid: str):
         "has_pdf": out_pdf.exists(),
         "has_xlsx": out_xlsx.exists(),
         "has_html": out_html.exists(),
+        "has_toc": bool(j.get("toc")),
         # stable URLs (client will cache-bust with ?v=)
         "organizer_url": f"/job/{jid}/organizer",
         "pdf_url": f"/job/{jid}/download/STACKED.pdf",
         "xlsx_url": f"/job/{jid}/download/Bags_with_Overflow.xlsx",
+        "toc_url": f"/job/{jid}/toc",
         "ts": int(time.time()),
     }
 
@@ -624,7 +626,8 @@ body{
       if(s.status === "done" || s.has_html){
         // Cache-bust so mobile browsers don't show old files
         var bust = "v=" + Date.now();
-        window.location.replace(s.organizer_url + "?" + bust);
+        var nextUrl = s.has_toc ? s.toc_url : s.organizer_url;
+        window.location.replace(nextUrl + "?" + bust);
         clearInterval(timer);
       } else if(s.status === "error"){
         showErr(s.error);
@@ -809,6 +812,364 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   var frame = document.getElementById("orgFrame");
   // cache-bust iframe so it always pulls the newest organizer without manual refresh
   frame.src = "/job/{jid}/organizer_raw?v=" + Date.now();
+}})();
+</script>
+</body>
+</html>
+""")
+
+
+@app.get("/job/{jid}/toc-data")
+def toc_data(jid: str):
+    j = store.get(jid)
+    if j.get("status") == "missing":
+        return JSONResponse({"status": "missing"}, status_code=404)
+
+    toc = j.get("toc") or {}
+    routes = toc.get("routes") or []
+    date_label = toc.get("date_label") or ""
+
+    if not routes:
+        return JSONResponse({"status": "not_ready"}, status_code=404)
+
+    return JSONResponse(
+        {
+            "status": "ok",
+            "date_label": date_label,
+            "routes": routes,
+            "route_count": len(routes),
+        }
+    )
+
+
+@app.get("/job/{jid}/toc", response_class=HTMLResponse)
+def toc_page(jid: str):
+    return HTMLResponse(f"""
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Route Sheets</title>
+<style>
+html, body{{
+  height:100%;
+  overflow:hidden;
+}}
+body{{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin:0;
+  background:#0b0f14;
+  color:#e8eef6;
+}}
+:root{{
+  --r:22px;
+  --glass:rgba(255,255,255,0.06);
+  --glassBorder:rgba(255,255,255,0.10);
+}}
+.uploadPage{{
+  height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:36px 18px 18px;
+  box-sizing:border-box;
+}}
+.heroWrap{{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+}}
+.heroWrap > *{{width:100%;}}
+.brandBanner{{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  object-position:center;
+  box-sizing:border-box;
+  border:1px solid var(--glassBorder);
+  border-radius:var(--r) var(--r) 0 0;
+  box-shadow:0 18px 45px rgba(0,0,0,0.40);
+}}
+.tagGlass{{
+  width:100%;
+  margin-top:-12px;
+  padding:14px 0;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-radius:0;
+  box-shadow:0 16px 40px rgba(0,0,0,0.35);
+}}
+.taglineText{{
+  text-align:center;
+  letter-spacing:2px;
+  font-size:13px;
+  opacity:0.85;
+}}
+.uploadCard{{
+  width:100%;
+  max-width:100%;
+  background:rgba(10,16,26,0.55);
+  border:1px solid var(--glassBorder);
+  border-radius:0 0 var(--r) var(--r);
+  padding:22px;
+  margin-top:0;
+  box-shadow:0 18px 45px rgba(0,0,0,0.35);
+}}
+.tocHeader{{
+  text-align:center;
+  padding:6px 0 10px;
+}}
+.tocTitle{{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:1px;
+}}
+.tocDate{{
+  margin-top:6px;
+  font-size:16px;
+  opacity:0.85;
+}}
+.tocCount{{
+  margin-top:6px;
+  font-size:14px;
+  opacity:0.7;
+}}
+.divider{{
+  height:1px;
+  background:rgba(255,255,255,0.12);
+  margin:12px 0 18px;
+}}
+.selectRow{{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:14px;
+}}
+.selectLabel{{
+  font-size:13px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  opacity:0.7;
+}}
+.selectInput{{
+  height:46px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);
+  color:#e8eef6;
+  padding:0 12px;
+  font-size:15px;
+  font-weight:600;
+}}
+.selectInput:disabled{{
+  opacity:0.5;
+}}
+.actionRow{{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:16px;
+}}
+.buildBtn{{
+  height:clamp(48px, 7vh, 64px);
+  font-size:clamp(16px, 2.4vh, 20px);
+  border-radius:16px;
+  border:0;
+  background:#3fa7ff;
+  color:#001018;
+  font-weight:800;
+  cursor:pointer;
+}}
+.buildBtn:disabled{{
+  opacity:0.6;
+  cursor:not-allowed;
+}}
+.secondaryBtn,
+.ghostBtn{{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:44px;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:700;
+  border:1px solid rgba(255,255,255,0.12);
+  color:#e8eef6;
+  background:rgba(255,255,255,0.04);
+}}
+.ghostBtn{{
+  background:transparent;
+}}
+.statusLine{{
+  margin-top:12px;
+  font-size:13px;
+  opacity:0.7;
+  text-align:center;
+}}
+@media (orientation: landscape) and (max-height: 560px){{
+  .uploadPage{{padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));}}
+  .uploadCard{{padding:12px;}}
+}}
+@media (orientation: portrait) and (max-height: 560px){{
+  html, body{{height:auto; min-height:100%; overflow:auto;}}
+  .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:20px;}}
+}}
+</style>
+</head>
+<body>
+  <div class="uploadPage">
+    <div class="heroWrap">
+      <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
+      <div class="tagGlass">
+        <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
+      </div>
+      <div class="uploadCard">
+        <div class="tocHeader">
+          <div class="tocTitle">Route Sheets</div>
+          <div class="tocDate" id="tocDate">Date</div>
+          <div class="tocCount" id="tocCount"># of routes</div>
+        </div>
+        <div class="divider"></div>
+        <div class="selectRow">
+          <label class="selectLabel" for="waveSelect">Wave Time</label>
+          <select id="waveSelect" class="selectInput">
+            <option value="">Loading…</option>
+          </select>
+        </div>
+        <div class="selectRow">
+          <label class="selectLabel" for="routeSelect">Route</label>
+          <select id="routeSelect" class="selectInput" disabled>
+            <option value="">Select a wave first</option>
+          </select>
+        </div>
+        <div class="actionRow">
+          <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
+          <a class="secondaryBtn" id="openOrganizer" href="/job/{jid}/organizer" target="_blank" rel="noopener">Open Organizer</a>
+          <a class="ghostBtn" id="openStacked" href="/job/{jid}/download/STACKED.pdf" target="_blank" rel="noopener">Open Stacked PDF</a>
+        </div>
+        <div class="statusLine" id="statusLine">Loading table of contents…</div>
+      </div>
+    </div>
+  </div>
+<script>
+(function(){{
+  var jid = "{jid}";
+  var waveSelect = document.getElementById("waveSelect");
+  var routeSelect = document.getElementById("routeSelect");
+  var openRoute = document.getElementById("openRoute");
+  var tocDate = document.getElementById("tocDate");
+  var tocCount = document.getElementById("tocCount");
+  var statusLine = document.getElementById("statusLine");
+  var groupedRoutes = {{}};
+  var routeIndex = {{}};
+
+  function waveLabel(timeLabel){{
+    if(!timeLabel) return "Wave: ??:??";
+    var match = String(timeLabel).match(/(\\d{{1,2}}):(\\d{{2}})/);
+    if(!match) return "Wave: ??:??";
+    var hh = match[1].padStart(2, "0");
+    var mm = match[2];
+    return "Wave: " + hh + ":" + mm;
+  }}
+
+  function setStatus(msg){{
+    if(statusLine) statusLine.textContent = msg;
+  }}
+
+  function populateWaves(){{
+    waveSelect.innerHTML = "";
+    var labels = Object.keys(groupedRoutes);
+    if(!labels.length){{
+      waveSelect.innerHTML = "<option value=''>No waves found</option>";
+      waveSelect.disabled = true;
+      return;
+    }}
+    labels.sort();
+    waveSelect.appendChild(new Option("Select wave time", ""));
+    labels.forEach(function(label){{
+      waveSelect.appendChild(new Option(label, label));
+    }});
+    waveSelect.disabled = false;
+  }}
+
+  function populateRoutes(label){{
+    routeSelect.innerHTML = "";
+    openRoute.disabled = true;
+    if(!label || !groupedRoutes[label]){{
+      routeSelect.appendChild(new Option("Select a wave first", ""));
+      routeSelect.disabled = true;
+      return;
+    }}
+    routeSelect.disabled = false;
+    routeSelect.appendChild(new Option("Select route", ""));
+    groupedRoutes[label].forEach(function(route){{
+      var opt = new Option(route.title, route.key);
+      routeSelect.appendChild(opt);
+    }});
+  }}
+
+  waveSelect.addEventListener("change", function(){{
+    populateRoutes(waveSelect.value);
+  }});
+
+  routeSelect.addEventListener("change", function(){{
+    openRoute.disabled = !routeSelect.value;
+  }});
+
+  openRoute.addEventListener("click", function(){{
+    var key = routeSelect.value;
+    if(!key || !routeIndex[key]) return;
+    var page = routeIndex[key].output_page;
+    var url = "/job/" + jid + "/download/STACKED.pdf#page=" + page;
+    window.open(url, "_blank", "noopener");
+  }});
+
+  fetch("/job/" + jid + "/toc-data", {{ cache: "no-store" }})
+    .then(function(r){{ return r.json(); }})
+    .then(function(data){{
+      if(!data || data.status !== "ok"){{
+        setStatus("Table of contents not ready yet.");
+        return;
+      }}
+      tocDate.textContent = data.date_label || "Date";
+      tocCount.textContent = "# of routes: " + (data.route_count || 0);
+      var routes = data.routes || [];
+      groupedRoutes = {{}};
+      routeIndex = {{}};
+
+      routes.forEach(function(route, idx){{
+        var label = waveLabel(route.time_label || "");
+        var key = label + "::" + route.title + "::" + idx;
+        var payload = {{
+          title: route.title || "Route",
+          output_page: route.output_page || 1,
+          time_label: route.time_label || "",
+          key: key
+        }};
+        if(!groupedRoutes[label]) groupedRoutes[label] = [];
+        groupedRoutes[label].push(payload);
+        routeIndex[key] = payload;
+      }});
+
+      Object.keys(groupedRoutes).forEach(function(label){{
+        groupedRoutes[label].sort(function(a, b){{
+          return a.title.localeCompare(b.title);
+        }});
+      }});
+
+      populateWaves();
+      setStatus("Select a wave time to view routes.");
+    }})
+    .catch(function(){{
+      setStatus("Unable to load table of contents.");
+    }});
 }})();
 </script>
 </body>
