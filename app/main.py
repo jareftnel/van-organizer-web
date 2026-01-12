@@ -862,6 +862,56 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</body>" in html and "wave-color-patch" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "(function(){"
+            "  var jid = \"" + jid + "\";"
+            "  var waveColors = {};"
+            "  function timeKey(timeLabel){"
+            "    if(!timeLabel) return \"\";"
+            "    var match = String(timeLabel).match(/(\\\\d{1,2}):(\\\\d{2})/);"
+            "    if(!match) return \"\";"
+            "    var hh = match[1].padStart(2, \"0\");"
+            "    var mm = match[2];"
+            "    return hh + \":\" + mm;"
+            "  }"
+            "  function applyRouteWaveColor(){"
+            "    var routeTitleEl = document.getElementById(\"routeTitle\");"
+            "    if(!routeTitleEl || !window.ROUTES) return;"
+            "    var idx = typeof window.activeRouteIndex === \"number\" ? window.activeRouteIndex : 0;"
+            "    var route = window.ROUTES[idx] || {};"
+            "    var key = timeKey(route.wave_time || \"\");"
+            "    var color = key ? waveColors[key] : \"\";"
+            "    routeTitleEl.style.color = color || \"\";"
+            "  }"
+            "  function fetchWaveColors(){"
+            "    fetch(\"/job/\" + jid + \"/toc-data\", { cache: \"no-store\" })"
+            "      .then(function(r){ return r.json(); })"
+            "      .then(function(data){"
+            "        if(!data || data.status !== \"ok\") return;"
+            "        waveColors = data.wave_colors || {};"
+            "        applyRouteWaveColor();"
+            "      })"
+            "      .catch(function(){});"
+            "  }"
+            "  var originalRender = window.render;"
+            "  if(typeof originalRender === \"function\"){"
+            "    window.render = function(){"
+            "      var result = originalRender.apply(this, arguments);"
+            "      applyRouteWaveColor();"
+            "      return result;"
+            "    };"
+            "  }"
+            "  window.addEventListener(\"load\", function(){"
+            "    fetchWaveColors();"
+            "    applyRouteWaveColor();"
+            "  });"
+            "})();"
+            "</script>"
+            "</body>",
+        )
 
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
