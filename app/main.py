@@ -1073,22 +1073,27 @@ body{{
   flex-direction:column;
   gap:8px;
   margin-bottom:14px;
+  align-items:center;
 }}
 .selectLabel{{
-  font-size:13px;
+  font-size:clamp(12px, 1.6vw, 13px);
   letter-spacing:1px;
   text-transform:uppercase;
   opacity:0.7;
+  text-align:center;
 }}
 .selectInput{{
   height:46px;
+  width:100%;
+  max-width:420px;
   border-radius:12px;
   border:1px solid rgba(255,255,255,0.12);
   background:rgba(255,255,255,0.04);
   color:#e8eef6;
   padding:0 12px;
-  font-size:15px;
+  font-size:clamp(14px, 2.1vw, 16px);
   font-weight:600;
+  text-align:center;
 }}
 .selectInput option{{
   background:#0b0f14;
@@ -1166,7 +1171,7 @@ body{{
         </div>
         <div class="divider"></div>
         <div class="selectRow">
-          <label class="selectLabel" for="waveSelect">Wave Time</label>
+          <label class="selectLabel" for="waveSelect">Wave</label>
           <select id="waveSelect" class="selectInput">
             <option value="">Loading…</option>
           </select>
@@ -1217,6 +1222,17 @@ body{{
     if(statusLine) statusLine.textContent = msg;
   }}
 
+  function ordinalize(num){{
+    var mod100 = num % 100;
+    if(mod100 >= 11 && mod100 <= 13) return num + "th";
+    switch(num % 10){{
+      case 1: return num + "st";
+      case 2: return num + "nd";
+      case 3: return num + "rd";
+      default: return num + "th";
+    }}
+  }}
+
   function populateWaves(){{
     waveSelect.innerHTML = "";
     var labels = Object.keys(groupedRoutes);
@@ -1226,9 +1242,9 @@ body{{
       return;
     }}
     labels.sort();
-    waveSelect.appendChild(new Option("Select wave time", ""));
-    labels.forEach(function(label){{
-      var opt = new Option(label, label);
+    waveSelect.appendChild(new Option("Select Wave", ""));
+    labels.forEach(function(label, index){{
+      var opt = new Option(ordinalize(index + 1) + " " + label, label);
       var key = label.replace("Wave: ", "");
       var color = waveColors[key];
       if(color){{
@@ -1323,7 +1339,7 @@ body{{
       }});
 
       populateWaves();
-      setStatus("Select a wave time to view routes.");
+      setStatus("Select a wave to view routes.");
     }})
     .catch(function(){{
       setStatus("Unable to load table of contents.");
