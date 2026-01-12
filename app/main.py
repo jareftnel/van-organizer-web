@@ -1067,6 +1067,22 @@ body{{
   border:1px solid rgba(255,255,255,0.12);
   padding:4px 12px;
   border-radius:999px;
+  color:inherit;
+  font:inherit;
+  line-height:1.2;
+}}
+.tocCount--button{{
+  cursor:pointer;
+  transition:opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}}
+.tocCount--button:hover{{
+  opacity:1;
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.2);
+}}
+.tocCount--button:focus-visible{{
+  outline:2px solid rgba(255,255,255,0.6);
+  outline-offset:2px;
 }}
 .divider{{
   height:1px;
@@ -1187,7 +1203,7 @@ body{{
       <div class="uploadCard">
         <div class="tocHeader">
           <div class="tocTitle" id="tocDate">Date</div>
-          <div class="tocCount" id="tocCount">0 Routes</div>
+          <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
         </div>
         <div class="divider"></div>
         <div class="selectRow selectRow--dual">
@@ -1206,7 +1222,6 @@ body{{
         </div>
         <div class="actionRow">
           <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
-          <a class="ghostBtn" id="openStacked" href="/job/{jid}/download/STACKED.pdf" target="_blank" rel="noopener">Open Stacked PDF</a>
         </div>
         <div class="statusLine" id="statusLine">Loading table of contents…</div>
       </div>
@@ -1225,6 +1240,11 @@ body{{
   var groupedRoutes = {{}};
   var routeIndex = {{}};
   var waveColors = {{}};
+  var stackedUrl = "/job/" + jid + "/download/STACKED.pdf";
+
+  tocCount.addEventListener("click", function(){{
+    window.open(stackedUrl, "_blank", "noopener");
+  }});
 
   function timeKey(timeLabel){{
     if(!timeLabel) return "";
