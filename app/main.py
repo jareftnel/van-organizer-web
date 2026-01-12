@@ -242,9 +242,9 @@ form{display:flex;flex-direction:column;gap:16px}
   width:28px;
   height:28px;
   border-radius:50%;
-  border:1px solid rgba(255,255,255,0.3);
-  background:rgba(63,167,255,0.92);
-  color:#001018;
+  border:none;
+  background:#f39c12;
+  color:#000;
   display:flex;
   align-items:center;
   justify-content:center;
