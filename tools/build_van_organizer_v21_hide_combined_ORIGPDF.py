@@ -400,7 +400,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>__HEADER_TITLE__</title>
 <style>
-:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;--page-pad-x:clamp(16px, 2.5vw, 24px);--page-pad-y:clamp(12px, 2vh, 18px);}
+:root{--bg:#0b0f14;--panel:#0f1722;--text:#e8eef6;--muted:#97a7bd;--border:#1c2a3a;--accent:#3fa7ff;--page-pad-x:clamp(16px, 2.5vw, 24px);--page-pad-y:clamp(12px, 2vh, 18px);--waveColor:rgba(255,255,255,.22);}
 *, *::before, *::after{box-sizing:border-box}
 html,body{height:100%;width:100%}
 body{margin:0;min-height:100vh;overflow-y:auto;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1400px 800px at 20% 0%, #101826, var(--bg));color:var(--text);}
@@ -423,6 +423,10 @@ select{min-width:0;width:max-content;max-width:100%;color-scheme: dark;}
 /* Make native dropdown readable (Chrome/Windows) */
 select option{background:#0f1722;color:#e8eef6;}
 select optgroup{background:#0b0f14;color:#97a7bd;font-weight:900;}
+#routeSel{
+  box-shadow: inset 0 -3px 0 var(--waveColor);
+  border-color: var(--waveColor);
+}
 
 .filterRow .sel{margin-left:0}
 input{min-width:140px;flex:1 1 auto;width:auto}
@@ -477,6 +481,12 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-column:2;
   grid-row:1;
   justify-self:center;
+}
+#routeTitle{
+  text-decoration-line: underline;
+  text-decoration-color: var(--waveColor);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
 }
 .sectionMeta{
   text-align:left;
@@ -1094,6 +1104,78 @@ const bagsCount = document.getElementById("bagsCount");
 const ovCount = document.getElementById("ovCount");
 const content = document.getElementById("content");
 const routeTitleEl = document.getElementById("routeTitle");
+
+let WAVE_COLORS = {}; // { "HH:MM": "#RRGGBB" }
+
+function timeKey(label){
+  const m = String(label||"").match(/(\d{1,2}):(\d{2})\s*([AP]M)?/i);
+  if(!m) return "";
+  let hh = parseInt(m[1],10);
+  const mm = m[2];
+  const ap = (m[3]||"").toUpperCase();
+  if(ap==="PM" && hh!==12) hh += 12;
+  if(ap==="AM" && hh===12) hh = 0;
+  return String(hh).padStart(2,"0")+":"+mm;
+}
+
+function hexToRgb(hex){
+  const h = (hex||"").replace("#","").trim();
+  if(h.length!==6) return null;
+  return { r:parseInt(h.slice(0,2),16), g:parseInt(h.slice(2,4),16), b:parseInt(h.slice(4,6),16) };
+}
+
+function rgbToHue(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  const d=max-min;
+  if(d===0) return 0;
+  let h;
+  if(max===r) h=((g-b)/d)%6;
+  else if(max===g) h=(b-r)/d+2;
+  else h=(r-g)/d+4;
+  h=Math.round(h*60);
+  if(h<0) h+=360;
+  return h;
+}
+
+function waveEmoji(hex){
+  const rgb = hexToRgb(hex);
+  if(!rgb) return "⚪️";
+  const {r,g,b}=rgb;
+  const avg=(r+g+b)/3;
+  if(avg < 55) return "⚫️";
+  if(avg > 235) return "⚪️";
+  const h = rgbToHue(r,g,b);
+  if(h < 20 || h >= 340) return "🔴";
+  if(h < 50) return "🟠";
+  if(h < 75) return "🟡";
+  if(h < 165) return "🟢";
+  if(h < 255) return "🔵";
+  return "🟣";
+}
+
+function waveColorForRoute(r){
+  const key = timeKey(r.wave_time||"");
+  return (key && WAVE_COLORS[key]) ? WAVE_COLORS[key] : "";
+}
+
+function applyWaveUI(r){
+  const c = waveColorForRoute(r);
+  document.documentElement.style.setProperty("--waveColor", c || "rgba(255,255,255,.22)");
+}
+
+function rebuildDropdownWithWaveDots(){
+  if(!routeSel) return;
+  routeSel.querySelectorAll("option").forEach(opt=>{
+    const idx = parseInt(opt.value,10);
+    const r = ROUTES[idx];
+    if(!r) return;
+    const c = waveColorForRoute(r);
+    const dot = c ? waveEmoji(c) : "⚪️";
+    opt.textContent = `${dot} ${routeTitle(r)}`;
+  });
+  adjustRouteSelectWidth();
+}
 
 function updateSearchPlaceholder(){
   if(!qBox) return;
@@ -1863,6 +1945,7 @@ function render(){
   bagsCount.textContent = r.bags_count ?? 0;
   ovCount.textContent = r.overflow_total ?? 0;
   updateSubHeader(r);
+  applyWaveUI(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
   if(activeTab==="bags") renderBags(r,q);
@@ -1939,6 +2022,18 @@ function init(){
     routeSel.value = String(activeRouteIndex);
   }
   routeSel.addEventListener("change", ()=>{ activeRouteIndex=parseInt(routeSel.value,10)||0; render(); });
+
+  fetch("toc-data", { cache:"no-store" })
+    .then(r=>r.json())
+    .then(data=>{
+      if(data && data.status==="ok"){
+        WAVE_COLORS = data.wave_colors || {};
+        rebuildDropdownWithWaveDots();
+        applyWaveUI(ROUTES[activeRouteIndex]);
+      }
+    })
+    .catch(()=>{});
+
   qBox.addEventListener("input", ()=>render());
   document.querySelectorAll(".tab").forEach(t=>{
     t.addEventListener("click", ()=>{
