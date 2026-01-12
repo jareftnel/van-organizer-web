@@ -244,7 +244,7 @@ form{display:flex;flex-direction:column;gap:16px}
   border-radius:50%;
   border:none;
   background:#f39c12;
-  color:#000;
+  color:#1b1b1b;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -256,6 +256,8 @@ form{display:flex;flex-direction:column;gap:16px}
   width:16px;
   height:16px;
   fill:currentColor;
+  stroke:currentColor;
+  stroke-width:0.5;
 }
 .waveBadge:hover{
   transform:translateY(-1px);
