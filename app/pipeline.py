@@ -69,6 +69,13 @@ def _time_key(label: str) -> str:
         return ""
     hh = int(match.group(1))
     mm = int(match.group(2))
+    ampm = (match.group(3) or "").upper()
+
+    if ampm == "PM" and hh != 12:
+        hh += 12
+    if ampm == "AM" and hh == 12:
+        hh = 0
+
     return f"{hh:02d}:{mm:02d}"
 
 
@@ -79,6 +86,7 @@ def _time_sort_key(label: str) -> int:
     hh = int(match.group(1))
     mm = int(match.group(2))
     ampm = (match.group(3) or "").upper()
+
     if ampm == "PM" and hh != 12:
         hh += 12
     if ampm == "AM" and hh == 12:
@@ -181,14 +189,18 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
     if not image_paths or not toc_entries:
         return {}
 
-    time_labels: list[str] = []
+    time_items: list[tuple[str, int]] = []
     seen: set[str] = set()
     for entry in toc_entries:
-        label = _time_key(entry.get("time_label", ""))
-        if not label or label in seen:
+        raw = entry.get("time_label", "") or ""
+        key = _time_key(raw)
+        if not key or key in seen:
             continue
-        time_labels.append(label)
-        seen.add(label)
+        seen.add(key)
+        time_items.append((key, _time_sort_key(raw)))
+
+    time_items.sort(key=lambda item: item[1])
+    time_labels = [key for key, _ in time_items]
 
     if not time_labels:
         return {}
