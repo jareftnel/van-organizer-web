@@ -255,9 +255,9 @@ form{display:flex;flex-direction:column;gap:16px}
 .waveBadge svg{
   width:16px;
   height:16px;
-  fill:currentColor;
-  stroke:currentColor;
-  stroke-width:0.5;
+  fill:#111111;
+  stroke:#111111;
+  stroke-width:1.25;
 }
 .waveBadge:hover{
   transform:translateY(-1px);
