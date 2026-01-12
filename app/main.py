@@ -522,7 +522,7 @@ def job_page(jid: str):
     elif prog.get("msg"):
         status_line = str(prog.get("msg"))
     elif status:
-        status_line = str(status)
+        status_line = "Running" if status == "running" else str(status)
     else:
         status_line = "Working…"
 
@@ -720,7 +720,7 @@ body{
       }else if(s.progress && s.progress.msg){
         nextLine = s.progress.msg;
       }else if(s.status){
-        nextLine = s.status;
+        nextLine = s.status === "running" ? "Running" : s.status;
       }else{
         nextLine = "Working…";
       }
