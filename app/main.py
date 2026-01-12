@@ -970,7 +970,11 @@ body{{
 }}
 .tocHeader{{
   text-align:center;
-  padding:6px 0 10px;
+  padding:6px 0 12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
 }}
 .tocTitle{{
   font-size:26px;
@@ -978,14 +982,20 @@ body{{
   letter-spacing:1px;
 }}
 .tocDate{{
-  margin-top:6px;
+  margin-top:0;
   font-size:16px;
   opacity:0.85;
 }}
 .tocCount{{
-  margin-top:6px;
-  font-size:14px;
-  opacity:0.7;
+  margin-top:0;
+  font-size:12px;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+  opacity:0.8;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:4px 12px;
+  border-radius:999px;
 }}
 .divider{{
   height:1px;
@@ -1085,9 +1095,8 @@ body{{
       </div>
       <div class="uploadCard">
         <div class="tocHeader">
-          <div class="tocTitle">Route Sheets</div>
-          <div class="tocDate" id="tocDate">Date</div>
-          <div class="tocCount" id="tocCount"># of routes</div>
+          <div class="tocTitle" id="tocDate">Date</div>
+          <div class="tocCount" id="tocCount">0 Routes</div>
         </div>
         <div class="divider"></div>
         <div class="selectRow">
@@ -1217,8 +1226,10 @@ body{{
         return;
       }}
       tocDate.textContent = data.date_label || "Date";
-      tocCount.textContent = "# of routes: " + (data.route_count || 0);
-      waveColors = data.wave_colors || {};
+const n = data.route_count ?? 0;
+tocCount.textContent = `${n} Route${n === 1 ? "" : "s"}`;
+waveColors = data.wave_colors ?? {};
+
       var routes = data.routes || [];
       groupedRoutes = {{}};
       routeIndex = {{}};
