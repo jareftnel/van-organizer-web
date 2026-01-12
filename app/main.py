@@ -739,6 +739,19 @@ def organizer_raw(jid: str):
             ".topCounts{grid-column:3 !important;grid-row:1 !important;justify-self:end !important;}"
             "</style>",
         )
+    if "</style>" in html and "grid-height-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* grid-height-patch */"
+            ".organizer-grid,"
+            ".tote-grid,"
+            ".cards-grid{"
+            "height:auto !important;"
+            "max-height:none !important;"
+            "overflow:visible !important;"
+            "}"
+            "</style>",
+        )
 
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
