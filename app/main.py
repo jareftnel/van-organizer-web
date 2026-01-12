@@ -1139,12 +1139,19 @@ body{{
   width:32px;
   height:32px;
   border-radius:999px;
-  background:rgba(22, 185, 78, 0.16);
-  border:1px solid rgba(22, 185, 78, 0.7);
-  color:#16b94e;
   font-size:18px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
+}}
+.mismatchIndicator--ok{{
+  background:rgba(22, 185, 78, 0.16);
+  border:1px solid rgba(22, 185, 78, 0.7);
+  color:#16b94e;
+}}
+.mismatchIndicator--error{{
+  background:rgba(248, 113, 113, 0.16);
+  border:1px solid rgba(248, 113, 113, 0.7);
+  color:#f87171;
 }}
 .tocCount--button:hover{{
   opacity:1;
@@ -1275,7 +1282,7 @@ body{{
         <div class="tocHeader">
           <div class="tocTitle" id="tocDate">Date</div>
           <div class="tocMetaRow">
-            <span class="mismatchIndicator" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
+            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
             <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
           </div>
         </div>
@@ -1341,10 +1348,21 @@ body{{
 
   function setMismatchIndicator(count){{
     if(!mismatchIndicator) return;
-    if(count === 0){{
-      mismatchIndicator.hidden = false;
-    }} else {{
+    if(typeof count !== "number"){{
       mismatchIndicator.hidden = true;
+      return;
+    }}
+    mismatchIndicator.hidden = false;
+    if(count === 0){{
+      mismatchIndicator.textContent = "✓";
+      mismatchIndicator.title = "No mismatches reported";
+      mismatchIndicator.classList.remove("mismatchIndicator--error");
+      mismatchIndicator.classList.add("mismatchIndicator--ok");
+    }} else {{
+      mismatchIndicator.textContent = "✕";
+      mismatchIndicator.title = "Mismatches reported";
+      mismatchIndicator.classList.remove("mismatchIndicator--ok");
+      mismatchIndicator.classList.add("mismatchIndicator--error");
     }}
   }}
 
