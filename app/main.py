@@ -163,6 +163,7 @@ form{display:flex;flex-direction:column;gap:16px}
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
+  position:relative;
 }
 .fileBtn .fileIcon{
   width:18px;
@@ -213,11 +214,57 @@ form{display:flex;flex-direction:column;gap:16px}
   overflow:hidden;
   text-overflow:ellipsis;
   font-size:clamp(12px, 1.8vh, 14px);
-  flex:1 1 auto;
+  flex:0 1 auto;
   min-width:0;
-  text-align:center;
+  text-align:left;
   opacity:0.9;
   font-weight:600;
+}
+.fileInfo{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  flex:1 1 auto;
+  min-width:0;
+}
+.fileHint{
+  color:rgba(255,255,255,0.55);
+  font-size:clamp(10px, 1.4vh, 12px);
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.waveBadge{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.3);
+  background:rgba(63,167,255,0.92);
+  color:#001018;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 10px 18px rgba(0,0,0,0.3);
+  transition:transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+.waveBadge svg{
+  width:16px;
+  height:16px;
+  fill:currentColor;
+}
+.waveBadge:hover{
+  transform:translateY(-1px);
+  box-shadow:0 14px 24px rgba(0,0,0,0.35);
+  filter:brightness(1.02);
+}
+.waveBadge:focus-visible{
+  outline:2px solid rgba(63,167,255,0.6);
+  outline-offset:2px;
 }
 .page, .container, .shell{
   max-width:none !important;
@@ -327,19 +374,16 @@ button{
               </svg>
               <span class="uploadText">Upload</span>
             </button>
-            <div class="fileNameLabel" id="fileLabel">Choose file</div>
-            <div class="fileSpacer"></div>
-            <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
-          </div>
-          <div class="fileRow">
-            <button class="fileBtn uploadBtn" type="button" id="waveBtn">
-              <svg class="fileIcon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
-                <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
+            <div class="fileInfo">
+              <div class="fileNameLabel" id="fileLabel">Choose file</div>
+              <div class="fileHint" id="waveLabel">Wave images (optional)</div>
+            </div>
+            <button class="waveBadge" type="button" id="waveBtn" aria-label="Add wave images">
+              <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                <path d="M12 5a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2h-5v5a1 1 0 1 1-2 0v-5H6a1 1 0 1 1 0-2h5V6a1 1 0 0 1 1-1z"/>
               </svg>
-              <span class="uploadText">Add wave images</span>
             </button>
-            <div class="fileNameLabel" id="waveLabel">Optional route assignment images</div>
-            <div class="fileSpacer"></div>
+            <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
             <input id="waveInput" class="fileInput" type="file" name="wave_images" accept="image/*" multiple hidden />
           </div>
           <button class="buildBtn" type="submit">Build</button>
@@ -382,12 +426,12 @@ button{
       waveInput.addEventListener("change", () => {
         const count = waveInput.files ? waveInput.files.length : 0;
         if (!count) {
-          waveLabel.textContent = "Optional route assignment images";
+          waveLabel.textContent = "Wave images (optional)";
           return;
         }
         waveLabel.textContent = count === 1
           ? waveInput.files[0].name
-          : `${count} images selected`;
+          : `Wave images: ${count} selected`;
       });
     }
   </script>

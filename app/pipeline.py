@@ -133,10 +133,14 @@ def _extract_color_bands(image_path: Path) -> list[str]:
     for start, end, color in merged:
         if (end - start + 1) < min_height:
             continue
-        brightness = float(np.mean(color))
+        band = arr[start : end + 1]
+        if band.size == 0:
+            continue
+        band_color = np.median(band.reshape(-1, 3), axis=0)
+        brightness = float(np.mean(band_color))
         if brightness > 245 or brightness < 10:
             continue
-        colors.append(_rgb_to_hex(color))
+        colors.append(_rgb_to_hex(band_color))
 
     cleaned = []
     for color in colors:
@@ -157,7 +161,8 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
         return {}
 
     colors: list[str] = []
-    for path in sorted(image_paths, key=lambda p: p.name):
+    sorted_images = sorted(image_paths, key=lambda p: p.name)
+    for path in sorted_images:
         colors.extend(_extract_color_bands(path))
 
     if not colors:
