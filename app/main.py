@@ -1115,6 +1115,7 @@ body{{
   border-radius:0 0 var(--r) var(--r);
   padding:22px;
   margin-top:0;
+  position:relative;
   box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }}
 .tocHeader{{
@@ -1169,6 +1170,9 @@ body{{
   font-size:18px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
+  position:absolute;
+  top:16px;
+  right:16px;
 }}
 .mismatchIndicator--ok{{
   background:rgba(22, 185, 78, 0.16);
@@ -1309,10 +1313,10 @@ body{{
         <div class="tocHeader">
           <div class="tocTitle" id="tocDate">Date</div>
           <div class="tocMetaRow">
-            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
             <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
           </div>
         </div>
+        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" title="No mismatches reported" hidden>✓</span>
         <div class="divider"></div>
         <div class="selectRow selectRow--dual">
           <div class="selectGroup">
