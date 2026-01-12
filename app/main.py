@@ -483,7 +483,10 @@ body{
 .auto-refresh{
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:8px;
+  text-align:center;
+  width:100%;
 }
 .auto-refresh::before{
   content:"";
