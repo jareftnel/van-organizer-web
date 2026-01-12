@@ -468,6 +468,13 @@ def process_job(store: JobStore, jid: str) -> None:
                 "wave_colors": wave_colors,
                 "mismatch_count": (stack_results or {}).get("mismatch_count"),
             },
+            summary={
+                "mismatches": (stack_results or {}).get("mismatches") or [],
+                "routes_over_30": (stack_results or {}).get("routes_over_30") or [],
+                "routes_over_50_overflow": (stack_results or {}).get("routes_over_50_overflow") or [],
+                "top10_heavy_totals": (stack_results or {}).get("top10_heavy_totals") or [],
+                "top10_commercial": (stack_results or {}).get("top10_commercial") or [],
+            },
         )
     except Exception as e:
         store.set(jid, status="error", error=str(e), progress={"pct": 100, "stage": "error", "msg": "Error"})
