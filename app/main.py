@@ -331,6 +331,17 @@ button{
             <div class="fileSpacer"></div>
             <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
           </div>
+          <div class="fileRow">
+            <button class="fileBtn uploadBtn" type="button" id="waveBtn">
+              <svg class="fileIcon" viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                <path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
+              </svg>
+              <span class="uploadText">Add wave images</span>
+            </button>
+            <div class="fileNameLabel" id="waveLabel">Optional route assignment images</div>
+            <div class="fileSpacer"></div>
+            <input id="waveInput" class="fileInput" type="file" name="wave_images" accept="image/*" multiple hidden />
+          </div>
           <button class="buildBtn" type="submit">Build</button>
         </form>
       </div>
@@ -341,6 +352,9 @@ button{
     const fileLabel = document.getElementById("fileLabel");
     const fileBtn = document.querySelector(".fileBtn");
     const uploadText = document.querySelector(".uploadText");
+    const waveInput = document.getElementById("waveInput");
+    const waveLabel = document.getElementById("waveLabel");
+    const waveBtn = document.getElementById("waveBtn");
 
     if (fileBtn && fileInput) {
       fileBtn.addEventListener("click", () => fileInput.click());
@@ -359,6 +373,23 @@ button{
         }
       });
     }
+
+    if (waveBtn && waveInput) {
+      waveBtn.addEventListener("click", () => waveInput.click());
+    }
+
+    if (waveInput && waveLabel) {
+      waveInput.addEventListener("change", () => {
+        const count = waveInput.files ? waveInput.files.length : 0;
+        if (!count) {
+          waveLabel.textContent = "Optional route assignment images";
+          return;
+        }
+        waveLabel.textContent = count === 1
+          ? waveInput.files[0].name
+          : `${count} images selected`;
+      });
+    }
   </script>
 </body>
 </html>
@@ -372,11 +403,22 @@ def banner_png():
 
 
 @app.post("/upload")
-async def upload(file: UploadFile = File(...)):
+async def upload(
+    file: UploadFile = File(...),
+    wave_images: list[UploadFile] | None = File(None),
+):
     jid = store.create()
     job_dir = store.path(jid)
     pdf_path = job_dir / "routesheets.pdf"
     pdf_path.write_bytes(await file.read())
+
+    if wave_images:
+        for idx, image in enumerate(wave_images, start=1):
+            if not image or not image.filename:
+                continue
+            suffix = Path(image.filename).suffix or ".png"
+            dest = job_dir / f"wave_image_{idx}{suffix.lower()}"
+            dest.write_bytes(await image.read())
 
     t = threading.Thread(target=process_job, args=(store, jid), daemon=True)
     t.start()
@@ -838,6 +880,7 @@ def toc_data(jid: str):
             "date_label": date_label,
             "routes": routes,
             "route_count": len(routes),
+            "wave_colors": toc.get("wave_colors") or {},
         }
     )
 
@@ -1088,14 +1131,20 @@ body{{
   var statusLine = document.getElementById("statusLine");
   var groupedRoutes = {{}};
   var routeIndex = {{}};
+  var waveColors = {{}};
 
-  function waveLabel(timeLabel){{
-    if(!timeLabel) return "Wave: ??:??";
+  function timeKey(timeLabel){{
+    if(!timeLabel) return "";
     var match = String(timeLabel).match(/(\\d{{1,2}}):(\\d{{2}})/);
-    if(!match) return "Wave: ??:??";
+    if(!match) return "";
     var hh = match[1].padStart(2, "0");
     var mm = match[2];
-    return "Wave: " + hh + ":" + mm;
+    return hh + ":" + mm;
+  }}
+
+  function waveLabel(timeLabel){{
+    var key = timeKey(timeLabel);
+    return key ? "Wave: " + key : "Wave: ??:??";
   }}
 
   function setStatus(msg){{
@@ -1113,7 +1162,14 @@ body{{
     labels.sort();
     waveSelect.appendChild(new Option("Select wave time", ""));
     labels.forEach(function(label){{
-      waveSelect.appendChild(new Option(label, label));
+      var opt = new Option(label, label);
+      var key = label.replace("Wave: ", "");
+      var color = waveColors[key];
+      if(color){{
+        opt.style.color = color;
+        opt.dataset.color = color;
+      }}
+      waveSelect.appendChild(opt);
     }});
     waveSelect.disabled = false;
   }}
@@ -1128,14 +1184,26 @@ body{{
     }}
     routeSelect.disabled = false;
     routeSelect.appendChild(new Option("Select route", ""));
+    var waveColor = waveColors[label.replace("Wave: ", "")] || "";
     groupedRoutes[label].forEach(function(route){{
       var opt = new Option(route.title, route.key);
+      if(waveColor){{
+        opt.style.color = waveColor;
+      }}
       routeSelect.appendChild(opt);
     }});
   }}
 
+  function applyWaveColor(){{
+    var selected = waveSelect.options[waveSelect.selectedIndex];
+    var color = selected && selected.dataset ? selected.dataset.color : "";
+    waveSelect.style.color = color || "";
+    routeSelect.style.color = color || "";
+  }}
+
   waveSelect.addEventListener("change", function(){{
     populateRoutes(waveSelect.value);
+    applyWaveColor();
   }});
 
   routeSelect.addEventListener("change", function(){{
@@ -1158,18 +1226,23 @@ body{{
         return;
       }}
       tocDate.textContent = data.date_label || "Date";
-      tocCount.textContent = (data.route_count || 0) + " Routes";
+const n = data.route_count ?? 0;
+tocCount.textContent = `${n} Route${n === 1 ? "" : "s"}`;
+waveColors = data.wave_colors ?? {};
+
       var routes = data.routes || [];
       groupedRoutes = {{}};
       routeIndex = {{}};
 
       routes.forEach(function(route, idx){{
         var label = waveLabel(route.time_label || "");
+        var timeKeyValue = timeKey(route.time_label || "");
         var key = label + "::" + route.title + "::" + idx;
         var payload = {{
           title: route.title || "Route",
           output_page: route.output_page || 1,
           time_label: route.time_label || "",
+          time_key: timeKeyValue,
           key: key
         }};
         if(!groupedRoutes[label]) groupedRoutes[label] = [];

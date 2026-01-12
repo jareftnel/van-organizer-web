@@ -7,8 +7,10 @@ import uuid
 from pathlib import Path
 from typing import Dict, Any, Optional, Callable
 
+import numpy as np
 import pdfplumber
 import pandas as pd
+from PIL import Image
 
 # we vendor these scripts into /tools
 import sys
@@ -59,6 +61,109 @@ def _map_stage_pct(stage_pct: int, a: int, b: int) -> int:
     """
     stage_pct = _clamp_pct(stage_pct)
     return int(a + (b - a) * (stage_pct / 100.0))
+
+
+def _time_key(label: str) -> str:
+    match = re.search(r"(\d{1,2}):(\d{2})\s*([AP]M)?", label or "", re.I)
+    if not match:
+        return ""
+    hh = int(match.group(1))
+    mm = int(match.group(2))
+    return f"{hh:02d}:{mm:02d}"
+
+
+def _time_sort_key(label: str) -> int:
+    match = re.search(r"(\d{1,2}):(\d{2})\s*([AP]M)?", label or "", re.I)
+    if not match:
+        return 0
+    hh = int(match.group(1))
+    mm = int(match.group(2))
+    ampm = (match.group(3) or "").upper()
+    if ampm == "PM" and hh != 12:
+        hh += 12
+    if ampm == "AM" and hh == 12:
+        hh = 0
+    return hh * 60 + mm
+
+
+def _rgb_to_hex(rgb: np.ndarray) -> str:
+    r, g, b = [int(round(v)) for v in rgb]
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def _extract_color_bands(image_path: Path) -> list[str]:
+    try:
+        with Image.open(image_path) as img:
+            img = img.convert("RGB")
+            width, height = img.size
+            if width < 2 or height < 2:
+                return []
+            target_width = min(120, width)
+            if width != target_width:
+                img = img.resize((target_width, height))
+            arr = np.array(img)
+    except Exception:
+        return []
+
+    row_colors = np.median(arr, axis=1)
+    threshold = 18.0
+    segments = []
+    start = 0
+    current = row_colors[0]
+    for i in range(1, len(row_colors)):
+        if np.linalg.norm(row_colors[i] - current) > threshold:
+            segments.append((start, i - 1, current))
+            current = row_colors[i]
+            start = i
+    segments.append((start, len(row_colors) - 1, current))
+
+    merged = []
+    for seg in segments:
+        if not merged:
+            merged.append(seg)
+            continue
+        prev = merged[-1]
+        if np.linalg.norm(prev[2] - seg[2]) < threshold:
+            merged[-1] = (prev[0], seg[1], (prev[2] + seg[2]) / 2.0)
+        else:
+            merged.append(seg)
+
+    min_height = max(6, int(len(row_colors) * 0.01))
+    colors = []
+    for start, end, color in merged:
+        if (end - start + 1) < min_height:
+            continue
+        brightness = float(np.mean(color))
+        if brightness > 245 or brightness < 10:
+            continue
+        colors.append(_rgb_to_hex(color))
+
+    cleaned = []
+    for color in colors:
+        if not cleaned or cleaned[-1] != color:
+            cleaned.append(color)
+    return cleaned
+
+
+def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> dict[str, str]:
+    if not image_paths or not toc_entries:
+        return {}
+    time_labels = sorted(
+        {_time_key(entry.get("time_label", "")) for entry in toc_entries},
+        key=_time_sort_key,
+    )
+    time_labels = [label for label in time_labels if label]
+    if not time_labels:
+        return {}
+
+    colors: list[str] = []
+    for path in sorted(image_paths, key=lambda p: p.name):
+        colors.extend(_extract_color_bands(path))
+
+    if not colors:
+        return {}
+
+    return {time_label: color for time_label, color in zip(time_labels, colors)}
 
 
 def generate_bags_xlsx_from_routesheets(
@@ -299,6 +404,9 @@ def process_job(store: JobStore, jid: str) -> None:
             store.set_progress(jid, payload)
 
         stack_results = run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
+        toc_entries = (stack_results or {}).get("toc_entries", [])
+        wave_images = list(job_dir.glob("wave_image_*"))
+        wave_colors = extract_wave_color_map(wave_images, toc_entries)
 
         store.set(
             jid,
@@ -311,7 +419,8 @@ def process_job(store: JobStore, jid: str) -> None:
             },
             toc={
                 "date_label": (stack_results or {}).get("date_label", date_label),
-                "routes": (stack_results or {}).get("toc_entries", []),
+                "routes": toc_entries,
+                "wave_colors": wave_colors,
             },
         )
     except Exception as e:
