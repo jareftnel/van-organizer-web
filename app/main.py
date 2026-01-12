@@ -1371,7 +1371,7 @@ body{{
       }});
 
       populateWaves();
-      setStatus("Select a wave to view routes.");
+      setStatus("");
     }})
     .catch(function(){{
       setStatus("Unable to load table of contents.");
