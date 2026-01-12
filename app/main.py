@@ -912,6 +912,9 @@ body{{
   font-size:13px;
   opacity:0.85;
 }}
+.heroWrap, .tagGlass, .uploadCard, .buildBtn{{
+  box-sizing:border-box;
+}}
 .uploadCard{{
   width:100%;
   max-width:100%;
