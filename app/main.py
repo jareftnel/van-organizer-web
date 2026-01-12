@@ -902,6 +902,8 @@ def organizer_raw(jid: str):
             "    var key = timeKey(route.wave_time || route.time_label || \"\");"
             "    var color = key ? waveColors[key] : \"\";"
             "    routeTitleEl.style.color = color || \"\";"
+            "    routeTitleEl.style.textDecorationLine = color ? \"underline\" : \"\";"
+            "    routeTitleEl.style.textDecorationColor = color || \"\";"
             "  }"
             "  function findRouteSelect(){"
             "    return document.getElementById(\"routeSelect\")"
