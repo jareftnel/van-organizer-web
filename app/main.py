@@ -1250,7 +1250,7 @@ body{{
       tocDate.textContent = data.date_label || "Date";
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
-      waveColors = data.wave_colors ?? {};
+      waveColors = data.wave_colors ?? {{}};
 
       var routes = data.routes || [];
       groupedRoutes = {{}};
