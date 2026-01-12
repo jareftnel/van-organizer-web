@@ -480,6 +480,25 @@ body{
 .muted{color:#97a7bd}
 .status{margin-top:14px;font-size:15px;font-weight:600}
 .subtle{margin-top:6px;font-size:12px;opacity:0.7}
+.auto-refresh{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.auto-refresh::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#38bdf8;
+  box-shadow:0 0 0 0 rgba(56,189,248,.6);
+  animation:autoPulse 1.6s ease-out infinite;
+}
+@keyframes autoPulse{
+  0%{ box-shadow:0 0 0 0 rgba(56,189,248,.6); opacity:1; }
+  70%{ box-shadow:0 0 0 8px rgba(56,189,248,0); opacity:.6; }
+  100%{ box-shadow:0 0 0 12px rgba(56,189,248,0); opacity:.4; }
+}
 .error{margin-top:12px;color:#ffb4b4;background:#291414;border:1px solid #3a1c1c;padding:10px 12px;border-radius:10px;font-size:13px}
 
 :root{
@@ -555,7 +574,7 @@ body{
         </div>
       </div>
 
-      <div class="muted subtle">This page updates automatically.</div>
+      <div class="muted subtle auto-refresh">This page updates automatically.</div>
 
       <div class="error" id="err" style="display:none"></div>
     </div>
