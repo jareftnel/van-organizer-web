@@ -623,7 +623,7 @@ body{
       setProgress(pct, nextLine);
 
       var stage = s.progress ? s.progress.stage : "";
-      if(s.status === "done" || s.has_html){
+      if(s.status === "done" || s.has_toc){
         // Cache-bust so mobile browsers don't show old files
         var bust = "v=" + Date.now();
         var nextUrl = s.has_toc ? s.toc_url : s.organizer_url;
