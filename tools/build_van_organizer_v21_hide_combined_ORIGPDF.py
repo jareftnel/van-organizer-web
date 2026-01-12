@@ -23,8 +23,8 @@ import openpyxl
 import pdfplumber
 
 
-CACHE_VERSION_PDF = 2
-CACHE_VERSION_ROUTES = 2
+CACHE_VERSION_PDF = 3
+CACHE_VERSION_ROUTES = 3
 
 # ----------------------------- Regex (precompiled) -----------------------------
 PAT_HEADER = re.compile(r'\b(DDF\d+)\s*·\s*([A-Z]{3},\s*[A-Z]{3}\s+\d{1,2},\s+\d{4})\b')
@@ -169,15 +169,45 @@ def _save_routes_cache(pdf_path: str, xlsx_path: str, data: dict) -> None:
 
 
 # ----------------------------- Parsing -----------------------------
-def parse_pdf_meta(pdf_path: str, use_cache: bool = True) -> Tuple[str, str, Dict[str, Dict[int, dict]], Dict[str, str]]:
+def _extract_pkg_summaries(lines: List[str]) -> Tuple[Optional[int], Optional[int]]:
+    commercial = None
+    total = None
+    for line in lines:
+        s = line.strip().lower()
+        if s.startswith("commercial packages"):
+            for tok in reversed(line.split()):
+                digits = re.sub(r"[^\d]", "", tok)
+                if digits:
+                    commercial = int(digits)
+                    break
+        if s.startswith("total packages"):
+            for tok in reversed(line.split()):
+                digits = re.sub(r"[^\d]", "", tok)
+                if digits:
+                    total = int(digits)
+                    break
+    return commercial, total
+
+
+def parse_pdf_meta(
+    pdf_path: str,
+    use_cache: bool = True,
+) -> Tuple[str, str, Dict[str, Dict[int, dict]], Dict[str, str], Dict[str, dict]]:
     """
     Returns:
-      header_title, route_code, pdf_meta[route_short][idx] = {sort_zone, pkgs}, route_time[route_short] = "11:20 AM"
+      header_title, route_code, pdf_meta[route_short][idx] = {sort_zone, pkgs},
+      route_time[route_short] = "11:20 AM", pkg_summary[route_short] = {commercial, total}
     """
     if use_cache:
         cached = _load_pdf_cache(pdf_path)
         if cached:
-            return cached["header_title"], cached["route_code"], cached["pdf_meta"], cached["route_time"]
+            return (
+                cached["header_title"],
+                cached["route_code"],
+                cached["pdf_meta"],
+                cached["route_time"],
+                cached.get("pkg_summary") or {},
+            )
 
     header_title = ""
     route_code = "DDF5"
@@ -185,6 +215,7 @@ def parse_pdf_meta(pdf_path: str, use_cache: bool = True) -> Tuple[str, str, Dic
 
     pdf_meta: Dict[str, Dict[int, dict]] = {}
     route_time: Dict[str, str] = {}
+    pkg_summary: Dict[str, dict] = {}
 
     def _group_words_into_lines(words: List[dict], y_tol: float = 2.0) -> List[str]:
         if not words:
@@ -257,6 +288,15 @@ def parse_pdf_meta(pdf_path: str, use_cache: bool = True) -> Tuple[str, str, Dic
             if not route_short:
                 continue
 
+            comm_pkgs, total_pkgs = _extract_pkg_summaries(lines_quick)
+            if comm_pkgs is not None or total_pkgs is not None:
+                summary = pkg_summary.get(route_short) or {}
+                if comm_pkgs is not None:
+                    summary["commercial"] = comm_pkgs
+                if total_pkgs is not None:
+                    summary["total"] = total_pkgs
+                pkg_summary[route_short] = summary
+
             if route_short not in route_time:
                 tm = PAT_TIME.search(page_text)
                 if tm:
@@ -287,13 +327,19 @@ def parse_pdf_meta(pdf_path: str, use_cache: bool = True) -> Tuple[str, str, Dic
             "header_title": header_title,
             "route_code": route_code,
             "pdf_meta": pdf_meta,
-            "route_time": route_time
+            "route_time": route_time,
+            "pkg_summary": pkg_summary,
         })
 
-    return header_title, route_code, pdf_meta, route_time
+    return header_title, route_code, pdf_meta, route_time, pkg_summary
 
 
-def parse_excel_routes(xlsx_path: str, pdf_meta: Dict[str, Dict[int, dict]], route_time: Dict[str, str]) -> List[dict]:
+def parse_excel_routes(
+    xlsx_path: str,
+    pdf_meta: Dict[str, Dict[int, dict]],
+    route_time: Dict[str, str],
+    pkg_summary: Dict[str, dict],
+) -> List[dict]:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
 
     routes: List[dict] = []
@@ -359,12 +405,20 @@ def parse_excel_routes(xlsx_path: str, pdf_meta: Dict[str, Dict[int, dict]], rou
                 "pkgs": meta["pkgs"] if meta else None
             })
 
+        pkg_info = pkg_summary.get(rs) or {}
+        total_pkgs = pkg_info.get("total")
+        if total_pkgs is None:
+            total_calc = sum(x["pkgs"] for x in bags_detail if x.get("pkgs") is not None)
+            total_pkgs = total_calc if total_calc > 0 else None
+
         routes.append({
             "route_short": rs,
             "cx": cx,
             "wave_time": route_time.get(rs, ""),
             "bags_count": len(bags),
             "overflow_total": overflow_total,
+            "commercial_pkgs": pkg_info.get("commercial"),
+            "total_pkgs": total_pkgs,
             "bags_detail": bags_detail,
             "overflow_agg": overflow_agg,
             "overflow_seq": ov_seq,
@@ -436,16 +490,30 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   display:flex;
   align-items:center;
   gap:14px;
-  opacity:.9;
-  font-weight:700;
   grid-column:3;
   grid-row:1;
   justify-self:end;
+}
+.countPill{
+  opacity:.9;
+  font-weight:700;
   padding:8px 12px;
   border:1px solid var(--border);
   border-radius:999px;
   background:rgba(255,255,255,.03);
   min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.topCountsExtra{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  grid-column:3;
+  grid-row:2;
+  justify-self:end;
+  align-items:flex-end;
 }
 .topCounts .dot{opacity:.75}
 .topCounts .dot.dot-muted{background:#97a7bd}
@@ -959,7 +1027,7 @@ td:last-child,th:last-child{text-align:right}
             <div class="routeTitle" id="routeTitle"></div>
           </div>
           <div class="sectionRight">
-            <div class="topCounts">
+            <div class="topCounts countPill">
               <span class="countGroup">
                 <span class="dot"></span>
                 <span id="bagsCount">0</span>
@@ -970,6 +1038,16 @@ td:last-child,th:last-child{text-align:right}
                 <span id="ovCount">0</span>
                 <span class="countLabel">overflow</span>
               </span>
+            </div>
+            <div class="topCountsExtra">
+              <div class="countPill">
+                <span id="commercialCount">0</span>
+                <span class="countLabel">commercial</span>
+              </div>
+              <div class="countPill">
+                <span id="totalCount">0</span>
+                <span class="countLabel">total</span>
+              </div>
             </div>
             <div class="tabsRow">
               <div class="tab active" data-tab="combined">Bags + Overflow</div>
@@ -1097,6 +1175,8 @@ const routeSel = document.getElementById("routeSel");
 const qBox = document.getElementById("q");
 const bagsCount = document.getElementById("bagsCount");
 const ovCount = document.getElementById("ovCount");
+const commercialCount = document.getElementById("commercialCount");
+const totalCount = document.getElementById("totalCount");
 const content = document.getElementById("content");
 const routeTitleEl = document.getElementById("routeTitle");
 
@@ -1939,6 +2019,8 @@ function render(){
   if(!r){ content.innerHTML = "<div style='color:var(--muted)'>No routes found.</div>"; return; }
   bagsCount.textContent = r.bags_count ?? 0;
   ovCount.textContent = r.overflow_total ?? 0;
+  commercialCount.textContent = r.commercial_pkgs ?? 0;
+  totalCount.textContent = r.total_pkgs ?? 0;
   updateSubHeader(r);
   applyWaveUI(r);
   const q = qBox.value.trim();
@@ -2092,9 +2174,12 @@ def main():
     ap.add_argument("--no-cache", action="store_true", help="Disable PDF parse cache")
     args = ap.parse_args()
 
-    header_title, _, pdf_meta, route_time = parse_pdf_meta(args.pdf, use_cache=not args.no_cache)
+    header_title, _, pdf_meta, route_time, pkg_summary = parse_pdf_meta(
+        args.pdf,
+        use_cache=not args.no_cache,
+    )
     if args.no_cache:
-        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time)
+        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary)
         wave_map = build_wave_labels(routes)
     else:
         cached = _load_routes_cache(args.pdf, args.xlsx)
@@ -2102,7 +2187,7 @@ def main():
             routes = cached["routes"]
             wave_map = cached["wave_map"]
         else:
-            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time)
+            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary)
             wave_map = build_wave_labels(routes)
             _save_routes_cache(args.pdf, args.xlsx, {"routes": routes, "wave_map": wave_map})
     html = build_html(header_title, routes, wave_map)
