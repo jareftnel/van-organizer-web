@@ -968,6 +968,13 @@ body{{
   font-size:15px;
   font-weight:600;
 }}
+.selectInput option{{
+  background:#0b0f14;
+  color:#e8eef6;
+}}
+.selectInput option:disabled{{
+  color:rgba(232,238,246,0.6);
+}}
 .selectInput:disabled{{
   opacity:0.5;
 }}
