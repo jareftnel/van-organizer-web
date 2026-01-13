@@ -380,13 +380,18 @@ def parse_excel_routes(
                     # Excel might store as float
                     total_val = int(float(total_cell))
 
+            zone_counts = _parse_zone_counts(zones_s)
+            zone_total = sum(cnt for _, cnt in zone_counts)
+            if total_val is None and zone_total:
+                total_val = zone_total
+
             combined.append({"bag": bag_s, "zones": zones_s, "total": "" if total_val is None else str(total_val)})
             bags.append(bag_s)
 
             if total_val is not None:
                 overflow_total += total_val
 
-            for z, cnt in _parse_zone_counts(zones_s):
+            for z, cnt in zone_counts:
                 ov_seq.append({"zone": z, "count": cnt, "bag_idx": len(bags)})
                 ov_agg[z] = ov_agg.get(z, 0) + cnt
 
@@ -409,6 +414,7 @@ def parse_excel_routes(
         total_pkgs = pkg_info.get("total")
         if total_pkgs is None:
             total_calc = sum(x["pkgs"] for x in bags_detail if x.get("pkgs") is not None)
+            total_calc += overflow_total
             total_pkgs = total_calc if total_calc > 0 else None
 
         routes.append({
