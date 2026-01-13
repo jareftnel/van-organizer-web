@@ -1330,9 +1330,18 @@ function getLoadedStats(r){
     const isSecond = isCombinedSecond(routeShort, idx);
     if(isSecond && isLoaded(routeShort, idx - 1)) return;
     const cur = byIdx[idx];
-    if(!cur) return;
+    if(!cur && !isSecond) return;
+    if(isSecond){
+      const first = byIdx[idx - 1];
+      if(!first && !cur) return;
+      overflowLoaded += sumOverflowCountsForBag(first, ovMap);
+      overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
+      pkgLoaded += pkgCountNumber(first, cur);
+      loadedCards += 2;
+      return;
+    }
     const secondIdx = idx + 1;
-    const second = (!isSecond && isCombinedSecond(routeShort, secondIdx)) ? byIdx[secondIdx] : null;
+    const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
     overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
     if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
     pkgLoaded += pkgCountNumber(cur, second);
