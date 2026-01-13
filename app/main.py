@@ -929,10 +929,11 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 }}
 .hudTitle{{
   position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  top:10px;
-  font-size:20px;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
   font-weight:900;
   color:#fff;
   white-space:nowrap;
