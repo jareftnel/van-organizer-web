@@ -860,11 +860,10 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .ovHeaderRight{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ovTitleRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .bagFooter{
-  display:flex;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   align-items:center;
   gap:12px;
-  flex-wrap:wrap;
   margin-top:12px;
 }
 .clearRow{
@@ -872,11 +871,22 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
   gap:10px;
   flex-wrap:wrap;
   align-items:center;
+  justify-content:flex-end;
+  justify-self:end;
 }
 .bagModeDock{
   display:flex;
-  justify-content:flex-end;
+  justify-content:flex-start;
   flex:1 1 auto;
+  justify-self:start;
+}
+.footerCounts{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-self:center;
 }
 .modeToggle{
   display:inline-flex;
@@ -1038,16 +1048,6 @@ td:last-child,th:last-child{text-align:right}
                 <span id="ovCount">0</span>
                 <span class="countLabel">overflow</span>
               </span>
-            </div>
-            <div class="topCountsExtra">
-              <div class="countPill">
-                <span id="commercialCount">0</span>
-                <span class="countLabel">commercial</span>
-              </div>
-              <div class="countPill">
-                <span id="totalCount">0</span>
-                <span class="countLabel">total</span>
-              </div>
             </div>
             <div class="tabsRow">
               <div class="tab active" data-tab="combined">Bags + Overflow</div>
@@ -1271,6 +1271,22 @@ function sendMetaToParent(r){
       total: r.total_pkgs ?? null
     }, "*");
   }catch(e){}
+}
+
+function updateFooterCounts(r){
+  const wrap = document.getElementById("footerCounts");
+  const commercial = document.getElementById("commercialCount");
+  const total = document.getElementById("totalCount");
+  if(!wrap || !commercial || !total) return;
+  const hasCommercial = r.commercial_pkgs !== undefined && r.commercial_pkgs !== null;
+  const hasTotal = r.total_pkgs !== undefined && r.total_pkgs !== null;
+  if(!hasCommercial && !hasTotal){
+    wrap.style.display = "none";
+    return;
+  }
+  wrap.style.display = "";
+  commercial.textContent = hasCommercial ? r.commercial_pkgs : "—";
+  total.textContent = hasTotal ? r.total_pkgs : "—";
 }
 
 function setActiveTab(name){
@@ -1802,6 +1818,16 @@ function renderBags(r, q){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
+      <div class="footerCounts" id="footerCounts">
+        <div class="countPill">
+          <span id="commercialCount">0</span>
+          <span class="countLabel">commercial</span>
+        </div>
+        <div class="countPill">
+          <span id="totalCount">0</span>
+          <span class="countLabel">total</span>
+        </div>
+      </div>
       <div class="clearRow">
         <button id="clearLoadedBtn" class="clearBtn">Clear</button>
         <button id="resetBagsBtn" class="clearBtn">Reset</button>
@@ -1811,6 +1837,7 @@ function renderBags(r, q){
 
   const allowDrag = (mode === "custom") && !q;
   attachBagHandlers(routeShort, allowDrag);
+  updateFooterCounts(r);
   scrollTotesToRight();
 }
 
@@ -1954,6 +1981,16 @@ function renderCombined(r,q){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
+      <div class="footerCounts" id="footerCounts">
+        <div class="countPill">
+          <span id="commercialCount">0</span>
+          <span class="countLabel">commercial</span>
+        </div>
+        <div class="countPill">
+          <span id="totalCount">0</span>
+          <span class="countLabel">total</span>
+        </div>
+      </div>
       <div class="clearRow">
         <button id="clearLoadedBtn" class="clearBtn">Clear</button>
         <button id="resetBagsBtn" class="clearBtn">Reset</button>
@@ -1963,6 +2000,7 @@ function renderCombined(r,q){
 
   const allowDrag = (mode === "custom") && !q;
   attachBagHandlers(routeShort, allowDrag);
+  updateFooterCounts(r);
   scrollTotesToRight();
 }
 
