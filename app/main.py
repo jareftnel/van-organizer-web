@@ -915,6 +915,20 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "card-spacing-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* card-spacing-patch */"
+            ":where(.cards-grid,.tote-grid) :where(.card,.cell){"
+            "  padding-bottom:14px !important;"
+            "}"
+            ":where(.cards-grid,.tote-grid) :where(.card,.cell)>:last-child{"
+            "  margin-top:8px !important;"
+            "  margin-bottom:2px !important;"
+            "  line-height:1.25 !important;"
+            "}"
+            "</style>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
