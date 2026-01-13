@@ -2399,10 +2399,17 @@ window.addEventListener("message", (ev)=>{
     wrap.style.overflowX = '';
     wrap.style.overflowY = '';
 
-    var wrapW  = wrap.clientWidth;
+    // Available visible width (subtract padding + tiny safety gutter)
+    var cs = getComputedStyle(wrap);
+    var padL = parseFloat(cs.paddingLeft)  || 0;
+    var padR = parseFloat(cs.paddingRight) || 0;
+
+    var wrapW = wrap.getBoundingClientRect().width - padL - padR - 2; // -2px gutter
     var boardW = board.scrollWidth;
+
     if(!wrapW || !boardW) return;
 
+    // If it already fits, don’t transform (keeps your original centering behavior)
     if(boardW <= wrapW){
       wrap.style.overflowX = 'hidden';
       wrap.style.overflowY = 'visible';
@@ -2410,18 +2417,16 @@ window.addEventListener("message", (ev)=>{
       return;
     }
 
-    // Use a tiny safety gutter to avoid 1–2px rounding crop
-    var safeW = Math.max(0, wrapW - 2);
+    // Scale to fit EXACTLY — no minimum clamp (prevents cropping)
+    var scale = Math.min(1, wrapW / boardW);
 
-    var scale = Math.max(0.60, Math.min(1, safeW / boardW));
-    var dx = Math.floor(safeW - (boardW * scale));   // shift left so right edge stays visible
+    // Right-align the scaled board inside the visible area, but never negative
+    var dx = Math.max(0, wrapW - (boardW * scale));
 
-    // IMPORTANT: translate + scale (don’t use top-right origin without translate)
     board.style.transformOrigin = 'top left';
-    board.style.transform =
-      'translateX(' + dx + 'px) scale(' + scale.toFixed(3) + ')';
+    board.style.transform = 'translateX(' + Math.floor(dx) + 'px) scale(' + scale.toFixed(4) + ')';
 
-    // After transform, measure actual on-screen height so nothing crops
+    // Set wrapper height to the transformed height
     var r = board.getBoundingClientRect();
     wrap.style.height = Math.ceil(r.height) + 'px';
     wrap.style.overflowX = 'hidden';
@@ -2446,6 +2451,10 @@ window.addEventListener("message", (ev)=>{
 
   window.addEventListener('load', fitBoardToWidth);
   window.addEventListener('resize', refitSoon);
+  if (window.visualViewport){
+    visualViewport.addEventListener('resize', refitSoon);
+    visualViewport.addEventListener('scroll', refitSoon);
+  }
 
   // Refit on DOM mutations (route switch, tab change, etc.)
   var target =
