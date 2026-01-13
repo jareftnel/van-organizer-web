@@ -980,6 +980,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       <div class="hudRight">
         <span class="pill" id="hudPillBags">—</span>
         <span class="pill" id="hudPillOverflow">—</span>
+        <span class="pill" id="hudPillTotal">—</span>
       </div>
     </div>
   </div>
@@ -1008,6 +1009,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   var hudTitle = document.getElementById("hudTitle");
   var pillBags = document.getElementById("hudPillBags");
   var pillOverflow = document.getElementById("hudPillOverflow");
+  var pillTotal = document.getElementById("hudPillTotal");
   var iframe = document.getElementById("orgFrame");
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
@@ -1028,10 +1030,21 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
     if(hudTitle) hudTitle.textContent = d.title || "—";
 
-    var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : "—";
-    var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : "—";
-    if(pillBags) pillBags.textContent = bags + " bags";
-    if(pillOverflow) pillOverflow.textContent = ov + " overflow";
+    function formatProgress(total, selected){
+      if(total === undefined || total === null) return "—";
+      var totalNum = parseInt(total, 10);
+      if(Number.isNaN(totalNum)) return "—";
+      var selectedNum = parseInt(selected, 10);
+      if(Number.isNaN(selectedNum)) selectedNum = 0;
+      return totalNum + " - " + selectedNum + "/" + totalNum;
+    }
+
+    var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : null;
+    var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : null;
+    var total = (d.total !== undefined && d.total !== null) ? d.total : null;
+    if(pillBags) pillBags.textContent = formatProgress(bags, d.bags_loaded);
+    if(pillOverflow) pillOverflow.textContent = formatProgress(ov, d.overflow_loaded);
+    if(pillTotal) pillTotal.textContent = formatProgress(total, d.total_loaded);
 
   }});
 }})();
