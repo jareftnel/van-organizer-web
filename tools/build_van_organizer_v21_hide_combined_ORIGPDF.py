@@ -1382,9 +1382,14 @@ function updateFooterCounts(r){
       if(totalLabel) totalLabel.textContent = "packages";
       return;
     }
-    const remaining = Math.max(totalNum - loadedNum, 0);
-    total.textContent = `${loadedNum}/${totalNum}`;
-    if(totalLabel) totalLabel.textContent = `packages (${remaining} left)`;
+    if(hasLoaded){
+      const remaining = Math.max(totalNum - loadedNum, 0);
+      total.textContent = `${loadedNum}/${totalNum}`;
+      if(totalLabel) totalLabel.textContent = `packages (${remaining} left)`;
+      return;
+    }
+    total.textContent = `${totalNum}`;
+    if(totalLabel) totalLabel.textContent = "packages";
   }else{
     total.textContent = "—";
     if(totalLabel) totalLabel.textContent = "packages";
