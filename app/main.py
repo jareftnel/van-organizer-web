@@ -889,12 +889,68 @@ def organizer_wrapper(jid: str):
 <style>
 html,body{{margin:0;padding:0;height:100%;background:#0b0f14;color:#e8eef6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:auto}}
 body{{display:flex;flex-direction:column;height:100dvh}}
-.banner{{flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
+.banner{{position:relative;flex:0 0 auto;background:#0b0f14;border-bottom:1px solid #1c2a3a}}
 .banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain;transition:max-height 220ms ease, opacity 220ms ease}}
 .bannerMin .banner img{{max-height:46px;opacity:0.95}}
 .bannerMin .banner{{border-bottom:1px solid rgba(28,42,58,0.7)}}
 .wrap{{flex:1 1 auto;padding:0 calc(10px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));min-height:0}}
 iframe{{border:0; display:block; width:100%; height:100%}}
+
+#bannerHUD{{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 14px;
+  pointer-events:none;
+}}
+.bannerMin #bannerHUD{{ display:flex; }}
+#bannerHUD::before{{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.60);
+  backdrop-filter: blur(2px);
+}}
+#bannerHUD > *{{ position:relative; z-index:1; pointer-events:auto; }}
+.hudLeft{{ display:flex; gap:8px; }}
+.hudTab{{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:#eaf2ff;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  cursor:pointer;
+  user-select:none;
+}}
+.hudTab.active{{
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.28);
+}}
+.hudTitle{{
+  flex:1;
+  text-align:center;
+  font-size:20px;
+  font-weight:900;
+  color:#fff;
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}}
+.hudRight{{ display:flex; gap:10px; align-items:flex-start; }}
+.pill{{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.14);
+  color:#eaf2ff;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:850;
+  white-space:nowrap;
+}}
 
 @media (max-width: 900px){{
   .wrap{{padding:0}}
@@ -913,6 +969,20 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 <body>
   <div class="banner">
     <img src="/banner.png" alt="Van organizer banner" />
+    <div id="bannerHUD">
+      <div class="hudLeft">
+        <button class="hudTab" data-tab="bags_overflow">Bags + Overflow</button>
+        <button class="hudTab" data-tab="bags">Bags</button>
+        <button class="hudTab" data-tab="overflow">Overflow</button>
+      </div>
+
+      <div class="hudTitle" id="hudTitle">—</div>
+
+      <div class="hudRight">
+        <span class="pill" id="hudPill1">—</span>
+        <span class="pill" id="hudPill2" style="display:none">—</span>
+      </div>
+    </div>
   </div>
   <div class="wrap">
     <iframe id="orgFrame" src="/job/{jid}/organizer_raw?v=1" scrolling="no"></iframe>
@@ -932,16 +1002,49 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 }})();
 (function(){{
   var root = document.documentElement;
-  var banner = document.querySelector(".banner");
   setTimeout(function(){{
     root.classList.add("bannerMin");
   }}, 3000);
-  if(banner){{
-    banner.style.cursor = "pointer";
-    banner.addEventListener("click", function(){{
-      root.classList.toggle("bannerMin");
+
+  var hudTitle = document.getElementById("hudTitle");
+  var pill1 = document.getElementById("hudPill1");
+  var pill2 = document.getElementById("hudPill2");
+  var iframe = document.getElementById("orgFrame");
+
+  document.querySelectorAll(".hudTab").forEach(function(btn){{
+    btn.addEventListener("click", function(){{
+      document.querySelectorAll(".hudTab").forEach(function(b){{ b.classList.remove("active"); }});
+      btn.classList.add("active");
+      if(iframe && iframe.contentWindow){{
+        iframe.contentWindow.postMessage({{ type:"setTab", tab: btn.dataset.tab }}, "*");
+      }}
     }});
-  }}
+  }});
+  var defaultTab = document.querySelector('.hudTab[data-tab="bags_overflow"]');
+  if(defaultTab) defaultTab.classList.add("active");
+
+  window.addEventListener("message", function(ev){{
+    var d = ev.data || {{}};
+    if(d.type !== "routeMeta") return;
+
+    if(hudTitle) hudTitle.textContent = d.title || "—";
+
+    var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : "—";
+    var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : "—";
+    if(pill1) pill1.textContent = bags + " bags • " + ov + " overflow";
+
+    var hasExtra = (d.commercial !== undefined && d.commercial !== null) || (d.total !== undefined && d.total !== null);
+    if(pill2){{
+      if(hasExtra){{
+        var c = (d.commercial !== undefined && d.commercial !== null) ? d.commercial : "—";
+        var t = (d.total !== undefined && d.total !== null) ? d.total : "—";
+        pill2.style.display = "";
+        pill2.textContent = c + " commercial • " + t + " total";
+      }}else{{
+        pill2.style.display = "none";
+      }}
+    }}
+  }});
 }})();
 </script>
 </body>

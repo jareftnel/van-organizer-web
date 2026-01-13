@@ -1173,12 +1173,7 @@ let activeTab = "combined";
 
 const routeSel = document.getElementById("routeSel");
 const qBox = document.getElementById("q");
-const bagsCount = document.getElementById("bagsCount");
-const ovCount = document.getElementById("ovCount");
-const commercialCount = document.getElementById("commercialCount");
-const totalCount = document.getElementById("totalCount");
 const content = document.getElementById("content");
-const routeTitleEl = document.getElementById("routeTitle");
 
 let WAVE_COLORS = {}; // { "HH:MM": "#RRGGBB" }
 
@@ -1264,13 +1259,24 @@ window.addEventListener("orientationchange", updateSearchPlaceholder);
 
 function routeTitle(r){ return (r.route_short||"") + (r.cx ? ` (${r.cx})` : ""); }
 function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
-function subHeaderTitle(r){
-  if(activeTab==="bags") return `${routeTitle(r)} — Bags`;
-  if(activeTab==="overflow") return `${routeTitle(r)} — Overflow`;
-  return `${routeTitle(r)}`;
+
+function sendMetaToParent(r){
+  try{
+    window.parent.postMessage({
+      type: "routeMeta",
+      title: routeTitle(r),
+      bags: r.bags_count ?? 0,
+      overflow: r.overflow_total ?? 0,
+      commercial: r.commercial_pkgs ?? null,
+      total: r.total_pkgs ?? null
+    }, "*");
+  }catch(e){}
 }
-function updateSubHeader(r){
-  if(routeTitleEl) routeTitleEl.textContent = subHeaderTitle(r);
+
+function setActiveTab(name){
+  if(!name) return;
+  activeTab = name;
+  render();
 }
 
 function normalizeRouteToken(val){
@@ -2017,11 +2023,7 @@ function scrollTotesToRight(){
 function render(){
   const r = ROUTES[activeRouteIndex];
   if(!r){ content.innerHTML = "<div style='color:var(--muted)'>No routes found.</div>"; return; }
-  bagsCount.textContent = r.bags_count ?? 0;
-  ovCount.textContent = r.overflow_total ?? 0;
-  commercialCount.textContent = r.commercial_pkgs ?? 0;
-  totalCount.textContent = r.total_pkgs ?? 0;
-  updateSubHeader(r);
+  sendMetaToParent(r);
   applyWaveUI(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
@@ -2093,6 +2095,45 @@ function adjustRouteSelectWidth(){
   routeSel.style.width = `${Math.ceil(textWidth + padding + borders + extra)}px`;
 }
 
+function removeInternalHeaderChrome(){
+  const sels = [
+    "#routeTitleRow",
+    "#routeTitle",
+    ".routeTitleWrap",
+    "#tabsRow",
+    ".tabsRow",
+    "#topRightTotals",
+    ".topRightTotals",
+    ".topCounts",
+    ".topCountsExtra",
+    ".sectionHeaderRow"
+  ];
+  sels.forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>el.remove());
+  });
+  ["#headerSpacer",".headerSpacer",".spacerTop"].forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>el.remove());
+  });
+}
+
+function onDomReady(){
+  removeInternalHeaderChrome();
+  const main = document.querySelector("#main")
+    || document.querySelector(".main")
+    || document.querySelector(".organizerBody")
+    || document.body;
+  if(main){
+    main.style.paddingTop = "0px";
+    main.style.marginTop = "0px";
+  }
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", onDomReady);
+}else{
+  onDomReady();
+}
+
 function init(){
   buildRouteDropdown();
   if(routeSel){
@@ -2112,14 +2153,6 @@ function init(){
     .catch(()=>{});
 
   qBox.addEventListener("input", ()=>render());
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      t.classList.add("active");
-      activeTab = t.dataset.tab;
-      render();
-    });
-  });
   if(organizerRoot && "ResizeObserver" in window){
     const ro = new ResizeObserver(()=>{
       scheduleRender();
@@ -2141,6 +2174,14 @@ function init(){
   render();
 }
 init();
+
+window.addEventListener("message", (ev)=>{
+  const d = ev.data || {};
+  if(d.type !== "setTab") return;
+  if(d.tab === "bags_overflow") setActiveTab("combined");
+  if(d.tab === "bags") setActiveTab("bags");
+  if(d.tab === "overflow") setActiveTab("overflow");
+});
 </script>
 </body>
 </html>
