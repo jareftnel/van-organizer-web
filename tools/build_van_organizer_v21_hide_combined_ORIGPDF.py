@@ -1323,19 +1323,32 @@ function getLoadedStats(r){
   const ovMap = buildOverflowMap(r);
   let overflowLoaded = 0;
   let pkgLoaded = 0;
+  let loadedCards = 0;
   loadedEntries.forEach((key)=>{
     const idx = parseInt(key, 10);
     if(!idx) return;
+    const isSecond = isCombinedSecond(routeShort, idx);
+    if(isSecond && isLoaded(routeShort, idx - 1)) return;
     const cur = byIdx[idx];
-    if(!cur) return;
+    if(!cur && !isSecond) return;
+    if(isSecond){
+      const first = byIdx[idx - 1];
+      if(!first && !cur) return;
+      overflowLoaded += sumOverflowCountsForBag(first, ovMap);
+      overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
+      pkgLoaded += pkgCountNumber(first, cur);
+      loadedCards += 2;
+      return;
+    }
     const secondIdx = idx + 1;
     const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
     overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
     if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
     pkgLoaded += pkgCountNumber(cur, second);
+    loadedCards += second ? 2 : 1;
   });
   return {
-    loadedCards: loadedEntries.length,
+    loadedCards,
     overflowLoaded,
     pkgLoaded,
     totalLoaded: pkgLoaded + overflowLoaded
