@@ -950,6 +950,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   width:var(--hud-pill-target-width, auto);
   padding:4px 10px;
   line-height:1.1;
+  text-align:center;
 }}
 .pill{{
   --pill-bg: rgba(0,0,0,.35);
