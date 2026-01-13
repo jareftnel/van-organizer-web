@@ -862,6 +862,18 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "grid-width-fit-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* grid-width-fit-patch */"
+            ".organizer-grid,"
+            ".tote-grid,"
+            ".cards-grid{"
+            "grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)) !important;"
+            "grid-auto-columns:minmax(120px, 1fr) !important;"
+            "}"
+            "</style>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
