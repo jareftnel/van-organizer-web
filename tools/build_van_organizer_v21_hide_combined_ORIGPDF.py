@@ -1346,6 +1346,7 @@ function updateFooterCounts(r){
   const wrap = document.getElementById("footerCounts");
   const commercial = document.getElementById("commercialCount");
   const total = document.getElementById("totalCount");
+  const totalLabel = document.getElementById("totalLabel");
   if(!wrap || !commercial || !total) return;
   const routeShort = r.route_short || r.short || "";
   const loadedEntries = routeShort && LOADED[routeShort] ? Object.keys(LOADED[routeShort]) : [];
@@ -1359,7 +1360,22 @@ function updateFooterCounts(r){
   wrap.style.display = "";
   wrap.classList.toggle("singlePill", hasLoaded);
   commercial.textContent = hasCommercial ? r.commercial_pkgs : "—";
-  total.textContent = hasTotal ? r.total_pkgs : "—";
+  if(hasTotal){
+    const stats = getLoadedStats(r);
+    const totalNum = parseInt(r.total_pkgs, 10);
+    const loadedNum = parseInt(stats.totalLoaded || 0, 10);
+    if(Number.isNaN(totalNum)){
+      total.textContent = "—";
+      if(totalLabel) totalLabel.textContent = "packages";
+      return;
+    }
+    const remaining = Math.max(totalNum - loadedNum, 0);
+    total.textContent = `${loadedNum}/${totalNum}`;
+    if(totalLabel) totalLabel.textContent = `packages (${remaining} left)`;
+  }else{
+    total.textContent = "—";
+    if(totalLabel) totalLabel.textContent = "packages";
+  }
 }
 
 function setActiveTab(name){
@@ -1918,7 +1934,7 @@ function renderBags(r, q){
         </div>
         <div class="countPill">
           <span id="totalCount">0</span>
-          <span class="countLabel">packages</span>
+          <span class="countLabel" id="totalLabel">packages</span>
         </div>
       </div>
       <div class="clearRow">
@@ -2079,7 +2095,7 @@ function renderCombined(r,q){
         </div>
         <div class="countPill">
           <span id="totalCount">0</span>
-          <span class="countLabel">packages</span>
+          <span class="countLabel" id="totalLabel">packages</span>
         </div>
       </div>
       <div class="clearRow">
