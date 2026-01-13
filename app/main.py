@@ -1062,13 +1062,13 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     var footerWidth = parseInt(d.footer_pill_width || 0, 10);
     var shouldStack = selectedCount > 0;
     if(hudRight) hudRight.classList.toggle("stacked", shouldStack);
-    if(hudWrap){
-      if(shouldStack && footerWidth > 0){
+    if(hudWrap){{
+      if(shouldStack && footerWidth > 0){{
         hudWrap.style.setProperty("--hud-pill-target-width", footerWidth + "px");
-      }else if(!shouldStack){
+      }}else if(!shouldStack){{
         hudWrap.style.removeProperty("--hud-pill-target-width");
-      }
-    }
+      }}
+    }}
 
   }});
 }})();
