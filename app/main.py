@@ -906,6 +906,15 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "footer-counts-spacing-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* footer-counts-spacing-patch */"
+            ".footerCounts{"
+            "padding-bottom:6px;"
+            "}"
+            "</style>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
