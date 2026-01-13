@@ -638,18 +638,24 @@ def render_table(
     d.rectangle([0, 0, width, banner_h], fill=STYLE["banner_bg"])
 
     left = ""
-    if date_label and time_label:
-        left = f"{date_label} [{time_label}]"
+    if time_label:
+        left = str(time_label)
+
+    right = ""
+    if date_label and style_label:
+        right = f"{date_label} • {str(style_label).upper()}"
     elif date_label:
-        left = str(date_label)
+        right = str(date_label)
+    elif style_label:
+        right = str(style_label).upper()
 
     if left:
         d.text((12, banner_h // 2), left, anchor="lm", font=FONT_DATE, fill=STYLE["meta_grey"])
 
     d.text((width // 2, banner_h // 2), title, anchor="mm", font=FONT_BANNER, fill="black")
 
-    if style_label:
-        d.text((width - 12, banner_h // 2), str(style_label).upper(), anchor="rm", font=FONT_STYLE_TAG, fill=STYLE["meta_grey"])
+    if right:
+        d.text((width - 12, banner_h // 2), right, anchor="rm", font=FONT_STYLE_TAG, fill=STYLE["meta_grey"])
 
     x = margin
     y0 = banner_h + margin
