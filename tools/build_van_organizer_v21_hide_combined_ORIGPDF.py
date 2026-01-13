@@ -506,12 +506,17 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   padding:8px 12px;
   border:1px solid var(--border);
   border-radius:999px;
-  background:rgba(255,255,255,.03);
+  --pill-bg: rgba(255,255,255,.03);
+  background:var(--pill-bg);
   min-height:40px;
   display:inline-flex;
   align-items:center;
   gap:6px;
 }
+.progressPill{
+  background:linear-gradient(90deg, var(--pill-fill) 0 var(--pill-progress, 0%), var(--pill-bg) var(--pill-progress, 0%));
+}
+.countPillPackages{ --pill-fill: rgba(255, 165, 79, 0.65); }
 .topCountsExtra{
   display:flex;
   flex-direction:column;
@@ -1370,6 +1375,7 @@ function updateFooterCounts(r){
   const commercial = document.getElementById("commercialCount");
   const total = document.getElementById("totalCount");
   const totalLabel = document.getElementById("totalLabel");
+  const packagePill = wrap ? wrap.querySelector(".countPillPackages") : null;
   if(!wrap || !commercial || !total) return;
   const routeShort = r.route_short || r.short || "";
   const loadedEntries = routeShort && LOADED[routeShort] ? Object.keys(LOADED[routeShort]) : [];
@@ -1390,19 +1396,26 @@ function updateFooterCounts(r){
     if(Number.isNaN(totalNum)){
       total.textContent = "—";
       if(totalLabel) totalLabel.textContent = "packages";
+      if(packagePill) packagePill.style.setProperty("--pill-progress", "0%");
       return;
     }
     if(hasLoaded){
       const remaining = Math.max(totalNum - loadedNum, 0);
       total.textContent = `${loadedNum}/${totalNum}`;
       if(totalLabel) totalLabel.textContent = `packages (${remaining} left)`;
+      if(packagePill){
+        const pct = totalNum > 0 ? Math.max(0, Math.min(loadedNum / totalNum, 1)) : 0;
+        packagePill.style.setProperty("--pill-progress", `${(pct * 100).toFixed(1)}%`);
+      }
       return;
     }
     total.textContent = `${totalNum}`;
     if(totalLabel) totalLabel.textContent = "packages";
+    if(packagePill) packagePill.style.setProperty("--pill-progress", "0%");
   }else{
     total.textContent = "—";
     if(totalLabel) totalLabel.textContent = "packages";
+    if(packagePill) packagePill.style.setProperty("--pill-progress", "0%");
   }
 }
 
@@ -1960,7 +1973,7 @@ function renderBags(r, q){
           <span id="commercialCount">0</span>
           <span class="countLabel">commercial</span>
         </div>
-        <div class="countPill">
+        <div class="countPill progressPill countPillPackages">
           <span id="totalCount">0</span>
           <span class="countLabel" id="totalLabel">packages</span>
         </div>
@@ -2121,7 +2134,7 @@ function renderCombined(r,q){
           <span id="commercialCount">0</span>
           <span class="countLabel">commercial</span>
         </div>
-        <div class="countPill">
+        <div class="countPill progressPill countPillPackages">
           <span id="totalCount">0</span>
           <span class="countLabel" id="totalLabel">packages</span>
         </div>

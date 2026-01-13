@@ -952,7 +952,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   line-height:1.1;
 }}
 .pill{{
-  background:rgba(0,0,0,.35);
+  --pill-bg: rgba(0,0,0,.35);
+  background:var(--pill-bg);
   border:1px solid rgba(255,255,255,.14);
   color:#eaf2ff;
   padding:6px 10px;
@@ -960,6 +961,11 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   font-weight:850;
   white-space:nowrap;
 }}
+.progressPill{{
+  background:linear-gradient(90deg, var(--pill-fill) 0 var(--pill-progress, 0%), var(--pill-bg) var(--pill-progress, 0%));
+}}
+.pillBags{{ --pill-fill: rgba(126, 201, 255, 0.65); }}
+.pillOverflow{{ --pill-fill: rgba(170, 170, 170, 0.55); }}
 
 @media (max-width: 900px){{
   .wrap{{padding:0}}
@@ -988,8 +994,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       <div class="hudTitle" id="hudTitle">—</div>
 
       <div class="hudRight">
-        <span class="pill" id="hudPillBags">—</span>
-        <span class="pill" id="hudPillOverflow">—</span>
+        <span class="pill progressPill pillBags" id="hudPillBags">—</span>
+        <span class="pill progressPill pillOverflow" id="hudPillOverflow">—</span>
       </div>
     </div>
   </div>
@@ -1054,10 +1060,25 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       return selectedNum + "/" + totalNum + suffix + " (" + remaining + " left)";
     }}
 
+    function setPillProgress(pill, total, selected){{
+      if(!pill) return;
+      var totalNum = parseInt(total, 10);
+      if(Number.isNaN(totalNum) || totalNum <= 0){{
+        pill.style.setProperty("--pill-progress", "0%");
+        return;
+      }}
+      var selectedNum = parseInt(selected, 10);
+      if(Number.isNaN(selectedNum)) selectedNum = 0;
+      var pct = Math.max(0, Math.min(selectedNum / totalNum, 1));
+      pill.style.setProperty("--pill-progress", (pct * 100).toFixed(1) + "%");
+    }}
+
     var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : null;
     var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : null;
     if(pillBags) pillBags.textContent = formatProgress(bags, d.bags_loaded, "bags");
     if(pillOverflow) pillOverflow.textContent = formatProgress(ov, d.overflow_loaded, "overflow");
+    setPillProgress(pillBags, bags, d.bags_loaded);
+    setPillProgress(pillOverflow, ov, d.overflow_loaded);
     var selectedCount = parseInt(d.bags_loaded || 0, 10);
     var footerWidth = parseInt(d.footer_pill_width || 0, 10);
     var shouldStack = selectedCount > 0;
