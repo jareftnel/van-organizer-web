@@ -917,6 +917,20 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .downloadLabelShort{display:none;}
 .downloadBtn:hover{filter:brightness(1.08)}
 .downloadBtn:active{transform:translateY(1px)}
+.clearBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.08);
+  color:var(--fg);
+  font-weight:900;
+  cursor:pointer;
+}
+.clearBtn:hover{filter:brightness(1.08)}
+.clearBtn:active{transform:translateY(1px)}
 .syncBtn{
   padding:6px 12px;
   border-radius:999px;
@@ -1940,7 +1954,7 @@ const routeShort = r.short || r.route_short || "";
     </table>
 
     <div class="rowActions">
-      <button class="btn" id="ovClear">Clear</button>
+      <button class="clearBtn" id="ovClear">Clear</button>
     </div>
   `;
 
