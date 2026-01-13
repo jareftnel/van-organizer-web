@@ -1799,12 +1799,12 @@ function renderBags(r, q){
       <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
     <div class="bagFooter">
+      <div class="bagModeDock">
+        ${bagModeHtml(routeShort)}
+      </div>
       <div class="clearRow">
         <button id="clearLoadedBtn" class="clearBtn">Clear</button>
         <button id="resetBagsBtn" class="clearBtn">Reset</button>
-      </div>
-      <div class="bagModeDock">
-        ${bagModeHtml(routeShort)}
       </div>
     </div>
   `;
@@ -1951,12 +1951,12 @@ function renderCombined(r,q){
       <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
     </div>
     <div class="bagFooter">
+      <div class="bagModeDock">
+        ${bagModeHtml(routeShort)}
+      </div>
       <div class="clearRow">
         <button id="clearLoadedBtn" class="clearBtn">Clear</button>
         <button id="resetBagsBtn" class="clearBtn">Reset</button>
-      </div>
-      <div class="bagModeDock">
-        ${bagModeHtml(routeShort)}
       </div>
     </div>
   `;
