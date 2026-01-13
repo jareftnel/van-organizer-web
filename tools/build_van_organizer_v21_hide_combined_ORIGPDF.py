@@ -1323,9 +1323,11 @@ function getLoadedStats(r){
   const ovMap = buildOverflowMap(r);
   let overflowLoaded = 0;
   let pkgLoaded = 0;
+  let loadedCards = 0;
   loadedEntries.forEach((key)=>{
     const idx = parseInt(key, 10);
     if(!idx) return;
+    if(isCombinedSecond(routeShort, idx)) return;
     const cur = byIdx[idx];
     if(!cur) return;
     const secondIdx = idx + 1;
@@ -1333,9 +1335,10 @@ function getLoadedStats(r){
     overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
     if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
     pkgLoaded += pkgCountNumber(cur, second);
+    loadedCards += second ? 2 : 1;
   });
   return {
-    loadedCards: loadedEntries.length,
+    loadedCards,
     overflowLoaded,
     pkgLoaded,
     totalLoaded: pkgLoaded + overflowLoaded
