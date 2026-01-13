@@ -940,7 +940,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   z-index:1;
   pointer-events:none;
 }}
-.hudRight{{ display:flex; gap:10px; z-index:1; justify-self:stretch; justify-content:flex-end; }}
+.hudRight{{ display:flex; flex-direction:column; gap:6px; z-index:1; justify-self:stretch; justify-content:center; align-items:flex-end; }}
 .pill{{
   background:rgba(0,0,0,.35);
   border:1px solid rgba(255,255,255,.14);
@@ -949,6 +949,13 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   border-radius:999px;
   font-weight:850;
   white-space:nowrap;
+}}
+#bannerHUD.hudReady .pill{{
+  padding:8px 12px;
+  min-height:40px;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
 }}
 
 @media (max-width: 900px){{
@@ -1006,6 +1013,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   }}, 3000);
 
   var hudTitle = document.getElementById("hudTitle");
+  var hud = document.getElementById("bannerHUD");
   var pillBags = document.getElementById("hudPillBags");
   var pillOverflow = document.getElementById("hudPillOverflow");
   var iframe = document.getElementById("orgFrame");
@@ -1027,6 +1035,11 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     if(d.type !== "routeMeta") return;
 
     if(hudTitle) hudTitle.textContent = d.title || "—";
+    if(hud && (d.bags !== undefined || d.overflow !== undefined)){{
+      hud.classList.add("hudReady");
+    }}else if(hud){{
+      hud.classList.remove("hudReady");
+    }}
 
     function formatProgress(total, selected, label){{
       if(total === undefined || total === null) return "—";
