@@ -2410,9 +2410,16 @@ window.addEventListener("message", (ev)=>{
       return;
     }
 
-    var scale = Math.max(0.60, Math.min(1, wrapW / boardW));
-    board.style.transformOrigin = 'top right';      // keep RTL alignment
-    board.style.transform = 'scale(' + scale.toFixed(3) + ')';
+    // Use a tiny safety gutter to avoid 1–2px rounding crop
+    var safeW = Math.max(0, wrapW - 2);
+
+    var scale = Math.max(0.60, Math.min(1, safeW / boardW));
+    var dx = Math.floor(safeW - (boardW * scale));   // shift left so right edge stays visible
+
+    // IMPORTANT: translate + scale (don’t use top-right origin without translate)
+    board.style.transformOrigin = 'top left';
+    board.style.transform =
+      'translateX(' + dx + 'px) scale(' + scale.toFixed(3) + ')';
 
     // After transform, measure actual on-screen height so nothing crops
     var r = board.getBoundingClientRect();
