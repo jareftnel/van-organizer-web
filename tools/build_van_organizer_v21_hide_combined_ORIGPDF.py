@@ -2443,47 +2443,23 @@ window.addEventListener("message", (ev)=>{
     var cardPadH = cardStyle
       ? (parseFloat(cardStyle.paddingTop) || 0) + (parseFloat(cardStyle.paddingBottom) || 0)
       : 0;
-    var maxRows = Math.min(4, Math.max(1, total));
-    var targetRows = Math.min(3, Math.max(1, total));
-    var best = null;
+    var rows = 3;
+    var cols = Math.max(1, Math.ceil(total / rows));
+    var totalGapX = gapX * Math.max(0, cols - 1);
+    var totalGapY = gapY * Math.max(0, rows - 1);
+    var cellW = (innerW - totalGapX) / cols;
+    var cellH = (innerH - totalGapY) / rows;
+    if(cellW <= 0 || cellH <= 0) return;
 
-    for(var rows = 1; rows <= maxRows; rows += 1){
-      var cols = Math.max(1, Math.ceil(total / rows));
-      var totalGapX = gapX * Math.max(0, cols - 1);
-      var totalGapY = gapY * Math.max(0, rows - 1);
-      var cellW = (innerW - totalGapX) / cols;
-      var cellH = (innerH - totalGapY) / rows;
-      if(cellW <= 0 || cellH <= 0) continue;
+    var contentW = cellW - cardPadW;
+    var contentH = cellH - cardPadH;
+    if(contentW <= 0 || contentH <= 0) return;
+    var rawScale = Math.min(contentW / baseW, contentH / baseH);
+    var scale = Math.min(maxScale, Math.max(minScale, rawScale));
 
-      var contentW = cellW - cardPadW;
-      var contentH = cellH - cardPadH;
-      if(contentW <= 0 || contentH <= 0) continue;
-      var rawScale = Math.min(contentW / baseW, contentH / baseH);
-      if(rawScale < minScale) continue;
-      var scale = Math.min(maxScale, Math.max(minScale, rawScale));
-      var score = scale;
-      if(!best || score > best.score + 0.001 || (Math.abs(score - best.score) <= 0.001 && Math.abs(rows - targetRows) < Math.abs(best.rows - targetRows))){
-        best = { rows: rows, cols: cols, scale: scale, score: score };
-      }
-    }
-
-    if(!best){
-      var fallbackRows = targetRows;
-      var fallbackCols = Math.max(1, Math.ceil(total / fallbackRows));
-      var fallbackGapX = gapX * Math.max(0, fallbackCols - 1);
-      var fallbackGapY = gapY * Math.max(0, fallbackRows - 1);
-      var fallbackCellW = (innerW - fallbackGapX) / fallbackCols;
-      var fallbackCellH = (innerH - fallbackGapY) / fallbackRows;
-      var fallbackContentW = fallbackCellW - cardPadW;
-      var fallbackContentH = fallbackCellH - cardPadH;
-      var fallbackScale = Math.min(fallbackContentW / baseW, fallbackContentH / baseH);
-      fallbackScale = Math.min(maxScale, Math.max(minScale, fallbackScale));
-      best = { rows: fallbackRows, cols: fallbackCols, scale: fallbackScale, score: fallbackScale };
-    }
-
-    grid.style.setProperty('--tote-rows', best.rows);
-    grid.style.setProperty('--tote-cols', best.cols);
-    grid.style.setProperty('--tote-scale', best.scale.toFixed(3));
+    grid.style.setProperty('--tote-rows', rows);
+    grid.style.setProperty('--tote-cols', cols);
+    grid.style.setProperty('--tote-scale', scale.toFixed(3));
   }
 
   var _fitTimer = null;
