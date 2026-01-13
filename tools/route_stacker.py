@@ -68,7 +68,7 @@ STYLE = {
 PAIR_MAP = {"A": "T", "B": "U", "C": "W", "D": "X", "E": "Y", "G": "Z"}
 INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 
-ZONE_RE = re.compile(r"^[A-Z]-[0-9.]*[A-Z]+$")
+ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z]+)$")
 SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 
