@@ -899,7 +899,10 @@ def organizer_raw(jid: str):
             ".tote-grid{"
             "position:relative;"
             "overflow-x:hidden !important;"
-            "overflow-y:visible !important;"
+            "overflow-y:hidden !important;"
+            "}"
+            ".toteGridFrame .toteWrap{"
+            "overflow:hidden !important;"
             "}"
             "</style>",
         )

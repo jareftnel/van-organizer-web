@@ -598,7 +598,24 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 /* tote cards */
 
 /* tote cards */
-.toteWrap{width:100%;min-width:0;display:flex;flex:1 1 auto;min-height:0;overflow-x:auto;overflow-y:hidden}
+.toteGridFrame{
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex:1 1 auto;
+  min-height:0;
+  padding:clamp(12px, 2.4vh, 20px);
+  box-sizing:border-box;
+}
+.toteWrap{
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  box-sizing:border-box;
+}
 .toteBoard{
   width:100%;
   padding:0;
@@ -608,19 +625,21 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   min-height:0;
 }
 .bagsGrid{
+  --tote-rows:3;
+  --tote-cols:1;
+  --tote-scale:1;
   display:grid;
-  grid-template-rows:repeat(3, minmax(max-content, auto));
+  grid-template-rows:repeat(var(--tote-rows), minmax(0, 1fr));
+  grid-template-columns:repeat(var(--tote-cols), minmax(0, 1fr));
   grid-auto-flow:column;
-  grid-auto-columns:clamp(170px, 12vw, 240px);
   gap:clamp(8px, 1.4vw, 16px);
-  justify-content:center;
+  justify-content:stretch;
   align-items:stretch;
-  width:max-content;
-  min-width:100%;
+  width:100%;
+  height:100%;
+  min-width:0;
   max-width:none;
   box-sizing:border-box;
-  height:auto;
-  min-height:0;
   overflow:visible;
   flex:1 1 auto;
   direction:rtl;
@@ -629,7 +648,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   overflow:visible;
 }
 /* grid-fit-patch: prevent horizontal scroll; allow vertical via page */
-.toteWrap, .cardsWrap, .organizer-grid{
+.toteWrap{
+  overflow:hidden;
+}
+.cardsWrap, .organizer-grid{
   overflow-x:hidden;
   overflow-y:visible;
 }
@@ -637,13 +659,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
 .toteCard{
-  --card-scale: 1;
+  --card-scale: var(--tote-scale, 1);
   --tote-badge-width: calc(44px * var(--card-scale));
   position:relative;
   width:100%;
   min-width:0;
   height:100%;
-  min-height:max-content;
+  min-height:0;
   max-width:100%;
   max-height:none;
   border-radius:18px;
@@ -1966,8 +1988,10 @@ function renderBags(r, q){
   const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
 
   content.innerHTML = `
-    <div class="toteWrap">
-      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+    <div class="toteGridFrame">
+      <div class="toteWrap">
+        <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      </div>
     </div>
     <div class="bagFooter">
       <div class="bagModeDock">
@@ -2127,8 +2151,10 @@ function renderCombined(r,q){
 
   const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
   content.innerHTML = `
-    <div class="toteWrap">
-      <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+    <div class="toteGridFrame">
+      <div class="toteWrap">
+        <div class="toteBoard bagsGrid">${layout.cardsHtml}</div>
+      </div>
     </div>
     <div class="bagFooter">
       <div class="bagModeDock">
@@ -2376,67 +2402,47 @@ window.addEventListener("message", (ev)=>{
 </script>
 <script>
 (function(){
-  // Scale the board to the wrapper width and keep RTL right edge aligned.
-  function fitBoardToWidth(){
-    var wrap =
-      document.querySelector('.toteWrap') ||
-      document.querySelector('.cardsWrap') ||
-      document.querySelector('.organizer-grid') ||
-      null;
+  function fitToteGridToFrame(){
+    var frame = document.querySelector('.toteGridFrame');
+    var wrap = frame && frame.querySelector('.toteWrap');
+    var grid = wrap && wrap.querySelector('.bagsGrid');
+    if(!frame || !wrap || !grid) return;
 
-    var board = wrap && (
-      wrap.querySelector('.toteBoard') ||
-      wrap.querySelector('.cards-grid') ||
-      wrap.firstElementChild
-    );
+    var cards = Array.from(grid.children).filter(function(el){
+      return el.classList && el.classList.contains('toteCard');
+    });
+    var total = cards.length || grid.children.length || 0;
+    var rows = 3;
+    var cols = Math.max(1, Math.ceil(total / rows));
+    grid.style.setProperty('--tote-rows', rows);
+    grid.style.setProperty('--tote-cols', cols);
 
-    if(!wrap || !board) return;
+    var wrapRect = wrap.getBoundingClientRect();
+    var availW = Math.max(0, wrapRect.width);
+    var availH = Math.max(0, wrapRect.height);
+    if(!availW || !availH) return;
 
-    // Reset before measuring
-    board.style.transform = '';
-    board.style.transformOrigin = '';
-    wrap.style.height = '';
-    wrap.style.overflowX = '';
-    wrap.style.overflowY = '';
+    var gridStyle = getComputedStyle(grid);
+    var gapX = parseFloat(gridStyle.columnGap || gridStyle.gap) || 0;
+    var gapY = parseFloat(gridStyle.rowGap || gridStyle.gap) || 0;
+    var totalGapX = gapX * Math.max(0, cols - 1);
+    var totalGapY = gapY * Math.max(0, rows - 1);
 
-    // Available visible width (subtract padding + tiny safety gutter)
-    var cs = getComputedStyle(wrap);
-    var padL = parseFloat(cs.paddingLeft)  || 0;
-    var padR = parseFloat(cs.paddingRight) || 0;
+    var cellW = (availW - totalGapX) / cols;
+    var cellH = (availH - totalGapY) / rows;
 
-    var wrapW = wrap.getBoundingClientRect().width - padL - padR - 2; // -2px gutter
-    var boardW = board.scrollWidth;
+    var baseW = 210;
+    var baseH = 190;
+    var scale = Math.min(cellW / baseW, cellH / baseH);
+    scale = Math.max(0.55, Math.min(scale, 1.15));
 
-    if(!wrapW || !boardW) return;
-
-    // If it already fits, don’t transform (keeps your original centering behavior)
-    if(boardW <= wrapW){
-      wrap.style.overflowX = 'hidden';
-      wrap.style.overflowY = 'visible';
-      wrap.style.height = board.scrollHeight + 'px';
-      return;
-    }
-
-    // Scale to fit EXACTLY — no minimum clamp (prevents cropping)
-    var scale = Math.min(1, wrapW / boardW);
-
-    // Right-align the scaled board inside the visible area, but never negative
-    var dx = Math.max(0, wrapW - (boardW * scale));
-
-    board.style.transformOrigin = 'top left';
-    board.style.transform = 'translateX(' + Math.floor(dx) + 'px) scale(' + scale.toFixed(4) + ')';
-
-    // Set wrapper height to the transformed height
-    var r = board.getBoundingClientRect();
-    wrap.style.height = Math.ceil(r.height) + 'px';
-    wrap.style.overflowX = 'hidden';
-    wrap.style.overflowY = 'visible';
+    grid.style.setProperty('--tote-scale', scale.toFixed(3));
   }
 
   var _fitTimer = null;
   function refitSoon(){
     clearTimeout(_fitTimer);
-    _fitTimer = setTimeout(fitBoardToWidth, 80);
+    _fitTimer = setTimeout(fitToteGridToFrame, 60);
   }
 
   // Hook into existing render if present
@@ -2444,25 +2450,29 @@ window.addEventListener("message", (ev)=>{
   if(typeof _render === 'function'){
     window.render = function(){
       var out = _render.apply(this, arguments);
-      fitBoardToWidth();
+      fitToteGridToFrame();
       return out;
     };
   }
 
-  window.addEventListener('load', fitBoardToWidth);
+  window.addEventListener('load', fitToteGridToFrame);
   window.addEventListener('resize', refitSoon);
   if (window.visualViewport){
     visualViewport.addEventListener('resize', refitSoon);
     visualViewport.addEventListener('scroll', refitSoon);
   }
 
-  // Refit on DOM mutations (route switch, tab change, etc.)
-  var target =
-    document.querySelector('.toteWrap') ||
-    document.querySelector('.cardsWrap') ||
-    document.body;
+  if(window.ResizeObserver){
+    var frame = document.querySelector('.toteGridFrame');
+    if(frame){
+      var ro = new ResizeObserver(refitSoon);
+      ro.observe(frame);
+    }
+  }
 
-  if(window.MutationObserver && target){
+  // Refit on DOM mutations (route switch, tab change, etc.)
+  if(window.MutationObserver){
+    var target = document.querySelector('.toteGridFrame') || document.body;
     var mo = new MutationObserver(refitSoon);
     mo.observe(target, { childList:true, subtree:true, attributes:true });
   }
