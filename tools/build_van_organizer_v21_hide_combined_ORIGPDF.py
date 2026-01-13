@@ -23,13 +23,15 @@ import openpyxl
 import pdfplumber
 
 
-CACHE_VERSION_PDF = 3
-CACHE_VERSION_ROUTES = 3
+CACHE_VERSION_PDF = 5
+CACHE_VERSION_ROUTES = 4
 
 # ----------------------------- Regex (precompiled) -----------------------------
 PAT_HEADER = re.compile(r'\b(DDF\d+)\s*·\s*([A-Z]{3},\s*[A-Z]{3}\s+\d{1,2},\s+\d{4})\b')
 PAT_DATE_ONLY = re.compile(r'\b([A-Z]{3},\s*[A-Z]{3}\s+\d{1,2},\s+\d{4})\b')
 PAT_FILE_DATE = re.compile(r'(\d{2})_(\d{2})_(\d{4})')
+PAT_ROUTE_CODE = re.compile(r'\bDDF\d+\b')
+PAT_ROUTE_TYPE_FALLBACK = re.compile(r'\bSTANDARD\b|\bSAME DAY\b|\bNEXT DAY\b|\bEXCEPTION\b|\bEXPRESS\b')
 
 PAT_ROW_FULL = re.compile(r'^\s*(\d+)\s+([A-Z]-\d+(?:\.\d+)?[A-Z]?)\s+([A-Za-z]+)\s+([0-9A-Za-z]+)\s+(\d+)(?:\s+|$)')
 PAT_ROW_NOSZ = re.compile(r'^\s*(\d+)\s+([A-Za-z]+)\s+([0-9A-Za-z]+)\s+(\d+)(?:\s+|$)')
@@ -192,30 +194,73 @@ def _extract_pkg_summaries(lines: List[str]) -> Tuple[Optional[int], Optional[in
 def parse_pdf_meta(
     pdf_path: str,
     use_cache: bool = True,
-) -> Tuple[str, str, Dict[str, Dict[int, dict]], Dict[str, str], Dict[str, dict]]:
+) -> Tuple[str, str, str, Dict[str, Dict[int, dict]], Dict[str, str], Dict[str, dict], Dict[str, str]]:
     """
     Returns:
-      header_title, route_code, pdf_meta[route_short][idx] = {sort_zone, pkgs},
-      route_time[route_short] = "11:20 AM", pkg_summary[route_short] = {commercial, total}
+      header_title, route_date, header_route_type, pdf_meta[route_short][idx] = {sort_zone, pkgs},
+      route_time[route_short] = "11:20 AM", pkg_summary[route_short] = {commercial, total},
+      route_type[route_short] = "STANDARD"
     """
     if use_cache:
         cached = _load_pdf_cache(pdf_path)
         if cached:
             return (
                 cached["header_title"],
-                cached["route_code"],
+                cached["route_date"],
+                cached.get("header_route_type") or "",
                 cached["pdf_meta"],
                 cached["route_time"],
                 cached.get("pkg_summary") or {},
+                cached.get("route_type") or {},
             )
 
     header_title = ""
     route_code = "DDF5"
     date_str = ""
+    header_route_type = ""
 
     pdf_meta: Dict[str, Dict[int, dict]] = {}
     route_time: Dict[str, str] = {}
     pkg_summary: Dict[str, dict] = {}
+    route_type: Dict[str, str] = {}
+
+    def _extract_route_type(words: List[dict], page_width: float) -> str:
+        if not words or not page_width:
+            return ""
+        max_top = 70.0
+        min_x = page_width * 0.6
+        candidates = [
+            w for w in words
+            if float(w.get("top", 0.0)) <= max_top and float(w.get("x0", 0.0)) >= min_x
+        ]
+        lines = _group_words_into_lines(candidates, y_tol=2.0)
+        for line in lines:
+            cleaned = re.sub(r"[•·]", "", line or "").strip().upper()
+            if not cleaned:
+                continue
+            if PAT_DATE_ONLY.search(cleaned):
+                continue
+            if PAT_HEADER.search(cleaned):
+                continue
+            if PAT_ROUTE_CODE.search(cleaned):
+                continue
+            if re.search(r"[A-Z]", cleaned):
+                return cleaned
+        return ""
+
+    def _extract_route_type_from_text(text: str, date_label: str) -> str:
+        if not text:
+            return ""
+        cleaned = text.upper()
+        if date_label:
+            pattern = re.compile(re.escape(date_label) + r"\s*[•·]\s*([A-Z0-9][A-Z0-9 /-]+)")
+            match = pattern.search(cleaned)
+            if match:
+                return match.group(1).strip()
+        match = PAT_ROUTE_TYPE_FALLBACK.search(cleaned)
+        if match:
+            return match.group(0).strip()
+        return ""
 
     def _group_words_into_lines(words: List[dict], y_tol: float = 2.0) -> List[str]:
         if not words:
@@ -265,6 +310,7 @@ def parse_pdf_meta(
                     mm, dd, yyyy = map(int, m3.groups())
                     dt = _dt.date(yyyy, mm, dd)
                     date_str = dt.strftime("%a, %b %d, %Y").upper()
+        header_route_type = _extract_route_type_from_text(t0, date_str)
         header_title = f"{route_code} • {date_str}".strip(" •")
 
         for page in pdf.pages:
@@ -287,6 +333,12 @@ def parse_pdf_meta(
                         break
             if not route_short:
                 continue
+
+            if route_short not in route_type:
+                words0 = page.extract_words(use_text_flow=True, keep_blank_chars=False) or []
+                route_type_value = _extract_route_type(words0, page.width)
+                if route_type_value:
+                    route_type[route_short] = route_type_value
 
             comm_pkgs, total_pkgs = _extract_pkg_summaries(lines_quick)
             if comm_pkgs is not None or total_pkgs is not None:
@@ -325,13 +377,15 @@ def parse_pdf_meta(
     if use_cache and pdf_meta:
         _save_pdf_cache(pdf_path, {
             "header_title": header_title,
-            "route_code": route_code,
+            "route_date": date_str,
+            "header_route_type": header_route_type,
             "pdf_meta": pdf_meta,
             "route_time": route_time,
             "pkg_summary": pkg_summary,
+            "route_type": route_type,
         })
 
-    return header_title, route_code, pdf_meta, route_time, pkg_summary
+    return header_title, date_str, header_route_type, pdf_meta, route_time, pkg_summary, route_type
 
 
 def parse_excel_routes(
@@ -339,6 +393,8 @@ def parse_excel_routes(
     pdf_meta: Dict[str, Dict[int, dict]],
     route_time: Dict[str, str],
     pkg_summary: Dict[str, dict],
+    route_type: Dict[str, str],
+    default_route_type: str,
 ) -> List[dict]:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
 
@@ -421,6 +477,7 @@ def parse_excel_routes(
             "route_short": rs,
             "cx": cx,
             "wave_time": route_time.get(rs, ""),
+            "route_type": route_type.get(rs) or default_route_type,
             "bags_count": len(bags),
             "overflow_total": overflow_total,
             "commercial_pkgs": pkg_info.get("commercial"),
@@ -476,6 +533,7 @@ body{margin:0;min-height:100vh;overflow-y:auto;font-family:system-ui,-apple-syst
 .topbar > *{min-width:0}
 .brand{font-weight:900;white-space:nowrap;flex:0 0 auto}
 .brand .routeDate{font-weight:800;}
+.brand .routeType{font-weight:800;}
 .filterRow{display:flex;align-items:center;gap:12px;flex:1 1 360px;min-width:0}
 .sel{margin-left:10px;flex:0 0 auto}
 select,input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px}
@@ -1032,7 +1090,7 @@ td:last-child,th:last-child{text-align:right}
 }
 
 @media (max-width: 720px){
-  .brand .routeCode,
+  .brand .routeType,
   .brand .routeSep{display:none;}
   .downloadLabelFull{display:none;}
   .downloadLabelShort{display:inline;}
@@ -1077,9 +1135,9 @@ td:last-child,th:last-child{text-align:right}
       <div class="header">
         <div class="topbar organizerHeaderRow">
           <div class="brand">
-            <span class="routeCode">__HEADER_ROUTE_CODE__</span>
-            <span class="routeSep">__HEADER_ROUTE_SEP__</span>
-            <span class="routeDate">__HEADER_ROUTE_DATE__</span>
+            <span class="routeDate" id="routeDate">__HEADER_ROUTE_DATE__</span>
+            <span class="routeSep" id="routeTypeSep">__HEADER_ROUTE_SEP__</span>
+            <span class="routeType" id="routeType">__HEADER_ROUTE_TYPE__</span>
           </div>
           <div class="filterRow">
             <div class="sel"><select id="routeSel"></select></div>
@@ -1232,6 +1290,11 @@ let activeTab = "combined";
 
 
 const routeSel = document.getElementById("routeSel");
+const routeDateEl = document.getElementById("routeDate");
+const routeTypeEl = document.getElementById("routeType");
+const routeTypeSepEl = document.getElementById("routeTypeSep");
+const headerDate = (routeDateEl && routeDateEl.textContent || "").trim();
+const headerType = (routeTypeEl && routeTypeEl.textContent || "").trim();
 const qBox = document.getElementById("q");
 const content = document.getElementById("content");
 
@@ -1311,6 +1374,19 @@ function updateSearchPlaceholder(){
   if(!qBox) return;
   const portraitMatch = window.matchMedia("(orientation: portrait) and (max-width: 720px)").matches;
   qBox.placeholder = portraitMatch ? "Search Bag / Overflow" : "Search Bag / Overflow Info";
+}
+
+function updateHeader(r){
+  if(routeDateEl){
+    routeDateEl.textContent = headerDate || "";
+  }
+  const typeValue = (r && r.route_type ? String(r.route_type).trim() : "") || headerType;
+  if(routeTypeEl){
+    routeTypeEl.textContent = typeValue;
+  }
+  if(routeTypeSepEl){
+    routeTypeSepEl.textContent = typeValue ? " • " : "";
+  }
 }
 
 updateSearchPlaceholder();
@@ -2245,6 +2321,7 @@ function scrollTotesToRight(){
 function render(){
   const r = ROUTES[activeRouteIndex];
   if(!r){ content.innerHTML = "<div style='color:var(--muted)'>No routes found.</div>"; return; }
+  updateHeader(r);
   applyWaveUI(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
@@ -2506,20 +2583,24 @@ window.addEventListener("message", (ev)=>{
 """
 
 
-def build_html(header_title: str, routes: List[dict], wave_map: dict) -> str:
+def build_html(header_title: str, header_date: str, header_route_type: str, routes: List[dict], wave_map: dict) -> str:
     # Keep JSON dumps settings identical to previous: no indent, ensure_ascii False.
     routes_json = json.dumps(routes, ensure_ascii=False)
     wave_json = json.dumps(wave_map, ensure_ascii=False)
-    route_code = header_title
-    route_date = ""
-    route_sep = ""
-    if " • " in header_title:
-        route_code, route_date = header_title.split(" • ", 1)
-        route_sep = " • "
+    route_date = header_date or ""
+    initial_type = ""
+    if routes:
+        initial_type = (routes[0].get("route_type") or "").strip()
+    if not initial_type:
+        initial_type = (header_route_type or "").strip()
+    route_sep = " • " if initial_type else ""
+    header_display = header_title
+    if route_date:
+        header_display = f"{route_date}{route_sep}{initial_type}".strip()
     return (HTML_TEMPLATE
-            .replace("__HEADER_TITLE__", header_title)
-            .replace("__HEADER_ROUTE_CODE__", route_code)
-            .replace("__HEADER_ROUTE_DATE__", route_date)
+            .replace("__HEADER_TITLE__", header_display)
+            .replace("__HEADER_ROUTE_DATE__", route_date or header_title)
+            .replace("__HEADER_ROUTE_TYPE__", initial_type)
             .replace("__HEADER_ROUTE_SEP__", route_sep)
             .replace("__ROUTES_JSON__", routes_json)
             .replace("__WAVE_JSON__", wave_json))
@@ -2533,12 +2614,12 @@ def main():
     ap.add_argument("--no-cache", action="store_true", help="Disable PDF parse cache")
     args = ap.parse_args()
 
-    header_title, _, pdf_meta, route_time, pkg_summary = parse_pdf_meta(
+    header_title, header_date, header_route_type, pdf_meta, route_time, pkg_summary, route_type = parse_pdf_meta(
         args.pdf,
         use_cache=not args.no_cache,
     )
     if args.no_cache:
-        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary)
+        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type, header_route_type)
         wave_map = build_wave_labels(routes)
     else:
         cached = _load_routes_cache(args.pdf, args.xlsx)
@@ -2546,10 +2627,10 @@ def main():
             routes = cached["routes"]
             wave_map = cached["wave_map"]
         else:
-            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary)
+            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type, header_route_type)
             wave_map = build_wave_labels(routes)
             _save_routes_cache(args.pdf, args.xlsx, {"routes": routes, "wave_map": wave_map})
-    html = build_html(header_title, routes, wave_map)
+    html = build_html(header_title, header_date, header_route_type, routes, wave_map)
     Path(args.out).write_text(html, encoding="utf-8")
     print(args.out)
 
