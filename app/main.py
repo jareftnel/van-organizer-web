@@ -938,9 +938,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   white-space:nowrap;
   z-index:1;
   pointer-events:none;
-  max-width:60%;
-  overflow:hidden;
-  text-overflow:ellipsis;
 }}
 .hudRight{{ display:flex; gap:10px; margin-left:auto; z-index:1; }}
 .pill{{
