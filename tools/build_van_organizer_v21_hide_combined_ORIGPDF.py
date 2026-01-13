@@ -1468,6 +1468,21 @@ function buildDisplayItems(r, q, ovMap){
   return items;
 }
 
+function pkgCountValue(bag){
+  if(!bag) return null;
+  const val = bag.pkgs;
+  if(val === undefined || val === null || val === "") return null;
+  const num = parseInt(val, 10);
+  return Number.isNaN(num) ? null : num;
+}
+
+function combinedPkgSum(anchor, other){
+  const first = pkgCountValue(anchor);
+  const second = pkgCountValue(other);
+  if(first === null && second === null) return "";
+  return String((first || 0) + (second || 0));
+}
+
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
   const orderedItems = items.slice();
   const cardsHtml = orderedItems.map((it, i)=>{
@@ -1811,7 +1826,7 @@ function renderBags(r, q){
   function subLine(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
     const sz = normZone(src.sort_zone);
-    const pk = (src.pkgs===undefined || src.pkgs===null) ? "" : String(src.pkgs);
+    const pk = other ? combinedPkgSum(anchor, other) : ((src.pkgs===undefined || src.pkgs===null) ? "" : String(src.pkgs));
     if(!sz && !pk) return "";
     if(sz && pk) return `${sz} (${pk})`;
     if(sz) return sz;
@@ -1973,9 +1988,7 @@ function renderCombined(r,q){
   }
 
   function combinedPkgCount(anchor, other){
-    const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
-    const pk = (src.pkgs===undefined || src.pkgs===null) ? "" : String(src.pkgs);
-    return pk;
+    return combinedPkgSum(anchor, other);
   }
 
   function combinedSubLine(anchor, other){
