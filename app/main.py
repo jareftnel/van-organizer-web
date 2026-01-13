@@ -979,7 +979,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
       <div class="hudRight">
         <span class="pill" id="hudPill1">—</span>
-        <span class="pill" id="hudPill2" style="display:none">—</span>
       </div>
     </div>
   </div>
@@ -1007,7 +1006,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
   var hudTitle = document.getElementById("hudTitle");
   var pill1 = document.getElementById("hudPill1");
-  var pill2 = document.getElementById("hudPill2");
   var iframe = document.getElementById("orgFrame");
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
@@ -1032,17 +1030,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : "—";
     if(pill1) pill1.textContent = bags + " bags • " + ov + " overflow";
 
-    var hasExtra = (d.commercial !== undefined && d.commercial !== null) || (d.total !== undefined && d.total !== null);
-    if(pill2){{
-      if(hasExtra){{
-        var c = (d.commercial !== undefined && d.commercial !== null) ? d.commercial : "—";
-        var t = (d.total !== undefined && d.total !== null) ? d.total : "—";
-        pill2.style.display = "";
-        pill2.textContent = c + " commercial • " + t + " total";
-      }}else{{
-        pill2.style.display = "none";
-      }}
-    }}
   }});
 }})();
 </script>
