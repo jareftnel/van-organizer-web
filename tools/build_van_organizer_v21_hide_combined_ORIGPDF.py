@@ -1283,9 +1283,18 @@ window.addEventListener("orientationchange", updateSearchPlaceholder);
 function routeTitle(r){ return (r.route_short||"") + (r.cx ? ` (${r.cx})` : ""); }
 function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
 
+function getFooterPackagePillWidth(){
+  const pill = document.querySelector("#footerCounts .countPill:not(.countPillCommercial)");
+  if(!pill) return null;
+  const rect = pill.getBoundingClientRect();
+  if(!rect || !rect.width) return null;
+  return Math.round(rect.width);
+}
+
 function sendMetaToParent(r){
   try{
     const stats = getLoadedStats(r);
+    const footerWidth = getFooterPackagePillWidth();
     window.parent.postMessage({
       type: "routeMeta",
       title: routeTitle(r),
@@ -1295,7 +1304,8 @@ function sendMetaToParent(r){
       overflow_loaded: stats.overflowLoaded,
       commercial: r.commercial_pkgs ?? null,
       total: r.total_pkgs ?? null,
-      total_loaded: stats.totalLoaded
+      total_loaded: stats.totalLoaded,
+      footer_pill_width: footerWidth
     }, "*");
   }catch(e){}
 }
@@ -2186,13 +2196,13 @@ function scrollTotesToRight(){
 function render(){
   const r = ROUTES[activeRouteIndex];
   if(!r){ content.innerHTML = "<div style='color:var(--muted)'>No routes found.</div>"; return; }
-  sendMetaToParent(r);
   applyWaveUI(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
+  sendMetaToParent(r);
 }
 
 function buildRouteDropdown(){

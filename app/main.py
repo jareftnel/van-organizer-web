@@ -941,6 +941,16 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   pointer-events:none;
 }}
 .hudRight{{ display:flex; gap:10px; z-index:1; justify-self:stretch; justify-content:flex-end; }}
+.hudRight.stacked{{
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}}
+.hudRight.stacked .pill{{
+  width:var(--hud-pill-target-width, auto);
+  padding:4px 10px;
+  line-height:1.1;
+}}
 .pill{{
   background:rgba(0,0,0,.35);
   border:1px solid rgba(255,255,255,.14);
@@ -1008,6 +1018,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   var hudTitle = document.getElementById("hudTitle");
   var pillBags = document.getElementById("hudPillBags");
   var pillOverflow = document.getElementById("hudPillOverflow");
+  var hudRight = document.querySelector(".hudRight");
+  var hudWrap = document.getElementById("bannerHUD");
   var iframe = document.getElementById("orgFrame");
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
@@ -1046,6 +1058,17 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : null;
     if(pillBags) pillBags.textContent = formatProgress(bags, d.bags_loaded, "bags");
     if(pillOverflow) pillOverflow.textContent = formatProgress(ov, d.overflow_loaded, "overflow");
+    var selectedCount = parseInt(d.bags_loaded || 0, 10);
+    var footerWidth = parseInt(d.footer_pill_width || 0, 10);
+    var shouldStack = selectedCount > 0;
+    if(hudRight) hudRight.classList.toggle("stacked", shouldStack);
+    if(hudWrap){
+      if(shouldStack && footerWidth > 0){
+        hudWrap.style.setProperty("--hud-pill-target-width", footerWidth + "px");
+      }else if(!shouldStack){
+        hudWrap.style.removeProperty("--hud-pill-target-width");
+      }
+    }
 
   }});
 }})();
