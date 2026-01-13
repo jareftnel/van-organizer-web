@@ -888,6 +888,9 @@ th,td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
   flex-wrap:wrap;
   justify-self:center;
 }
+.footerCounts.singlePill .countPillCommercial{
+  display:none;
+}
 .modeToggle{
   display:inline-flex;
   align-items:center;
@@ -1292,6 +1295,9 @@ function updateFooterCounts(r){
   const commercial = document.getElementById("commercialCount");
   const total = document.getElementById("totalCount");
   if(!wrap || !commercial || !total) return;
+  const routeShort = r.route_short || r.short || "";
+  const loadedEntries = routeShort && LOADED[routeShort] ? Object.keys(LOADED[routeShort]) : [];
+  const hasLoaded = loadedEntries && loadedEntries.length > 0;
   const hasCommercial = r.commercial_pkgs !== undefined && r.commercial_pkgs !== null;
   const hasTotal = r.total_pkgs !== undefined && r.total_pkgs !== null;
   if(!hasCommercial && !hasTotal){
@@ -1299,6 +1305,7 @@ function updateFooterCounts(r){
     return;
   }
   wrap.style.display = "";
+  wrap.classList.toggle("singlePill", hasLoaded);
   commercial.textContent = hasCommercial ? r.commercial_pkgs : "—";
   total.textContent = hasTotal ? r.total_pkgs : "—";
 }
@@ -1583,6 +1590,8 @@ function attachBagHandlers(routeShort, allowDrag){
       if(!idx) return;
       toggleLoaded(routeShort, idx);
       el.classList.toggle('loaded', isLoaded(routeShort, idx));
+      const r = ROUTES[activeRouteIndex];
+      if(r) updateFooterCounts(r);
     });
   });
 
@@ -1848,7 +1857,7 @@ function renderBags(r, q){
         ${bagModeHtml(routeShort)}
       </div>
       <div class="footerCounts" id="footerCounts">
-        <div class="countPill">
+        <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
           <span class="countLabel">commercial</span>
         </div>
@@ -2009,7 +2018,7 @@ function renderCombined(r,q){
         ${bagModeHtml(routeShort)}
       </div>
       <div class="footerCounts" id="footerCounts">
-        <div class="countPill">
+        <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
           <span class="countLabel">commercial</span>
         </div>
