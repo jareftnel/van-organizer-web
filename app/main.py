@@ -905,7 +905,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   gap:12px;
   padding:10px 14px;
 }}
-.bannerMin #bannerHUD{{ display:grid; padding:14px 16px; }}
+.bannerMin #bannerHUD{{ display:grid; padding:7px 16px; }}
 #bannerHUD::before{{
   content:"";
   position:absolute;
