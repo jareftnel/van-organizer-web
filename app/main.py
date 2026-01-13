@@ -978,7 +978,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       <div class="hudTitle" id="hudTitle">—</div>
 
       <div class="hudRight">
-        <span class="pill" id="hudPill1">—</span>
+        <span class="pill" id="hudPillBags">—</span>
+        <span class="pill" id="hudPillOverflow">—</span>
       </div>
     </div>
   </div>
@@ -1005,7 +1006,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   }}, 3000);
 
   var hudTitle = document.getElementById("hudTitle");
-  var pill1 = document.getElementById("hudPill1");
+  var pillBags = document.getElementById("hudPillBags");
+  var pillOverflow = document.getElementById("hudPillOverflow");
   var iframe = document.getElementById("orgFrame");
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
@@ -1028,7 +1030,8 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
     var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : "—";
     var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : "—";
-    if(pill1) pill1.textContent = bags + " bags • " + ov + " overflow";
+    if(pillBags) pillBags.textContent = bags + " bags";
+    if(pillOverflow) pillOverflow.textContent = ov + " overflow";
 
   }});
 }})();
