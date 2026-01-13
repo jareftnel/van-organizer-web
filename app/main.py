@@ -1030,14 +1030,14 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
     if(hudTitle) hudTitle.textContent = d.title || "—";
 
-    function formatProgress(total, selected){
+    function formatProgress(total, selected){{
       if(total === undefined || total === null) return "—";
       var totalNum = parseInt(total, 10);
       if(Number.isNaN(totalNum)) return "—";
       var selectedNum = parseInt(selected, 10);
       if(Number.isNaN(selectedNum)) selectedNum = 0;
       return totalNum + " - " + selectedNum + "/" + totalNum;
-    }
+    }}
 
     var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : null;
     var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : null;
