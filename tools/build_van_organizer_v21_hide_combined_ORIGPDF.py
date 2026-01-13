@@ -23,15 +23,14 @@ import openpyxl
 import pdfplumber
 
 
-CACHE_VERSION_PDF = 5
-CACHE_VERSION_ROUTES = 4
+CACHE_VERSION_PDF = 4
+CACHE_VERSION_ROUTES = 3
 
 # ----------------------------- Regex (precompiled) -----------------------------
 PAT_HEADER = re.compile(r'\b(DDF\d+)\s*·\s*([A-Z]{3},\s*[A-Z]{3}\s+\d{1,2},\s+\d{4})\b')
 PAT_DATE_ONLY = re.compile(r'\b([A-Z]{3},\s*[A-Z]{3}\s+\d{1,2},\s+\d{4})\b')
 PAT_FILE_DATE = re.compile(r'(\d{2})_(\d{2})_(\d{4})')
 PAT_ROUTE_CODE = re.compile(r'\bDDF\d+\b')
-PAT_ROUTE_TYPE_FALLBACK = re.compile(r'\bSTANDARD\b|\bSAME DAY\b|\bNEXT DAY\b|\bEXCEPTION\b|\bEXPRESS\b')
 
 PAT_ROW_FULL = re.compile(r'^\s*(\d+)\s+([A-Z]-\d+(?:\.\d+)?[A-Z]?)\s+([A-Za-z]+)\s+([0-9A-Za-z]+)\s+(\d+)(?:\s+|$)')
 PAT_ROW_NOSZ = re.compile(r'^\s*(\d+)\s+([A-Za-z]+)\s+([0-9A-Za-z]+)\s+(\d+)(?:\s+|$)')
@@ -194,10 +193,10 @@ def _extract_pkg_summaries(lines: List[str]) -> Tuple[Optional[int], Optional[in
 def parse_pdf_meta(
     pdf_path: str,
     use_cache: bool = True,
-) -> Tuple[str, str, str, Dict[str, Dict[int, dict]], Dict[str, str], Dict[str, dict], Dict[str, str]]:
+) -> Tuple[str, str, Dict[str, Dict[int, dict]], Dict[str, str], Dict[str, dict], Dict[str, str]]:
     """
     Returns:
-      header_title, route_date, header_route_type, pdf_meta[route_short][idx] = {sort_zone, pkgs},
+      header_title, route_date, pdf_meta[route_short][idx] = {sort_zone, pkgs},
       route_time[route_short] = "11:20 AM", pkg_summary[route_short] = {commercial, total},
       route_type[route_short] = "STANDARD"
     """
@@ -207,7 +206,6 @@ def parse_pdf_meta(
             return (
                 cached["header_title"],
                 cached["route_date"],
-                cached.get("header_route_type") or "",
                 cached["pdf_meta"],
                 cached["route_time"],
                 cached.get("pkg_summary") or {},
@@ -217,7 +215,6 @@ def parse_pdf_meta(
     header_title = ""
     route_code = "DDF5"
     date_str = ""
-    header_route_type = ""
 
     pdf_meta: Dict[str, Dict[int, dict]] = {}
     route_time: Dict[str, str] = {}
@@ -246,20 +243,6 @@ def parse_pdf_meta(
                 continue
             if re.search(r"[A-Z]", cleaned):
                 return cleaned
-        return ""
-
-    def _extract_route_type_from_text(text: str, date_label: str) -> str:
-        if not text:
-            return ""
-        cleaned = text.upper()
-        if date_label:
-            pattern = re.compile(re.escape(date_label) + r"\s*[•·]\s*([A-Z0-9][A-Z0-9 /-]+)")
-            match = pattern.search(cleaned)
-            if match:
-                return match.group(1).strip()
-        match = PAT_ROUTE_TYPE_FALLBACK.search(cleaned)
-        if match:
-            return match.group(0).strip()
         return ""
 
     def _group_words_into_lines(words: List[dict], y_tol: float = 2.0) -> List[str]:
@@ -310,7 +293,6 @@ def parse_pdf_meta(
                     mm, dd, yyyy = map(int, m3.groups())
                     dt = _dt.date(yyyy, mm, dd)
                     date_str = dt.strftime("%a, %b %d, %Y").upper()
-        header_route_type = _extract_route_type_from_text(t0, date_str)
         header_title = f"{route_code} • {date_str}".strip(" •")
 
         for page in pdf.pages:
@@ -378,14 +360,13 @@ def parse_pdf_meta(
         _save_pdf_cache(pdf_path, {
             "header_title": header_title,
             "route_date": date_str,
-            "header_route_type": header_route_type,
             "pdf_meta": pdf_meta,
             "route_time": route_time,
             "pkg_summary": pkg_summary,
             "route_type": route_type,
         })
 
-    return header_title, date_str, header_route_type, pdf_meta, route_time, pkg_summary, route_type
+    return header_title, date_str, pdf_meta, route_time, pkg_summary, route_type
 
 
 def parse_excel_routes(
@@ -394,7 +375,6 @@ def parse_excel_routes(
     route_time: Dict[str, str],
     pkg_summary: Dict[str, dict],
     route_type: Dict[str, str],
-    default_route_type: str,
 ) -> List[dict]:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
 
@@ -477,7 +457,7 @@ def parse_excel_routes(
             "route_short": rs,
             "cx": cx,
             "wave_time": route_time.get(rs, ""),
-            "route_type": route_type.get(rs) or default_route_type,
+            "route_type": route_type.get(rs, ""),
             "bags_count": len(bags),
             "overflow_total": overflow_total,
             "commercial_pkgs": pkg_info.get("commercial"),
@@ -1294,7 +1274,6 @@ const routeDateEl = document.getElementById("routeDate");
 const routeTypeEl = document.getElementById("routeType");
 const routeTypeSepEl = document.getElementById("routeTypeSep");
 const headerDate = (routeDateEl && routeDateEl.textContent || "").trim();
-const headerType = (routeTypeEl && routeTypeEl.textContent || "").trim();
 const qBox = document.getElementById("q");
 const content = document.getElementById("content");
 
@@ -1380,7 +1359,7 @@ function updateHeader(r){
   if(routeDateEl){
     routeDateEl.textContent = headerDate || "";
   }
-  const typeValue = (r && r.route_type ? String(r.route_type).trim() : "") || headerType;
+  const typeValue = (r && r.route_type ? String(r.route_type).trim() : "");
   if(routeTypeEl){
     routeTypeEl.textContent = typeValue;
   }
@@ -2583,7 +2562,7 @@ window.addEventListener("message", (ev)=>{
 """
 
 
-def build_html(header_title: str, header_date: str, header_route_type: str, routes: List[dict], wave_map: dict) -> str:
+def build_html(header_title: str, header_date: str, routes: List[dict], wave_map: dict) -> str:
     # Keep JSON dumps settings identical to previous: no indent, ensure_ascii False.
     routes_json = json.dumps(routes, ensure_ascii=False)
     wave_json = json.dumps(wave_map, ensure_ascii=False)
@@ -2591,8 +2570,6 @@ def build_html(header_title: str, header_date: str, header_route_type: str, rout
     initial_type = ""
     if routes:
         initial_type = (routes[0].get("route_type") or "").strip()
-    if not initial_type:
-        initial_type = (header_route_type or "").strip()
     route_sep = " • " if initial_type else ""
     header_display = header_title
     if route_date:
@@ -2614,12 +2591,12 @@ def main():
     ap.add_argument("--no-cache", action="store_true", help="Disable PDF parse cache")
     args = ap.parse_args()
 
-    header_title, header_date, header_route_type, pdf_meta, route_time, pkg_summary, route_type = parse_pdf_meta(
+    header_title, header_date, pdf_meta, route_time, pkg_summary, route_type = parse_pdf_meta(
         args.pdf,
         use_cache=not args.no_cache,
     )
     if args.no_cache:
-        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type, header_route_type)
+        routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type)
         wave_map = build_wave_labels(routes)
     else:
         cached = _load_routes_cache(args.pdf, args.xlsx)
@@ -2627,10 +2604,10 @@ def main():
             routes = cached["routes"]
             wave_map = cached["wave_map"]
         else:
-            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type, header_route_type)
+            routes = parse_excel_routes(args.xlsx, pdf_meta, route_time, pkg_summary, route_type)
             wave_map = build_wave_labels(routes)
             _save_routes_cache(args.pdf, args.xlsx, {"routes": routes, "wave_map": wave_map})
-    html = build_html(header_title, header_date, header_route_type, routes, wave_map)
+    html = build_html(header_title, header_date, routes, wave_map)
     Path(args.out).write_text(html, encoding="utf-8")
     print(args.out)
 
