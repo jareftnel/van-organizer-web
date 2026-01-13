@@ -1327,11 +1327,12 @@ function getLoadedStats(r){
   loadedEntries.forEach((key)=>{
     const idx = parseInt(key, 10);
     if(!idx) return;
-    if(isCombinedSecond(routeShort, idx)) return;
+    const isSecond = isCombinedSecond(routeShort, idx);
+    if(isSecond && isLoaded(routeShort, idx - 1)) return;
     const cur = byIdx[idx];
     if(!cur) return;
     const secondIdx = idx + 1;
-    const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
+    const second = (!isSecond && isCombinedSecond(routeShort, secondIdx)) ? byIdx[secondIdx] : null;
     overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
     if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
     pkgLoaded += pkgCountNumber(cur, second);
