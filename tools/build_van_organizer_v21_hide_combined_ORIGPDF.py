@@ -628,6 +628,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .organizer-grid{
   overflow:visible;
 }
+/* grid-fit-patch: prevent horizontal scroll; allow vertical via page */
+.toteWrap, .cardsWrap, .organizer-grid{
+  overflow-x:hidden;
+  overflow-y:visible;
+}
 .toteBoard{flex:1 1 auto}
 .toteCol{display:flex;flex-direction:column;gap:14px;}
 
@@ -2368,6 +2373,84 @@ window.addEventListener("message", (ev)=>{
   if(d.tab === "bags") setActiveTab("bags");
   if(d.tab === "overflow") setActiveTab("overflow");
 });
+</script>
+<script>
+(function(){
+  // Scale the board to the wrapper width and keep RTL right edge aligned.
+  function fitBoardToWidth(){
+    var wrap =
+      document.querySelector('.toteWrap') ||
+      document.querySelector('.cardsWrap') ||
+      document.querySelector('.organizer-grid') ||
+      null;
+
+    var board = wrap && (
+      wrap.querySelector('.toteBoard') ||
+      wrap.querySelector('.cards-grid') ||
+      wrap.firstElementChild
+    );
+
+    if(!wrap || !board) return;
+
+    // Reset before measuring
+    board.style.transform = '';
+    board.style.transformOrigin = '';
+    wrap.style.height = '';
+    wrap.style.overflowX = '';
+    wrap.style.overflowY = '';
+
+    var wrapW  = wrap.clientWidth;
+    var boardW = board.scrollWidth;
+    if(!wrapW || !boardW) return;
+
+    if(boardW <= wrapW){
+      wrap.style.overflowX = 'hidden';
+      wrap.style.overflowY = 'visible';
+      wrap.style.height = board.scrollHeight + 'px';
+      return;
+    }
+
+    var scale = Math.max(0.60, Math.min(1, wrapW / boardW));
+    board.style.transformOrigin = 'top right';      // keep RTL alignment
+    board.style.transform = 'scale(' + scale.toFixed(3) + ')';
+
+    // After transform, measure actual on-screen height so nothing crops
+    var r = board.getBoundingClientRect();
+    wrap.style.height = Math.ceil(r.height) + 'px';
+    wrap.style.overflowX = 'hidden';
+    wrap.style.overflowY = 'visible';
+  }
+
+  var _fitTimer = null;
+  function refitSoon(){
+    clearTimeout(_fitTimer);
+    _fitTimer = setTimeout(fitBoardToWidth, 80);
+  }
+
+  // Hook into existing render if present
+  var _render = window.render;
+  if(typeof _render === 'function'){
+    window.render = function(){
+      var out = _render.apply(this, arguments);
+      fitBoardToWidth();
+      return out;
+    };
+  }
+
+  window.addEventListener('load', fitBoardToWidth);
+  window.addEventListener('resize', refitSoon);
+
+  // Refit on DOM mutations (route switch, tab change, etc.)
+  var target =
+    document.querySelector('.toteWrap') ||
+    document.querySelector('.cardsWrap') ||
+    document.body;
+
+  if(window.MutationObserver && target){
+    var mo = new MutationObserver(refitSoon);
+    mo.observe(target, { childList:true, subtree:true, attributes:true });
+  }
+})();
 </script>
 </body>
 </html>
