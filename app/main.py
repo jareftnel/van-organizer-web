@@ -1034,8 +1034,11 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       if(Number.isNaN(totalNum)) return "—";
       var selectedNum = parseInt(selected, 10);
       if(Number.isNaN(selectedNum)) selectedNum = 0;
-      var remaining = Math.max(totalNum - selectedNum, 0);
       var suffix = label ? " " + label : "";
+      if(selectedNum <= 0){{
+        return totalNum + suffix;
+      }}
+      var remaining = Math.max(totalNum - selectedNum, 0);
       return selectedNum + "/" + totalNum + suffix + " (" + remaining + " left)";
     }}
 
