@@ -1918,7 +1918,7 @@ function renderBags(r, q){
         </div>
         <div class="countPill">
           <span id="totalCount">0</span>
-          <span class="countLabel">total</span>
+          <span class="countLabel">packages</span>
         </div>
       </div>
       <div class="clearRow">
@@ -2079,7 +2079,7 @@ function renderCombined(r,q){
         </div>
         <div class="countPill">
           <span id="totalCount">0</span>
-          <span class="countLabel">total</span>
+          <span class="countLabel">packages</span>
         </div>
       </div>
       <div class="clearRow">
