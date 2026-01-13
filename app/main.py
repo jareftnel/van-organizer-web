@@ -900,7 +900,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   position:absolute;
   inset:0;
   display:none;
-  grid-template-columns:auto minmax(0, 1fr) auto;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   align-items:center;
   gap:12px;
   padding:10px 14px;
@@ -914,7 +914,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   backdrop-filter: blur(2px);
 }}
 #bannerHUD > *{{ position:relative; z-index:1; pointer-events:auto; }}
-.hudLeft{{ display:flex; gap:8px; z-index:1; justify-self:start; }}
+.hudLeft{{ display:flex; gap:8px; z-index:1; justify-self:stretch; justify-content:flex-start; }}
 .hudTab{{
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);
@@ -940,7 +940,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   z-index:1;
   pointer-events:none;
 }}
-.hudRight{{ display:flex; gap:10px; z-index:1; justify-self:end; }}
+.hudRight{{ display:flex; gap:10px; z-index:1; justify-self:stretch; justify-content:flex-end; }}
 .pill{{
   background:rgba(0,0,0,.35);
   border:1px solid rgba(255,255,255,.14);
