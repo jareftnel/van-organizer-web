@@ -874,6 +874,76 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "grid-right-fit-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* grid-right-fit-patch */"
+            ".toteWrap,"
+            ".cardsWrap,"
+            ".organizer-grid,"
+            ".tote-grid{"
+            "position:relative;"
+            "overflow-x:hidden !important;"
+            "overflow-y:visible !important;"
+            "}"
+            "</style>",
+        )
+    if "</body>" in html and "grid-right-fit-patch" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "(function(){"
+            "  function innerWidth(el){"
+            "    const cs = getComputedStyle(el);"
+            "    const pl = parseFloat(cs.paddingLeft)||0, pr = parseFloat(cs.paddingRight)||0;"
+            "    return Math.max(0, el.clientWidth - pl - pr - 2);"
+            "  }"
+            "  function fitGrid(){"
+            "    const wrap = document.querySelector('.toteWrap, .cardsWrap, .organizer-grid, .tote-grid');"
+            "    const board = wrap && (wrap.querySelector('.toteBoard, .cards-grid, .tote-grid'));"
+            "    if(!wrap || !board) return;"
+            "    board.style.transform = '';"
+            "    board.style.transformOrigin = '';"
+            "    wrap.style.height = '';"
+            "    const usable = innerWidth(wrap);"
+            "    const contentW = board.scrollWidth;"
+            "    if(!usable || !contentW) return;"
+            "    if(contentW <= usable){"
+            "      wrap.style.overflowX = 'hidden';"
+            "      wrap.style.overflowY = 'visible';"
+            "      wrap.style.height = board.scrollHeight + 'px';"
+            "      return;"
+            "    }"
+            "    const scale = Math.max(0.60, Math.min(1, usable / contentW));"
+            "    const rightOffset = Math.min(0, Math.round(usable - contentW * scale));"
+            "    board.style.transformOrigin = 'top left';"
+            "    board.style.transform = 'translateX(' + rightOffset + 'px) scale(' + scale.toFixed(3) + ')';"
+            "    const h = Math.ceil(board.getBoundingClientRect().height);"
+            "    wrap.style.height = h + 'px';"
+            "    wrap.style.overflowX = 'hidden';"
+            "    wrap.style.overflowY = 'visible';"
+            "  }"
+            "  let t;"
+            "  function refitSoon(){ clearTimeout(t); t = setTimeout(fitGrid, 80); }"
+            "  const _render = window.render;"
+            "  if (typeof _render === 'function'){"
+            "    window.render = function(){"
+            "      const out = _render.apply(this, arguments);"
+            "      fitGrid();"
+            "      return out;"
+            "    };"
+            "  }"
+            "  window.addEventListener('load', fitGrid);"
+            "  window.addEventListener('resize', refitSoon);"
+            "  window.addEventListener('orientationchange', refitSoon);"
+            "  const moTarget = document.querySelector('.toteWrap, .cardsWrap') || document.body;"
+            "  if (window.MutationObserver && moTarget){"
+            "    new MutationObserver(refitSoon).observe(moTarget, {childList:true, subtree:true, attributes:true});"
+            "  }"
+            "})();"
+            "</script>"
+            "</body>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
