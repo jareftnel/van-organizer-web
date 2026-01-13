@@ -628,11 +628,16 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   --tote-rows:3;
   --tote-cols:1;
   --tote-scale:1;
+  --tote-gap: clamp(8px, 1.4vw, 16px);
+  --tote-base-w: 210px;
+  --tote-base-h: 190px;
+  --tote-min-scale: 0.55;
+  --tote-max-scale: 1.15;
   display:grid;
   grid-template-rows:repeat(var(--tote-rows), minmax(0, 1fr));
   grid-template-columns:repeat(var(--tote-cols), minmax(0, 1fr));
   grid-auto-flow:column;
-  gap:clamp(8px, 1.4vw, 16px);
+  gap:var(--tote-gap);
   justify-content:stretch;
   align-items:stretch;
   width:100%;
@@ -2412,30 +2417,48 @@ window.addEventListener("message", (ev)=>{
       return el.classList && el.classList.contains('toteCard');
     });
     var total = cards.length || grid.children.length || 0;
-    var rows = 3;
-    var cols = Math.max(1, Math.ceil(total / rows));
-    grid.style.setProperty('--tote-rows', rows);
-    grid.style.setProperty('--tote-cols', cols);
-
     var wrapRect = wrap.getBoundingClientRect();
     var availW = Math.max(0, wrapRect.width);
     var availH = Math.max(0, wrapRect.height);
     if(!availW || !availH) return;
 
     var gridStyle = getComputedStyle(grid);
+    var padX = (parseFloat(gridStyle.paddingLeft) || 0) + (parseFloat(gridStyle.paddingRight) || 0);
+    var padY = (parseFloat(gridStyle.paddingTop) || 0) + (parseFloat(gridStyle.paddingBottom) || 0);
+    var innerW = Math.max(0, availW - padX);
+    var innerH = Math.max(0, availH - padY);
+    if(!innerW || !innerH) return;
+
+    var baseW = parseFloat(gridStyle.getPropertyValue('--tote-base-w')) || 210;
+    var baseH = parseFloat(gridStyle.getPropertyValue('--tote-base-h')) || 190;
+    var minScale = parseFloat(gridStyle.getPropertyValue('--tote-min-scale')) || 0.55;
+    var maxScale = parseFloat(gridStyle.getPropertyValue('--tote-max-scale')) || 1.15;
     var gapX = parseFloat(gridStyle.columnGap || gridStyle.gap) || 0;
     var gapY = parseFloat(gridStyle.rowGap || gridStyle.gap) || 0;
+    var card = cards[0];
+    var cardStyle = card ? getComputedStyle(card) : null;
+    var cardPadW = cardStyle
+      ? (parseFloat(cardStyle.paddingLeft) || 0) + (parseFloat(cardStyle.paddingRight) || 0)
+      : 0;
+    var cardPadH = cardStyle
+      ? (parseFloat(cardStyle.paddingTop) || 0) + (parseFloat(cardStyle.paddingBottom) || 0)
+      : 0;
+    var rows = 3;
+    var cols = Math.max(1, Math.ceil(total / rows));
     var totalGapX = gapX * Math.max(0, cols - 1);
     var totalGapY = gapY * Math.max(0, rows - 1);
+    var cellW = (innerW - totalGapX) / cols;
+    var cellH = (innerH - totalGapY) / rows;
+    if(cellW <= 0 || cellH <= 0) return;
 
-    var cellW = (availW - totalGapX) / cols;
-    var cellH = (availH - totalGapY) / rows;
+    var contentW = cellW - cardPadW;
+    var contentH = cellH - cardPadH;
+    if(contentW <= 0 || contentH <= 0) return;
+    var rawScale = Math.min(contentW / baseW, contentH / baseH);
+    var scale = Math.min(maxScale, Math.max(minScale, rawScale));
 
-    var baseW = 210;
-    var baseH = 190;
-    var scale = Math.min(cellW / baseW, cellH / baseH);
-    scale = Math.max(0.55, Math.min(scale, 1.15));
-
+    grid.style.setProperty('--tote-rows', rows);
+    grid.style.setProperty('--tote-cols', cols);
     grid.style.setProperty('--tote-scale', scale.toFixed(3));
   }
 
