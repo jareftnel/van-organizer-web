@@ -934,7 +934,7 @@ def organizer_raw(jid: str):
             "</body>",
             "<style>"
             "/* combined-search-patch */"
-            ".card[hidden], [data-card][hidden] { display: none !important; }"
+            ".card[hidden], [data-card][hidden], .toteCard[hidden] { display: none !important; }"
             "</style>"
             "<script>"
             "/* combined-search-patch */"
@@ -989,7 +989,7 @@ def organizer_raw(jid: str):
             "    ].filter(Boolean);"
             "    const cards = [];"
             "    roots.forEach(r => {"
-            "      cards.push.apply(cards, $all('.card, [data-card]', r));"
+            "      cards.push.apply(cards, $all('.card, [data-card], .toteCard', r));"
             "    });"
             "    return cards;"
             "  }"
