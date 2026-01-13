@@ -1279,15 +1279,61 @@ function baseOrder(r){ return (r.bags_detail||[]).map(x=>x.idx); }
 
 function sendMetaToParent(r){
   try{
+    const stats = getLoadedStats(r);
     window.parent.postMessage({
       type: "routeMeta",
       title: routeTitle(r),
       bags: r.bags_count ?? 0,
+      bags_loaded: stats.loadedCards,
       overflow: r.overflow_total ?? 0,
+      overflow_loaded: stats.overflowLoaded,
       commercial: r.commercial_pkgs ?? null,
-      total: r.total_pkgs ?? null
+      total: r.total_pkgs ?? null,
+      total_loaded: stats.totalLoaded
     }, "*");
   }catch(e){}
+}
+
+function sumOverflowCountsForBag(entry, ovMap){
+  if(!entry || !ovMap) return 0;
+  const label = String(entry.bag || entry.bag_id || "").trim();
+  if(!label) return 0;
+  const list = ovMap.get(label);
+  if(!list || !list.length) return 0;
+  return list.reduce((acc, item)=>acc + (parseInt(item.count || 0, 10) || 0), 0);
+}
+
+function pkgCountNumber(anchor, other){
+  const first = pkgCountValue(anchor);
+  const second = pkgCountValue(other);
+  if(first === null && second === null) return 0;
+  return (first || 0) + (second || 0);
+}
+
+function getLoadedStats(r){
+  const routeShort = r.route_short || "";
+  const loadedEntries = routeShort && LOADED[routeShort] ? Object.keys(LOADED[routeShort]) : [];
+  const byIdx = Object.fromEntries((r.bags_detail || []).map(x=>[x.idx, x]));
+  const ovMap = buildOverflowMap(r);
+  let overflowLoaded = 0;
+  let pkgLoaded = 0;
+  loadedEntries.forEach((key)=>{
+    const idx = parseInt(key, 10);
+    if(!idx) return;
+    const cur = byIdx[idx];
+    if(!cur) return;
+    const secondIdx = idx + 1;
+    const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
+    overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
+    if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
+    pkgLoaded += pkgCountNumber(cur, second);
+  });
+  return {
+    loadedCards: loadedEntries.length,
+    overflowLoaded,
+    pkgLoaded,
+    totalLoaded: pkgLoaded + overflowLoaded
+  };
 }
 
 function updateFooterCounts(r){
@@ -1591,7 +1637,10 @@ function attachBagHandlers(routeShort, allowDrag){
       toggleLoaded(routeShort, idx);
       el.classList.toggle('loaded', isLoaded(routeShort, idx));
       const r = ROUTES[activeRouteIndex];
-      if(r) updateFooterCounts(r);
+      if(r){
+        updateFooterCounts(r);
+        sendMetaToParent(r);
+      }
     });
   });
 
