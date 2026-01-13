@@ -933,7 +933,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 .hudTitle{{
   flex:1;
   text-align:center;
-  font-size:20px;
+  font-size:24px;
   font-weight:900;
   color:#fff;
   margin-top:2px;
