@@ -1098,7 +1098,7 @@ def organizer_raw(jid: str):
             "  }"
             "  function updateFooterPills(){"
             "    var activeTab = getActiveTab();"
-            "    var shouldHide = activeTab === 'bags';"
+            "    var shouldHide = activeTab !== 'combined';"
             "    var pills = findFooterPillEls();"
             "    pills.forEach(function(pill){"
             "      if(shouldHide){"
