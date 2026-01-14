@@ -692,6 +692,31 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCard.dragging{opacity:.25;}
 .toteCard.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
 .toteCard.loaded{filter:grayscale(.85) brightness(.72);}
+.toteSlot{
+  border:2px dashed rgba(255,255,255,.15);
+  border-radius:18px;
+  background:rgba(255,255,255,.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(255,255,255,.4);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:12px;
+}
+.toteSlot.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
+.customSlotControls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin-top:10px;
+}
+.customSlotControls .clearBtn{
+  height:38px;
+  padding:0 14px;
+}
 
 .toteTopRow{
   display:grid;
@@ -1156,6 +1181,7 @@ const STORAGE_KEY = "vanorg_loaded_v1";
 const MODE_KEY = "vanorg_bagmode_v1";
 const ORDER_KEY = "vanorg_bagorder_v1";
 const COMBINE_KEY = "vanorg_combined_v1";
+const CUSTOM_SLOTS_KEY = "vanorg_custom_slots_v1";
 
 function readJSON(key, fallback){ try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch(e){ return fallback; } }
 function writeJSON(key, obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch(e){} }
@@ -1164,6 +1190,7 @@ let LOADED = readJSON(STORAGE_KEY, {});
 let BAGMODE = readJSON(MODE_KEY, {});
 let BAGORDER = readJSON(ORDER_KEY, {});
 let COMBINED = readJSON(COMBINE_KEY, {});
+let CUSTOMSLOTS = readJSON(CUSTOM_SLOTS_KEY, {});
 
 // Overflow checklist + ordering
 const OVKEY = "vanorg_overflow_checks_v1";
@@ -1213,6 +1240,9 @@ function clearLoaded(routeShort){ LOADED[routeShort] = {}; writeJSON(STORAGE_KEY
 function getMode(routeShort){ return BAGMODE[routeShort] || "normal"; }
 function setMode(routeShort, mode){ BAGMODE[routeShort] = mode; writeJSON(MODE_KEY, BAGMODE); }
 
+function getCustomSlots(routeShort){ return (CUSTOMSLOTS[routeShort] || []).slice(); }
+function setCustomSlots(routeShort, slots){ CUSTOMSLOTS[routeShort] = slots.slice(); writeJSON(CUSTOM_SLOTS_KEY, CUSTOMSLOTS); }
+
 function isCombinedSecond(routeShort, secondIdx){ return !!(COMBINED[routeShort] && COMBINED[routeShort][String(secondIdx)]); }
 function setCombined(routeShort, secondIdx, val){
   if(!COMBINED[routeShort]) COMBINED[routeShort] = {};
@@ -1225,13 +1255,16 @@ function clearCombined(routeShort){
   COMBINED[routeShort] = {};
   writeJSON(COMBINE_KEY, COMBINED);
 }
-function resetBagsPage(routeShort, baseOrderArr){
+function resetBagsPage(routeShort, baseOrderArr, items){
   // Unpress all totes + uncombine everything
   clearLoaded(routeShort);
   clearCombined(routeShort);
   // If in custom mode, restore order to base (so nothing stays missing)
   if(getMode(routeShort)==="custom"){
     setCustomOrder(routeShort, baseOrderArr.slice());
+    if(items){
+      setCustomSlots(routeShort, defaultCustomSlots(items));
+    }
   }
 }
 
@@ -1620,6 +1653,61 @@ function overflowSearchText(label, ovMap){
 }
 
 // Custom order helpers
+function slotIdForItem(item){
+  if(!item) return "";
+  const idx = item.idx ?? (item.cur && item.cur.idx);
+  if(idx === undefined || idx === null) return "";
+  return String(idx);
+}
+
+function defaultCustomSlots(items){
+  const slots = (items || []).map(slotIdForItem).filter(Boolean);
+  while(slots.length % 3 !== 0) slots.push(null);
+  return slots;
+}
+
+function normalizeCustomSlots(routeShort, items){
+  const validIds = new Set((items || []).map(slotIdForItem).filter(Boolean));
+  const seen = new Set();
+  const raw = getCustomSlots(routeShort);
+  const normalized = raw.map((val)=>{
+    if(val === null || val === undefined) return null;
+    const key = String(val).trim();
+    if(!key || !validIds.has(key) || seen.has(key)) return null;
+    seen.add(key);
+    return key;
+  });
+  (items || []).forEach((item)=>{
+    const key = slotIdForItem(item);
+    if(!key || seen.has(key)) return;
+    normalized.push(key);
+    seen.add(key);
+  });
+  while(normalized.length % 3 !== 0) normalized.push(null);
+  setCustomSlots(routeShort, normalized);
+  return normalized;
+}
+
+function customOrderFromSlots(routeShort, baseOrderArr){
+  const baseSet = new Set(baseOrderArr.map(String));
+  const seen = new Set();
+  const order = [];
+  getCustomSlots(routeShort).forEach((slot)=>{
+    if(slot === null || slot === undefined) return;
+    const key = String(slot);
+    if(!baseSet.has(key) || seen.has(key)) return;
+    seen.add(key);
+    order.push(parseInt(key, 10));
+  });
+  baseOrderArr.forEach((idx)=>{
+    const key = String(idx);
+    if(seen.has(key)) return;
+    seen.add(key);
+    order.push(idx);
+  });
+  return order;
+}
+
 function getCustomOrder(routeShort, base){
   const arr = (BAGORDER[routeShort] || []).slice();
   const baseSet = new Set(base.map(String));
@@ -1645,7 +1733,7 @@ function buildOrder(r){
   const mode = getMode(routeShort);
   let ord = base.slice();
   if(mode==="reversed") ord.reverse();
-  if(mode==="custom") ord = getCustomOrder(routeShort, base).slice();
+  if(mode==="custom") ord = customOrderFromSlots(routeShort, base);
   if(mode==="custom") ord = removeCombinedSecondsFromOrder(routeShort, ord);
   return ord;
 }
@@ -1690,64 +1778,79 @@ function combinedPkgSum(anchor, other){
   return String((first || 0) + (second || 0));
 }
 
-function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
-  const orderedItems = items.slice();
-  const cardsHtml = orderedItems.map((it, i)=>{
-    const cur = it.cur;
-    const second = it.second;
-    const main1 = (cur.bag_id || cur.bag || "").toString();
-    const chip1 = bagColorChip(cur.bag);
-    const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
-    const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
-    const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
-    const badgeHtml = badgeText
-      ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>`
-      : ``;
-    const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
-    const pkgClass = pkgText ? "hasPkg" : "";
-    const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
-    const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-    const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}</div>`;
-    const barHtml = `<div class="card-bar">
-      <span class="bar-left-icon">${starHtml}</span>
-      <div class="bar-track"><div class="bar-fill"></div></div>
-      <span class="bar-count">${pkgHtml}</span>
-    </div>`;
-    if(second){
-      const main2 = (second.bag_id || second.bag || "").toString();
-      const chip2 = bagColorChip(second.bag);
-      const sub = getSubLine(cur, second);
-      const topNum = (cur.sort_zone ? main1 : main2);
-      const botNum = (cur.sort_zone ? main2 : main1);
-      const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
-      const chipBorder = chipBorderColor(chip1, chip2);
-      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
-        ${minusHtml}
-        <div class="toteTopRow">
-          ${badgeGroupHtml}
-          ${barHtml}
-        </div>
-        <div class="toteBigNumber toteBigNumberStack">
-          <div class="toteBigNumberLine">${topNum}</div>
-          <div class="toteBigNumberLine">${botNum}</div>
-        </div>
-        ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
-      </div>`;
-    }
-
-    const sub = getSubLine(cur, null);
-
-    const chipBorder = chipBorderColor(chip1, chip1);
-    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
+function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount, slotIndex){
+  const cur = it.cur;
+  const second = it.second;
+  const main1 = (cur.bag_id || cur.bag || "").toString();
+  const chip1 = bagColorChip(cur.bag);
+  const loadedClass = isLoaded(routeShort, it.idx) ? "loaded" : "";
+  const badgeText = getBadgeText ? getBadgeText(cur, second, it.idx) : it.idx;
+  const pkgText = getPkgCount ? getPkgCount(cur, second) : "";
+  const badgeHtml = badgeText
+    ? `<div class="toteCornerBadge toteBubble">${badgeText}</div>`
+    : ``;
+  const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
+  const pkgClass = pkgText ? "hasPkg" : "";
+  const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
+  const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+  const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}</div>`;
+  const barHtml = `<div class="card-bar">
+    <span class="bar-left-icon">${starHtml}</span>
+    <div class="bar-track"><div class="bar-fill"></div></div>
+    <span class="bar-count">${pkgHtml}</span>
+  </div>`;
+  const slotAttr = (slotIndex === 0 || slotIndex) ? ` data-slot="${slotIndex}"` : "";
+  if(second){
+    const main2 = (second.bag_id || second.bag || "").toString();
+    const chip2 = bagColorChip(second.bag);
+    const sub = getSubLine(cur, second);
+    const topNum = (cur.sort_zone ? main1 : main2);
+    const botNum = (cur.sort_zone ? main2 : main1);
+    const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
+    const chipBorder = chipBorderColor(chip1, chip2);
+    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}"${slotAttr} style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
+      ${minusHtml}
       <div class="toteTopRow">
         ${badgeGroupHtml}
         ${barHtml}
       </div>
-      <div class="toteBigNumber">${main1}</div>
+      <div class="toteBigNumber toteBigNumberStack">
+        <div class="toteBigNumberLine">${topNum}</div>
+        <div class="toteBigNumberLine">${botNum}</div>
+      </div>
       ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
     </div>`;
+  }
+
+  const sub = getSubLine(cur, null);
+  const chipBorder = chipBorderColor(chip1, chip1);
+  return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}"${slotAttr} style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
+    <div class="toteTopRow">
+      ${badgeGroupHtml}
+      ${barHtml}
+    </div>
+    <div class="toteBigNumber">${main1}</div>
+    ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
+  </div>`;
+}
+
+function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
+  const orderedItems = items.slice();
+  const cardsHtml = orderedItems.map((it)=>{
+    return buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount, null);
   }).join("");
 
+  return { cardsHtml };
+}
+
+function buildCustomSlotsLayout(routeShort, slots, itemsById, getSubLine, getBadgeText, getPkgCount){
+  const cardsHtml = slots.map((slot, index)=>{
+    if(!slot || !itemsById.has(slot)){
+      return `<div class="toteSlot toteSlot--empty" data-slot="${index}" aria-label="Empty slot">Empty</div>`;
+    }
+    const item = itemsById.get(slot);
+    return buildToteCardHtml(item, routeShort, getSubLine, getBadgeText, getPkgCount, index);
+  }).join("");
   return { cardsHtml };
 }
 
@@ -1780,7 +1883,9 @@ function overflowSummary(bagLabel, ovMap){
 }
 
 
-function attachBagHandlers(routeShort, allowDrag){
+function attachBagHandlers(routeShort, allowDrag, customState){
+  const hasCustomSlots = customState && customState.mode === "custom";
+  const items = customState ? customState.items || [] : [];
   // click to mark loaded (ignore star clicks)
   document.querySelectorAll('.toteCard[data-idx]').forEach(el=>{
     el.addEventListener('click', (e)=>{
@@ -1810,22 +1915,13 @@ function attachBagHandlers(routeShort, allowDrag){
 
       if(act==="combine"){
         setCombined(routeShort, second, true);
-        if(getMode(routeShort)==="custom"){
-          const ord = getCustomOrder(routeShort, base).slice().filter(i=>i!==second);
-          setCustomOrder(routeShort, ord);
-        }
       } else if(act==="uncombine"){
         setCombined(routeShort, second, false);
-        if(getMode(routeShort)==="custom"){
-          const ord = getCustomOrder(routeShort, base).slice();
-          const first = second-1;
-          if(!ord.includes(second)){
-            const pos = ord.indexOf(first);
-            if(pos>=0) ord.splice(pos+1,0,second);
-            else ord.push(second);
-            setCustomOrder(routeShort, ord);
-          }
-        }
+      }
+      if(getMode(routeShort)==="custom"){
+        const ord = customOrderFromSlots(routeShort, base);
+        setCustomOrder(routeShort, ord);
+        normalizeCustomSlots(routeShort, items);
       }
       render();
     });
@@ -1839,7 +1935,7 @@ function attachBagHandlers(routeShort, allowDrag){
     rbtn.addEventListener('click', ()=>{
       const r = ROUTES[activeRouteIndex];
       const base = baseOrder(r);
-      resetBagsPage(routeShort, base);
+      resetBagsPage(routeShort, base, items);
       render();
     });
   }
@@ -1849,26 +1945,54 @@ function attachBagHandlers(routeShort, allowDrag){
     b.addEventListener('click', ()=>{ setMode(routeShort, b.getAttribute('data-bagmode')); render(); });
   });
 
-  // drag/drop for custom: reorder displayed cards
-  if(!allowDrag) return;
-  let dragIdx = null;
+  const addSlotsBtn = document.getElementById("addEmptySlotsBtn");
+  if(addSlotsBtn){
+    addSlotsBtn.addEventListener("click", ()=>{
+      const slots = normalizeCustomSlots(routeShort, items);
+      const updated = [null, null, null, ...slots];
+      setCustomSlots(routeShort, updated);
+      normalizeCustomSlots(routeShort, items);
+      render();
+    });
+  }
 
-  document.querySelectorAll('.toteCard[data-idx]').forEach(el=>{
+  const removeSlotsBtn = document.getElementById("removeEmptySlotsBtn");
+  if(removeSlotsBtn){
+    removeSlotsBtn.addEventListener("click", ()=>{
+      const slots = normalizeCustomSlots(routeShort, items);
+      if(slots.length >= 3 && slots.slice(0, 3).every(v=>v === null)){
+        setCustomSlots(routeShort, slots.slice(3));
+        normalizeCustomSlots(routeShort, items);
+        render();
+      }
+    });
+  }
+
+  // drag/drop for custom: swap slots
+  if(!allowDrag) return;
+  if(!hasCustomSlots){
+    return;
+  }
+  let dragSlot = null;
+
+  document.querySelectorAll('.toteCard[data-slot]').forEach(el=>{
     el.setAttribute('draggable', 'true');
     el.classList.add('draggable');
 
     el.addEventListener('dragstart', (e)=>{
-      dragIdx = el.getAttribute('data-idx');
+      dragSlot = el.getAttribute('data-slot');
       el.classList.add('dragging');
-      try { e.dataTransfer.setData('text/plain', dragIdx); } catch(_) {}
+      try { e.dataTransfer.setData('text/plain', dragSlot); } catch(_) {}
       e.dataTransfer.effectAllowed = 'move';
     });
 
     el.addEventListener('dragend', ()=>{
-      dragIdx = null;
-      document.querySelectorAll('.toteCard').forEach(x=>x.classList.remove('dragging','dropTarget'));
+      dragSlot = null;
+      document.querySelectorAll('[data-slot]').forEach(x=>x.classList.remove('dragging','dropTarget'));
     });
+  });
 
+  document.querySelectorAll('[data-slot]').forEach(el=>{
     el.addEventListener('dragover', (e)=>{
       e.preventDefault();
       el.classList.add('dropTarget');
@@ -1880,24 +2004,28 @@ function attachBagHandlers(routeShort, allowDrag){
     el.addEventListener('drop', (e)=>{
       e.preventDefault();
       el.classList.remove('dropTarget');
-      const targetIdx = el.getAttribute('data-idx');
-      const src = dragIdx || (function(){ try { return e.dataTransfer.getData('text/plain'); } catch(_){ return null; } })();
-      if(!src || !targetIdx || src === targetIdx) return;
+      const targetSlot = el.getAttribute('data-slot');
+      const src = dragSlot || (function(){ try { return e.dataTransfer.getData('text/plain'); } catch(_){ return null; } })();
+      if(src === null || src === undefined || targetSlot === null || targetSlot === undefined) return;
+      if(src === targetSlot) return;
 
-      const s = parseInt(src,10);
-      const t = parseInt(targetIdx,10);
+      const from = parseInt(src, 10);
+      const to = parseInt(targetSlot, 10);
+      if(Number.isNaN(from) || Number.isNaN(to)) return;
 
-      const r = ROUTES[activeRouteIndex];
-      const base = baseOrder(r);
-      let ord = removeCombinedSecondsFromOrder(routeShort, getCustomOrder(routeShort, base).slice());
-
-      const domOrder = ord.slice();
-      const from = domOrder.indexOf(s);
-      const to = domOrder.indexOf(t);
-      if(from === -1 || to === -1) return;
-      domOrder.splice(from, 1);
-      domOrder.splice(to, 0, s);
-      setCustomOrder(routeShort, domOrder);
+      const slots = normalizeCustomSlots(routeShort, items);
+      const updated = slots.slice();
+      const fromValue = updated[from];
+      const toValue = updated[to];
+      if(toValue === null || toValue === undefined){
+        updated[to] = fromValue;
+        updated[from] = null;
+      }else{
+        updated[from] = toValue;
+        updated[to] = fromValue;
+      }
+      setCustomSlots(routeShort, updated);
+      normalizeCustomSlots(routeShort, items);
       setMode(routeShort, "custom");
       render();
     });
@@ -2033,7 +2161,8 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
     const mode = getMode(routeShort);
 
     const ovMap = buildOverflowMap(r);
-    const items = buildDisplayItems(r, q, ovMap);
+    const allItems = buildDisplayItems(r, "", ovMap);
+    const items = q ? buildDisplayItems(r, q, ovMap) : allItems;
 
   function subLine(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
@@ -2046,7 +2175,19 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
     return String(anchor.idx || idx);
   }
 
-  const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText, combinedPkgSum);
+  let layout = null;
+  let slots = null;
+  if(mode === "custom"){
+    slots = normalizeCustomSlots(routeShort, allItems);
+    const itemsById = new Map();
+    items.forEach((item)=>{
+      const key = slotIdForItem(item);
+      if(key) itemsById.set(key, item);
+    });
+    layout = buildCustomSlotsLayout(routeShort, slots, itemsById, subLine, bagBadgeText, combinedPkgSum);
+  }else{
+    layout = buildToteLayout(items, routeShort, subLine, bagBadgeText, combinedPkgSum);
+  }
 
   content.innerHTML = `
     <div class="toteGridFrame">
@@ -2058,6 +2199,12 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
+      ${mode === "custom" ? `
+      <div class="customSlotControls">
+        <button id="addEmptySlotsBtn" class="clearBtn" type="button">Add Empty Slots</button>
+        <button id="removeEmptySlotsBtn" class="clearBtn" type="button">Remove Empty Slots</button>
+      </div>
+      ` : ""}
       <div class="footerCounts" id="footerCounts">
         <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
@@ -2076,7 +2223,7 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
   `;
 
   const allowDrag = (mode === "custom") && !q;
-  attachBagHandlers(routeShort, allowDrag);
+  attachBagHandlers(routeShort, allowDrag, { mode, slots, items: allItems });
   updateFooterCounts(r);
   scrollTotesToRight();
 }
@@ -2191,7 +2338,8 @@ function renderCombined(r,q){
   const routeShort = r.route_short;
   const mode = getMode(routeShort);
   const ovMap = buildOverflowMap(r);
-  const items = buildDisplayItems(r, q, ovMap);
+  const allItems = buildDisplayItems(r, "", ovMap);
+  const items = q ? buildDisplayItems(r, q, ovMap) : allItems;
 
   function combinedBadgeText(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
@@ -2210,7 +2358,19 @@ function renderCombined(r,q){
     return parts.join("");
   }
 
-  const layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
+  let layout = null;
+  let slots = null;
+  if(mode === "custom"){
+    slots = normalizeCustomSlots(routeShort, allItems);
+    const itemsById = new Map();
+    items.forEach((item)=>{
+      const key = slotIdForItem(item);
+      if(key) itemsById.set(key, item);
+    });
+    layout = buildCustomSlotsLayout(routeShort, slots, itemsById, combinedSubLine, combinedBadgeText, combinedPkgCount);
+  }else{
+    layout = buildToteLayout(items, routeShort, combinedSubLine, combinedBadgeText, combinedPkgCount);
+  }
   content.innerHTML = `
     <div class="toteGridFrame">
       <div class="toteWrap">
@@ -2221,6 +2381,12 @@ function renderCombined(r,q){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
+      ${mode === "custom" ? `
+      <div class="customSlotControls">
+        <button id="addEmptySlotsBtn" class="clearBtn" type="button">Add Empty Slots</button>
+        <button id="removeEmptySlotsBtn" class="clearBtn" type="button">Remove Empty Slots</button>
+      </div>
+      ` : ""}
       <div class="footerCounts" id="footerCounts">
         <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
@@ -2239,7 +2405,7 @@ function renderCombined(r,q){
   `;
 
   const allowDrag = (mode === "custom") && !q;
-  attachBagHandlers(routeShort, allowDrag);
+  attachBagHandlers(routeShort, allowDrag, { mode, slots, items: allItems });
   updateFooterCounts(r);
   scrollTotesToRight();
 }
@@ -2473,7 +2639,7 @@ window.addEventListener("message", (ev)=>{
     var cards = Array.from(grid.children).filter(function(el){
       return el.classList && el.classList.contains('toteCard');
     });
-    var total = cards.length || grid.children.length || 0;
+    var total = grid.children.length || cards.length || 0;
     var wrapRect = wrap.getBoundingClientRect();
     var availW = Math.max(0, wrapRect.width);
     var availH = Math.max(0, wrapRect.height);
