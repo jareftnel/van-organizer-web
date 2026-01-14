@@ -691,16 +691,6 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCard.draggable{cursor:grab;}
 .toteCard.dragging{opacity:.25;}
 .toteCard.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
-.toteSlot{
-  border:2px dashed rgba(90,170,255,.35);
-  border-radius:18px;
-  opacity:.35;
-}
-.toteSlot.dropTarget{
-  outline:2px dashed rgba(90,170,255,.85);
-  outline-offset:2px;
-  opacity:.8;
-}
 .toteCard.loaded{filter:grayscale(.85) brightness(.72);}
 
 .toteTopRow{
@@ -1156,7 +1146,6 @@ function scheduleRender(){
 const STORAGE_KEY = "vanorg_loaded_v1";
 const MODE_KEY = "vanorg_bagmode_v1";
 const ORDER_KEY = "vanorg_bagorder_v1";
-const TOTE_ROWS = 3;
 const COMBINE_KEY = "vanorg_combined_v1";
 
 function readJSON(key, fallback){ try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch(e){ return fallback; } }
@@ -1625,38 +1614,14 @@ function overflowSearchText(label, ovMap){
 function getCustomOrder(routeShort, base){
   const arr = (BAGORDER[routeShort] || []).slice();
   const baseSet = new Set(base.map(String));
-  const cleaned = [];
-  const cleanedSet = new Set();
-  arr.forEach((val)=>{
-    const s = String(val);
-    if(s === "0"){
-      cleaned.push(0);
-      return;
-    }
-    if(baseSet.has(s) && !cleanedSet.has(s)){
-      cleaned.push(parseInt(s,10));
-      cleanedSet.add(s);
-    }
-  });
-  base.forEach(i=>{ const s=String(i); if(!cleanedSet.has(s)) cleaned.push(i); });
-  BAGORDER[routeShort] = cleaned;
+  const cleaned = arr.map(String).filter(x=>baseSet.has(x));
+  const cleanedSet = new Set(cleaned);
+  base.forEach(i=>{ const s=String(i); if(!cleanedSet.has(s)) cleaned.push(s); });
+  BAGORDER[routeShort] = cleaned.map(x=>parseInt(x,10));
   writeJSON(ORDER_KEY, BAGORDER);
   return BAGORDER[routeShort];
 }
 function setCustomOrder(routeShort, orderArr){ BAGORDER[routeShort] = orderArr.map(x=>parseInt(x,10)); writeJSON(ORDER_KEY, BAGORDER); }
-
-function stripEmptySlots(orderArr){
-  return orderArr.filter(i=>parseInt(i,10) !== 0);
-}
-
-function padOrderToRows(orderArr){
-  const padded = orderArr.slice();
-  const rem = padded.length % TOTE_ROWS;
-  if(rem === 0) return padded;
-  const needed = TOTE_ROWS - rem;
-  for(let i=0; i<needed; i++) padded.push(0);
-  return padded;
-}
 
 function removeCombinedSecondsFromOrder(routeShort, orderArr){
   const sec = COMBINED[routeShort] || {};
@@ -1673,43 +1638,15 @@ function buildOrder(r){
   if(mode==="reversed") ord.reverse();
   if(mode==="custom") ord = getCustomOrder(routeShort, base).slice();
   if(mode==="custom") ord = removeCombinedSecondsFromOrder(routeShort, ord);
-  if(mode==="custom") ord = stripEmptySlots(ord);
-  return ord;
-}
-
-function buildLayoutOrder(r, allowSlots){
-  const routeShort = r.route_short;
-  const base = baseOrder(r);
-  const mode = getMode(routeShort);
-  let ord = base.slice();
-  if(mode==="reversed") ord.reverse();
-  if(mode==="custom"){
-    ord = getCustomOrder(routeShort, base).slice();
-    ord = removeCombinedSecondsFromOrder(routeShort, ord);
-    ord = allowSlots ? padOrderToRows(ord) : stripEmptySlots(ord);
-  }
-  return ord;
-}
-
-function getCustomOrderWithSlots(routeShort, base){
-  let ord = getCustomOrder(routeShort, base).slice();
-  ord = removeCombinedSecondsFromOrder(routeShort, ord);
-  ord = padOrderToRows(ord);
   return ord;
 }
 
 function buildDisplayItems(r, q, ovMap){
   const routeShort = r.route_short;
-  const mode = getMode(routeShort);
-  const allowSlots = mode==="custom" && !q;
   const byIdx = Object.fromEntries((r.bags_detail||[]).map(x=>[x.idx, x]));
-  const ord = buildLayoutOrder(r, allowSlots);
+  const ord = buildOrder(r);
   const items = [];
-  ord.forEach((idx, pos)=>{
-    if(idx === 0){
-      if(allowSlots) items.push({ empty: true, pos });
-      return;
-    }
+  for(const idx of ord){
     if(isCombinedSecond(routeShort, idx)) continue;
     const cur = byIdx[idx];
     if(!cur) continue;
@@ -1726,8 +1663,8 @@ function buildDisplayItems(r, q, ovMap){
     const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${curSort} ${cur.pkgs||""} ${curOverflow}` +
       (second ? ` ${secondLabel} ${second.bag||""} ${second.sort_zone||""} ${secondSort} ${second.pkgs||""} ${secondOverflow}` : "");
     if(!match(text, q)) continue;
-    items.push({ idx, cur, secondIdx: second ? secondIdx : null, second, eligibleCombine, pos });
-  });
+    items.push({ idx, cur, secondIdx: second ? secondIdx : null, second, eligibleCombine });
+  }
   return items;
 }
 
@@ -1747,9 +1684,6 @@ function combinedPkgSum(anchor, other){
 function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCount){
   const orderedItems = items.slice();
   const cardsHtml = orderedItems.map((it, i)=>{
-    if(it.empty){
-      return `<div class="toteSlot" data-slot-index="${it.pos}" data-pos="${it.pos}"></div>`;
-    }
     const cur = it.cur;
     const second = it.second;
     const main1 = (cur.bag_id || cur.bag || "").toString();
@@ -1778,7 +1712,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const botNum = (cur.sort_zone ? main2 : main1);
       const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
       const chipBorder = chipBorderColor(chip1, chip2);
-      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" data-pos="${it.pos}" style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
+      return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
         ${minusHtml}
         <div class="toteTopRow">
           ${badgeGroupHtml}
@@ -1795,7 +1729,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const sub = getSubLine(cur, null);
 
     const chipBorder = chipBorderColor(chip1, chip1);
-    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" data-pos="${it.pos}" style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
+    return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
       <div class="toteTopRow">
         ${badgeGroupHtml}
         ${barHtml}
@@ -1923,7 +1857,7 @@ function attachBagHandlers(routeShort, allowDrag){
 
     el.addEventListener('dragend', ()=>{
       dragIdx = null;
-      document.querySelectorAll('.toteCard, .toteSlot').forEach(x=>x.classList.remove('dragging','dropTarget'));
+      document.querySelectorAll('.toteCard').forEach(x=>x.classList.remove('dragging','dropTarget'));
     });
 
     el.addEventListener('dragover', (e)=>{
@@ -1937,52 +1871,24 @@ function attachBagHandlers(routeShort, allowDrag){
     el.addEventListener('drop', (e)=>{
       e.preventDefault();
       el.classList.remove('dropTarget');
+      const targetIdx = el.getAttribute('data-idx');
       const src = dragIdx || (function(){ try { return e.dataTransfer.getData('text/plain'); } catch(_){ return null; } })();
-      if(!src) return;
+      if(!src || !targetIdx || src === targetIdx) return;
 
       const s = parseInt(src,10);
-      const tpos = parseInt(el.getAttribute('data-pos')||"-1",10);
-      if(!s || tpos < 0) return;
+      const t = parseInt(targetIdx,10);
 
       const r = ROUTES[activeRouteIndex];
       const base = baseOrder(r);
-      let ord = getCustomOrderWithSlots(routeShort, base);
-      const from = ord.indexOf(s);
-      if(from === -1 || from === tpos) return;
-      ord.splice(from, 1);
-      ord.splice(tpos, 0, s);
-      setCustomOrder(routeShort, ord);
-      setMode(routeShort, "custom");
-      render();
-    });
-  });
+      let ord = removeCombinedSecondsFromOrder(routeShort, getCustomOrder(routeShort, base).slice());
 
-  document.querySelectorAll('.toteSlot[data-pos]').forEach(el=>{
-    el.addEventListener('dragover', (e)=>{
-      e.preventDefault();
-      el.classList.add('dropTarget');
-      e.dataTransfer.dropEffect = 'move';
-    });
-
-    el.addEventListener('dragleave', ()=>{ el.classList.remove('dropTarget'); });
-
-    el.addEventListener('drop', (e)=>{
-      e.preventDefault();
-      el.classList.remove('dropTarget');
-      const src = dragIdx || (function(){ try { return e.dataTransfer.getData('text/plain'); } catch(_){ return null; } })();
-      if(!src) return;
-      const s = parseInt(src,10);
-      const tpos = parseInt(el.getAttribute('data-pos')||"-1",10);
-      if(!s || tpos < 0) return;
-
-      const r = ROUTES[activeRouteIndex];
-      const base = baseOrder(r);
-      let ord = getCustomOrderWithSlots(routeShort, base);
-      const from = ord.indexOf(s);
-      if(from === -1 || from === tpos) return;
-      ord.splice(from, 1);
-      ord.splice(tpos, 0, s);
-      setCustomOrder(routeShort, ord);
+      const domOrder = ord.slice();
+      const from = domOrder.indexOf(s);
+      const to = domOrder.indexOf(t);
+      if(from === -1 || to === -1) return;
+      domOrder.splice(from, 1);
+      domOrder.splice(to, 0, s);
+      setCustomOrder(routeShort, domOrder);
       setMode(routeShort, "custom");
       render();
     });
