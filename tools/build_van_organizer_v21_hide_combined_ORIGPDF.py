@@ -1994,10 +1994,18 @@ function attachBagHandlers(routeShort, allowDrag, customState){
       if(nextMode === "custom" && currentMode !== "custom"){
         setLastNonCustomMode(routeShort, currentMode);
         const r = ROUTES[activeRouteIndex];
-        const startingOrder = buildOrderForMode(r, currentMode);
-        const filtered = removeCombinedSecondsFromOrder(routeShort, startingOrder);
-        setCustomOrder(routeShort, filtered);
-        setCustomSlots(routeShort, customSlotsFromOrder(filtered));
+        const base = baseOrder(r);
+        const existingSlots = getCustomSlots(routeShort);
+        const hasSavedCustom = existingSlots.some(slot=>slot !== null && slot !== undefined && String(slot).trim() !== "");
+        if(!hasSavedCustom){
+          const startingOrder = buildOrderForMode(r, currentMode);
+          const filtered = removeCombinedSecondsFromOrder(routeShort, startingOrder);
+          setCustomOrder(routeShort, filtered);
+          setCustomSlots(routeShort, customSlotsFromOrder(filtered));
+        }else{
+          const filteredBase = removeCombinedSecondsFromOrder(routeShort, base);
+          setCustomOrder(routeShort, customOrderFromSlots(routeShort, filteredBase));
+        }
       }
       setMode(routeShort, nextMode);
       RESET_ARMED[routeShort] = false;
