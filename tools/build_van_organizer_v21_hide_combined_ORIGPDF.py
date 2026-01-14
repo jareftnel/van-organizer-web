@@ -693,16 +693,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 .toteCard.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
 .toteCard.loaded{filter:grayscale(.85) brightness(.72);}
 .toteSlot{
-  border:2px dashed rgba(255,255,255,.15);
+  border:0;
   border-radius:18px;
-  background:rgba(255,255,255,.03);
+  background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:rgba(255,255,255,.4);
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:1px;
+  color:transparent;
   font-size:12px;
 }
 .toteSlot.dropTarget{outline:2px dashed rgba(90,170,255,.85); outline-offset:2px;}
@@ -1846,7 +1843,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
 function buildCustomSlotsLayout(routeShort, slots, itemsById, getSubLine, getBadgeText, getPkgCount){
   const cardsHtml = slots.map((slot, index)=>{
     if(!slot || !itemsById.has(slot)){
-      return `<div class="toteSlot toteSlot--empty" data-slot="${index}" aria-label="Empty slot">Empty</div>`;
+      return `<div class="toteSlot" data-slot="${index}" aria-label="Empty slot"></div>`;
     }
     const item = itemsById.get(slot);
     return buildToteCardHtml(item, routeShort, getSubLine, getBadgeText, getPkgCount, index);
@@ -1944,29 +1941,6 @@ function attachBagHandlers(routeShort, allowDrag, customState){
   document.querySelectorAll('[data-bagmode]').forEach(b=>{
     b.addEventListener('click', ()=>{ setMode(routeShort, b.getAttribute('data-bagmode')); render(); });
   });
-
-  const addSlotsBtn = document.getElementById("addEmptySlotsBtn");
-  if(addSlotsBtn){
-    addSlotsBtn.addEventListener("click", ()=>{
-      const slots = normalizeCustomSlots(routeShort, items);
-      const updated = [null, null, null, ...slots];
-      setCustomSlots(routeShort, updated);
-      normalizeCustomSlots(routeShort, items);
-      render();
-    });
-  }
-
-  const removeSlotsBtn = document.getElementById("removeEmptySlotsBtn");
-  if(removeSlotsBtn){
-    removeSlotsBtn.addEventListener("click", ()=>{
-      const slots = normalizeCustomSlots(routeShort, items);
-      if(slots.length >= 3 && slots.slice(0, 3).every(v=>v === null)){
-        setCustomSlots(routeShort, slots.slice(3));
-        normalizeCustomSlots(routeShort, items);
-        render();
-      }
-    });
-  }
 
   // drag/drop for custom: swap slots
   if(!allowDrag) return;
@@ -2199,12 +2173,6 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
-      ${mode === "custom" ? `
-      <div class="customSlotControls">
-        <button id="addEmptySlotsBtn" class="clearBtn" type="button">Add Empty Slots</button>
-        <button id="removeEmptySlotsBtn" class="clearBtn" type="button">Remove Empty Slots</button>
-      </div>
-      ` : ""}
       <div class="footerCounts" id="footerCounts">
         <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
@@ -2381,12 +2349,6 @@ function renderCombined(r,q){
       <div class="bagModeDock">
         ${bagModeHtml(routeShort)}
       </div>
-      ${mode === "custom" ? `
-      <div class="customSlotControls">
-        <button id="addEmptySlotsBtn" class="clearBtn" type="button">Add Empty Slots</button>
-        <button id="removeEmptySlotsBtn" class="clearBtn" type="button">Remove Empty Slots</button>
-      </div>
-      ` : ""}
       <div class="footerCounts" id="footerCounts">
         <div class="countPill countPillCommercial">
           <span id="commercialCount">0</span>
