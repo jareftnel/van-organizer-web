@@ -1550,13 +1550,23 @@ function overflowZonesText(label, ovMap){
   return entry.map((item)=>`${item.zone||""} ${normZone(item.zone)}`).join(" ");
 }
 function overflowSearchText(label, ovMap){
-  if(!label || !ovMap) return "";
-  const entry = ovMap.get(label);
-  if(!entry || !entry.length) return "";
-  return entry.map((item)=>{
-    const count = (item.count === 0 || item.count) ? String(item.count) : "";
-    return `${item.zone||""} ${normZone(item.zone)} ${count}`.trim();
-  }).join(" ");
+  if(!ovMap) return "";
+
+  let v = null;
+
+  // ovMap is a Map in this codebase
+  if(ovMap instanceof Map){
+    v = ovMap.get(label);
+  }else{
+    v = ovMap[label];
+  }
+
+  if(!v) return "";
+
+  // Most cases are arrays like ["16.2U (11)", "99.6X (1)"]
+  if(Array.isArray(v)) return v.join(" ").toLowerCase();
+
+  return String(v).toLowerCase();
 }
 
 // Custom order helpers
