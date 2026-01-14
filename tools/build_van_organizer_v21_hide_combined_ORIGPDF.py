@@ -1571,8 +1571,18 @@ function overflowSearchText(label, ovMap){
 
   if(!v) return "";
 
-  // Most cases are arrays like ["16.2U (11)", "99.6X (1)"]
-  if(Array.isArray(v)) return v.join(" ").toLowerCase();
+  // Most cases are arrays like [{zone:"16.2U",count:11}, {zone:"99.6X",count:1}] or strings.
+  if(Array.isArray(v)){
+    return v.map((item)=>{
+      if(item && typeof item === "object"){
+        const zone = item.zone || "";
+        const norm = normZone(zone);
+        const count = item.count ? `(${item.count})` : "";
+        return `${zone} ${norm} ${count}`.trim();
+      }
+      return String(item || "");
+    }).join(" ").toLowerCase();
+  }
 
   return String(v).toLowerCase();
 }
@@ -1623,8 +1633,8 @@ function buildDisplayItems(r, q, ovMap){
     // IMPORTANT: combined cards use bag_id as the tote/bag key; label/bag may be missing
     const curLabel = cur.bag_id || cur.label || cur.bag;
     const secondLabel = second && (second.bag_id || second.label || second.bag);
-    const curOverflow = overflowSearchText(curLabel || cur.bag, ovMap);
-    const secondOverflow = overflowSearchText(secondLabel || (second && second.bag), ovMap);
+    const curOverflow = overflowSearchText(cur.bag || curLabel, ovMap);
+    const secondOverflow = overflowSearchText((second && second.bag) || secondLabel, ovMap);
     const curSort = normZone(cur.sort_zone);
     const secondSort = second ? normZone(second.sort_zone) : "";
     const text = `${cur.idx} ${curLabel} ${cur.bag||""} ${cur.sort_zone||""} ${curSort} ${cur.pkgs||""} ${curOverflow}` +
