@@ -1060,9 +1060,9 @@ def organizer_raw(jid: str):
             "<script>"
             "/* bags-footer-pill-filter-patch */"
             "(function(){"
-            "  function isBagsTabActive(){"
+            "  function isCombinedTabActive(){"
             "    var active = document.querySelector('.tab.active[data-tab]');"
-            "    return active && active.getAttribute('data-tab') === 'bags';"
+            "    return active && active.getAttribute('data-tab') === 'combined';"
             "  }"
             "  function findFooterPillEls(){"
             "    var footer = document.querySelector('.footerCounts') || document.querySelector('[data-footer-counts]');"
@@ -1076,7 +1076,7 @@ def organizer_raw(jid: str):
             "    });"
             "  }"
             "  function updateFooterPills(){"
-            "    var shouldHide = isBagsTabActive();"
+            "    var shouldHide = !isCombinedTabActive();"
             "    var pills = findFooterPillEls();"
             "    pills.forEach(function(pill){"
             "      if(shouldHide){"
@@ -1203,6 +1203,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   background:linear-gradient(90deg, var(--pill-fill) 0 var(--pill-progress, 0%), var(--pill-bg) var(--pill-progress, 0%));
 }}
 .pillBags{{ --pill-fill: rgba(126, 201, 255, 0.65); }}
+.pillOverflow{{ --pill-fill: rgba(255, 186, 93, 0.7); }}
 
 @media (max-width: 900px){{
   .wrap{{padding:0}}
@@ -1232,6 +1233,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
       <div class="hudRight">
         <span class="pill progressPill pillBags" id="hudPillBags">—</span>
+        <span class="pill progressPill pillOverflow" id="hudPillOverflow">—</span>
       </div>
     </div>
   </div>
@@ -1259,11 +1261,14 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
   var hudTitle = document.getElementById("hudTitle");
   var pillBags = document.getElementById("hudPillBags");
+  var pillOverflow = document.getElementById("hudPillOverflow");
   var hudRight = document.querySelector(".hudRight");
   var hudWrap = document.getElementById("bannerHUD");
   var iframe = document.getElementById("orgFrame");
   var lastBags = null;
   var lastBagsLoaded = 0;
+  var lastOverflow = null;
+  var lastOverflowLoaded = 0;
   var lastFooterWidth = 0;
   var activeHudTab = "bags_overflow";
 
@@ -1282,14 +1287,33 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   if(defaultTab) defaultTab.classList.add("active");
   updateHudPillVisibility();
 
-  function updateHudPillVisibility(){{
-    if(!pillBags) return;
-    var shouldShow = activeHudTab === "bags";
-    pillBags.style.display = shouldShow ? "inline-flex" : "none";
-    if(hudRight) hudRight.classList.toggle("stacked", false);
-    if(hudWrap && !shouldShow){{
-      hudWrap.style.removeProperty("--hud-pill-target-width");
+  function shouldShowBags(){{
+    return activeHudTab === "bags" || activeHudTab === "bags_overflow";
+  }}
+
+  function shouldShowOverflow(){{
+    return activeHudTab === "overflow" || activeHudTab === "bags_overflow";
+  }}
+
+  function applyHudStacking(){{
+    var selectedCount = parseInt(lastBagsLoaded || 0, 10);
+    var footerWidth = parseInt(lastFooterWidth || 0, 10);
+    var shouldStack = selectedCount > 0;
+    var allowStack = activeHudTab === "bags" || activeHudTab === "bags_overflow";
+    if(hudRight) hudRight.classList.toggle("stacked", shouldStack && allowStack);
+    if(hudWrap){{
+      if(shouldStack && allowStack && footerWidth > 0){{
+        hudWrap.style.setProperty("--hud-pill-target-width", footerWidth + "px");
+      }}else{{
+        hudWrap.style.removeProperty("--hud-pill-target-width");
+      }}
     }}
+  }}
+
+  function updateHudPillVisibility(){{
+    if(pillBags) pillBags.style.display = shouldShowBags() ? "inline-flex" : "none";
+    if(pillOverflow) pillOverflow.style.display = shouldShowOverflow() ? "inline-flex" : "none";
+    applyHudStacking();
   }}
 
   window.addEventListener("message", function(ev){{
@@ -1327,25 +1351,19 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
     if(d.bags !== undefined && d.bags !== null) lastBags = d.bags;
     if(d.bags_loaded !== undefined && d.bags_loaded !== null) lastBagsLoaded = d.bags_loaded;
+    if(d.overflow !== undefined && d.overflow !== null) lastOverflow = d.overflow;
+    if(d.overflow_loaded !== undefined && d.overflow_loaded !== null) lastOverflowLoaded = d.overflow_loaded;
     if(d.footer_pill_width !== undefined && d.footer_pill_width !== null) lastFooterWidth = d.footer_pill_width;
 
     var bags = lastBags;
     var bagsLoaded = lastBagsLoaded;
     if(pillBags) pillBags.textContent = formatProgress(bags, bagsLoaded, "bags");
     setPillProgress(pillBags, bags, bagsLoaded);
-    var selectedCount = parseInt(bagsLoaded || 0, 10);
-    var footerWidth = parseInt(lastFooterWidth || 0, 10);
-    var shouldStack = selectedCount > 0;
-    if(hudRight) hudRight.classList.toggle("stacked", shouldStack && activeHudTab === "bags");
-    if(hudWrap && activeHudTab === "bags"){{
-      if(shouldStack && footerWidth > 0){{
-        hudWrap.style.setProperty("--hud-pill-target-width", footerWidth + "px");
-      }}else if(!shouldStack){{
-        hudWrap.style.removeProperty("--hud-pill-target-width");
-      }}
-    }}else if(hudWrap){{
-      hudWrap.style.removeProperty("--hud-pill-target-width");
-    }}
+    var overflow = lastOverflow;
+    var overflowLoaded = lastOverflowLoaded;
+    if(pillOverflow) pillOverflow.textContent = formatProgress(overflow, overflowLoaded, "overflow");
+    setPillProgress(pillOverflow, overflow, overflowLoaded);
+    applyHudStacking();
 
   }});
 }})();
