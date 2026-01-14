@@ -1543,9 +1543,16 @@ function bagLabel(entry){
   return String(entry.bag_id || entry.bag || "").trim();
 }
 
+function bagKey(label){
+  return String(label || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "");
+}
+
 function overflowZonesText(label, ovMap){
   if(!label || !ovMap) return "";
-  const entry = ovMap.get(label);
+  const entry = ovMap.get(bagKey(label));
   if(!entry || !entry.length) return "";
   return entry.map((item)=>`${item.zone||""} ${normZone(item.zone)}`).join(" ");
 }
@@ -1553,12 +1560,13 @@ function overflowSearchText(label, ovMap){
   if(!ovMap) return "";
 
   let v = null;
+  const key = bagKey(label);
 
   // ovMap is a Map in this codebase
   if(ovMap instanceof Map){
-    v = ovMap.get(label);
+    v = ovMap.get(key);
   }else{
-    v = ovMap[label];
+    v = ovMap[key];
   }
 
   if(!v) return "";
@@ -1706,7 +1714,7 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
 function buildOverflowMap(r){
   const map = new Map();
   (r.combined || []).forEach((x)=>{
-    const bag = String(x.bag || "").trim();
+    const bag = bagKey(x.bag);
     if(!bag) return;
     let entry = map.get(bag);
     if(!entry){
@@ -1720,7 +1728,7 @@ function buildOverflowMap(r){
 
 function overflowSummary(bagLabel, ovMap){
   if(!bagLabel || !ovMap) return "";
-  const entry = ovMap.get(bagLabel);
+  const entry = ovMap.get(bagKey(bagLabel));
   if(!entry || !entry.length) return "";
   return entry.map((item)=>{
     const label = normZone(item.zone);
