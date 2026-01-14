@@ -1221,6 +1221,9 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 }}
 .pill{{
   --pill-bg: rgba(0,0,0,.35);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   background:var(--pill-bg);
   border:1px solid rgba(255,255,255,.14);
   color:#eaf2ff;
@@ -1228,6 +1231,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   border-radius:999px;
   font-weight:850;
   white-space:nowrap;
+  text-align:center;
 }}
 .progressPill{{
   background:linear-gradient(90deg, var(--pill-fill) 0 var(--pill-progress, 0%), var(--pill-bg) var(--pill-progress, 0%));
