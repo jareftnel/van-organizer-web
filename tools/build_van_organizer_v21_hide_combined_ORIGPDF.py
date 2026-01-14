@@ -2019,28 +2019,25 @@ function attachOverflowHandlers(routeShort, allowDrag, r){
   });
 }
 
-function renderBags(r, q){
-  const routeShort = r.route_short;
-  const mode = getMode(routeShort);
+  function renderBags(r, q){
+    const routeShort = r.route_short;
+    const mode = getMode(routeShort);
 
-  const ovMap = buildOverflowMap(r);
-  const items = buildDisplayItems(r, q, ovMap);
+    const ovMap = buildOverflowMap(r);
+    const items = buildDisplayItems(r, q, ovMap);
 
   function subLine(anchor, other){
     const src = anchor.sort_zone ? anchor : (other && other.sort_zone ? other : anchor);
     const sz = normZone(src.sort_zone);
-    const pk = other ? combinedPkgSum(anchor, other) : ((src.pkgs===undefined || src.pkgs===null) ? "" : String(src.pkgs));
-    if(!sz && !pk) return "";
-    if(sz && pk) return `${sz} (${pk})`;
-    if(sz) return sz;
-    return `(${pk})`;
+    if(!sz) return "";
+    return sz;
   }
 
   function bagBadgeText(anchor, other, idx){
     return String(anchor.idx || idx);
   }
 
-  const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText);
+  const layout = buildToteLayout(items, routeShort, subLine, bagBadgeText, combinedPkgSum);
 
   content.innerHTML = `
     <div class="toteGridFrame">
