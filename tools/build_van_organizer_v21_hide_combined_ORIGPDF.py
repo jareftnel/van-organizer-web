@@ -826,6 +826,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   padding:0 6px;
   position:static;
 }
+.bags-tab .toteStar.combine{
+  position:absolute;
+  bottom:10px;
+  left:10px;
+}
+.bags-tab .toteStar.on{
+  bottom:10px;
+  right:10px;
+}
 .toteStar.on{
   border-color: rgba(255,75,75,.45);
   background: rgba(255,75,75,.08);
@@ -2295,6 +2304,7 @@ function render(){
   applyWaveUI(r);
   const q = qBox.value.trim();
   content.classList.toggle('plain', activeTab==='bags' || activeTab==='combined');
+  content.classList.toggle('bags-tab', activeTab==='bags');
   if(activeTab==="bags") renderBags(r,q);
   if(activeTab==="overflow") renderOverflow(r,q);
   if(activeTab==="combined") renderCombined(r,q);
