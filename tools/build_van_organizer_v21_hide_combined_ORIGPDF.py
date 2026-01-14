@@ -1612,8 +1612,9 @@ function buildDisplayItems(r, q, ovMap){
     const secondIdx = idx + 1;
     const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
     const eligibleCombine = (!cur.sort_zone) && idx > 1;
-    const curLabel = bagLabel(cur);
-    const secondLabel = bagLabel(second);
+    // IMPORTANT: combined cards use bag_id as the tote/bag key; label/bag may be missing
+    const curLabel = cur.bag_id || cur.label || cur.bag;
+    const secondLabel = second && (second.bag_id || second.label || second.bag);
     const curOverflow = overflowSearchText(curLabel || cur.bag, ovMap);
     const secondOverflow = overflowSearchText(secondLabel || (second && second.bag), ovMap);
     const curSort = normZone(cur.sort_zone);
