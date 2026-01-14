@@ -1179,6 +1179,7 @@ const MODE_KEY = "vanorg_bagmode_v1";
 const ORDER_KEY = "vanorg_bagorder_v1";
 const COMBINE_KEY = "vanorg_combined_v1";
 const CUSTOM_SLOTS_KEY = "vanorg_custom_slots_v1";
+const LAST_MODE_KEY = "vanorg_last_bagmode_v1";
 
 function readJSON(key, fallback){ try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch(e){ return fallback; } }
 function writeJSON(key, obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch(e){} }
@@ -1188,6 +1189,7 @@ let BAGMODE = readJSON(MODE_KEY, {});
 let BAGORDER = readJSON(ORDER_KEY, {});
 let COMBINED = readJSON(COMBINE_KEY, {});
 let CUSTOMSLOTS = readJSON(CUSTOM_SLOTS_KEY, {});
+let LAST_NON_CUSTOM = readJSON(LAST_MODE_KEY, {});
 
 // Overflow checklist + ordering
 const OVKEY = "vanorg_overflow_checks_v1";
@@ -1197,6 +1199,11 @@ const OVORDER_KEY = "vanorg_overflow_order_v1";
 let OVCHK = readJSON(OVKEY, {});
 let OVMODE = readJSON(OVMODE_KEY, {});
 let OVORDER = readJSON(OVORDER_KEY, {});
+let RESET_ARMED = {};
+
+function clearResetArmed(routeShort){
+  RESET_ARMED[routeShort] = false;
+}
 
 function getOvMode(routeShort){ return OVMODE[routeShort] || "normal"; }
 function setOvMode(routeShort, mode){ OVMODE[routeShort] = mode; writeJSON(OVMODE_KEY, OVMODE); }
@@ -1231,11 +1238,30 @@ function toggleLoaded(routeShort, idx){
   if(LOADED[routeShort][k]) delete LOADED[routeShort][k];
   else LOADED[routeShort][k] = true;
   writeJSON(STORAGE_KEY, LOADED);
+  clearResetArmed(routeShort);
 }
 function clearLoaded(routeShort){ LOADED[routeShort] = {}; writeJSON(STORAGE_KEY, LOADED); }
 
 function getMode(routeShort){ return BAGMODE[routeShort] || "normal"; }
-function setMode(routeShort, mode){ BAGMODE[routeShort] = mode; writeJSON(MODE_KEY, BAGMODE); }
+function setMode(routeShort, mode){
+  BAGMODE[routeShort] = mode;
+  writeJSON(MODE_KEY, BAGMODE);
+  if(mode !== "custom"){
+    setLastNonCustomMode(routeShort, mode);
+  }
+}
+
+function getLastNonCustomMode(routeShort){
+  const stored = LAST_NON_CUSTOM[routeShort];
+  if(stored === "normal" || stored === "reversed") return stored;
+  const current = getMode(routeShort);
+  return current === "reversed" ? "reversed" : "normal";
+}
+function setLastNonCustomMode(routeShort, mode){
+  if(mode !== "normal" && mode !== "reversed") return;
+  LAST_NON_CUSTOM[routeShort] = mode;
+  writeJSON(LAST_MODE_KEY, LAST_NON_CUSTOM);
+}
 
 function getCustomSlots(routeShort){ return (CUSTOMSLOTS[routeShort] || []).slice(); }
 function setCustomSlots(routeShort, slots){ CUSTOMSLOTS[routeShort] = slots.slice(); writeJSON(CUSTOM_SLOTS_KEY, CUSTOMSLOTS); }
@@ -1247,6 +1273,7 @@ function setCombined(routeShort, secondIdx, val){
   if(val) COMBINED[routeShort][k] = true;
   else delete COMBINED[routeShort][k];
   writeJSON(COMBINE_KEY, COMBINED);
+  clearResetArmed(routeShort);
 }
 function clearCombined(routeShort){
   COMBINED[routeShort] = {};
@@ -1663,6 +1690,12 @@ function defaultCustomSlots(items){
   return slots;
 }
 
+function customSlotsFromOrder(orderArr){
+  const slots = (orderArr || []).map((idx)=>String(idx));
+  while(slots.length % 3 !== 0) slots.push(null);
+  return slots;
+}
+
 function normalizeCustomSlots(routeShort, items){
   const validIds = new Set((items || []).map(slotIdForItem).filter(Boolean));
   const seen = new Set();
@@ -1724,15 +1757,19 @@ function removeCombinedSecondsFromOrder(routeShort, orderArr){
   return orderArr.filter(i=>!secSet.has(i));
 }
 
-function buildOrder(r){
+function buildOrderForMode(r, mode){
   const routeShort = r.route_short;
   const base = baseOrder(r);
-  const mode = getMode(routeShort);
   let ord = base.slice();
   if(mode==="reversed") ord.reverse();
   if(mode==="custom") ord = customOrderFromSlots(routeShort, base);
   if(mode==="custom") ord = removeCombinedSecondsFromOrder(routeShort, ord);
   return ord;
+}
+
+function buildOrder(r){
+  const mode = getMode(r.route_short);
+  return buildOrderForMode(r, mode);
 }
 
 function buildDisplayItems(r, q, ovMap){
@@ -1933,13 +1970,39 @@ function attachBagHandlers(routeShort, allowDrag, customState){
       const r = ROUTES[activeRouteIndex];
       const base = baseOrder(r);
       resetBagsPage(routeShort, base, items);
+      if(RESET_ARMED[routeShort]){
+        if(getMode(routeShort) === "custom"){
+          const fallbackMode = getLastNonCustomMode(routeShort);
+          const fallbackOrder = buildOrderForMode(r, fallbackMode);
+          const filtered = removeCombinedSecondsFromOrder(routeShort, fallbackOrder);
+          setCustomOrder(routeShort, filtered);
+          setCustomSlots(routeShort, customSlotsFromOrder(filtered));
+        }
+        RESET_ARMED[routeShort] = false;
+      }else{
+        RESET_ARMED[routeShort] = true;
+      }
       render();
     });
   }
 
   // mode buttons
   document.querySelectorAll('[data-bagmode]').forEach(b=>{
-    b.addEventListener('click', ()=>{ setMode(routeShort, b.getAttribute('data-bagmode')); render(); });
+    b.addEventListener('click', ()=>{
+      const nextMode = b.getAttribute('data-bagmode');
+      const currentMode = getMode(routeShort);
+      if(nextMode === "custom" && currentMode !== "custom"){
+        setLastNonCustomMode(routeShort, currentMode);
+        const r = ROUTES[activeRouteIndex];
+        const startingOrder = buildOrderForMode(r, currentMode);
+        const filtered = removeCombinedSecondsFromOrder(routeShort, startingOrder);
+        setCustomOrder(routeShort, filtered);
+        setCustomSlots(routeShort, customSlotsFromOrder(filtered));
+      }
+      setMode(routeShort, nextMode);
+      RESET_ARMED[routeShort] = false;
+      render();
+    });
   });
 
   // drag/drop for custom: swap slots
@@ -2001,6 +2064,7 @@ function attachBagHandlers(routeShort, allowDrag, customState){
       setCustomSlots(routeShort, updated);
       normalizeCustomSlots(routeShort, items);
       setMode(routeShort, "custom");
+      clearResetArmed(routeShort);
       render();
     });
   });
