@@ -2052,13 +2052,18 @@ function attachBagHandlers(routeShort, allowDrag, customState){
 
       const slots = normalizeCustomSlots(routeShort, items);
       const updated = slots.slice();
+      if(from < 0 || to < 0 || from >= updated.length || to >= updated.length) return;
       const fromValue = updated[from];
-      const toValue = updated[to];
-      if(toValue === null || toValue === undefined){
+      if(fromValue === null || fromValue === undefined) return;
+      if(from < to){
+        for(let i = from; i < to; i++){
+          updated[i] = updated[i + 1];
+        }
         updated[to] = fromValue;
-        updated[from] = null;
-      }else{
-        updated[from] = toValue;
+      }else if(from > to){
+        for(let i = from; i > to; i--){
+          updated[i] = updated[i - 1];
+        }
         updated[to] = fromValue;
       }
       setCustomSlots(routeShort, updated);
