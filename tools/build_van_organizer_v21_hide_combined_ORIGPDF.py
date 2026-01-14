@@ -1571,8 +1571,18 @@ function overflowSearchText(label, ovMap){
 
   if(!v) return "";
 
-  // Most cases are arrays like ["16.2U (11)", "99.6X (1)"]
-  if(Array.isArray(v)) return v.join(" ").toLowerCase();
+  // Most cases are arrays like [{zone:"16.2U",count:11}, {zone:"99.6X",count:1}] or strings.
+  if(Array.isArray(v)){
+    return v.map((item)=>{
+      if(item && typeof item === "object"){
+        const zone = item.zone || "";
+        const norm = normZone(zone);
+        const count = item.count ? `(${item.count})` : "";
+        return `${zone} ${norm} ${count}`.trim();
+      }
+      return String(item || "");
+    }).join(" ").toLowerCase();
+  }
 
   return String(v).toLowerCase();
 }
