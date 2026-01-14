@@ -1054,6 +1054,51 @@ def organizer_raw(jid: str):
             "</script>"
             "</body>",
         )
+    if "</body>" in html and "bags-footer-pill-filter-patch" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "/* bags-footer-pill-filter-patch */"
+            "(function(){"
+            "  function isBagsTabActive(){"
+            "    var active = document.querySelector('.tab.active[data-tab]');"
+            "    return active && active.getAttribute('data-tab') === 'bags';"
+            "  }"
+            "  function findFooterPillEls(){"
+            "    var footer = document.querySelector('.footerCounts') || document.querySelector('[data-footer-counts]');"
+            "    if(!footer) return [];"
+            "    var nodes = Array.prototype.slice.call(footer.querySelectorAll('*'));"
+            "    return nodes.filter(function(node){"
+            "      var text = (node.textContent || '').trim().toLowerCase();"
+            "      return text === 'commercial' || text === 'packages';"
+            "    }).map(function(node){"
+            "      return node.closest('.pill') || node;"
+            "    });"
+            "  }"
+            "  function updateFooterPills(){"
+            "    var shouldHide = isBagsTabActive();"
+            "    var pills = findFooterPillEls();"
+            "    pills.forEach(function(pill){"
+            "      if(shouldHide){"
+            "        pill.setAttribute('hidden', 'hidden');"
+            "      }else{"
+            "        pill.removeAttribute('hidden');"
+            "      }"
+            "    });"
+            "  }"
+            "  document.addEventListener('click', function(ev){"
+            "    var target = ev.target;"
+            "    if(target && target.classList && target.classList.contains('tab')){"
+            "      setTimeout(updateFooterPills, 0);"
+            "    }"
+            "  });"
+            "  var observer = new MutationObserver(function(){ updateFooterPills(); });"
+            "  observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });"
+            "  updateFooterPills();"
+            "})();"
+            "</script>"
+            "</body>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
@@ -1158,7 +1203,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   background:linear-gradient(90deg, var(--pill-fill) 0 var(--pill-progress, 0%), var(--pill-bg) var(--pill-progress, 0%));
 }}
 .pillBags{{ --pill-fill: rgba(126, 201, 255, 0.65); }}
-.pillOverflow{{ --pill-fill: rgba(170, 170, 170, 0.55); }}
 
 @media (max-width: 900px){{
   .wrap{{padding:0}}
@@ -1188,7 +1232,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
       <div class="hudRight">
         <span class="pill progressPill pillBags" id="hudPillBags">—</span>
-        <span class="pill progressPill pillOverflow" id="hudPillOverflow">—</span>
       </div>
     </div>
   </div>
@@ -1216,20 +1259,20 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 
   var hudTitle = document.getElementById("hudTitle");
   var pillBags = document.getElementById("hudPillBags");
-  var pillOverflow = document.getElementById("hudPillOverflow");
   var hudRight = document.querySelector(".hudRight");
   var hudWrap = document.getElementById("bannerHUD");
   var iframe = document.getElementById("orgFrame");
   var lastBags = null;
-  var lastOverflow = null;
   var lastBagsLoaded = 0;
-  var lastOverflowLoaded = 0;
   var lastFooterWidth = 0;
+  var activeHudTab = "bags_overflow";
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
     btn.addEventListener("click", function(){{
       document.querySelectorAll(".hudTab").forEach(function(b){{ b.classList.remove("active"); }});
       btn.classList.add("active");
+      activeHudTab = btn.dataset.tab || "bags_overflow";
+      updateHudPillVisibility();
       if(iframe && iframe.contentWindow){{
         iframe.contentWindow.postMessage({{ type:"setTab", tab: btn.dataset.tab }}, "*");
       }}
@@ -1237,6 +1280,17 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   }});
   var defaultTab = document.querySelector('.hudTab[data-tab="bags_overflow"]');
   if(defaultTab) defaultTab.classList.add("active");
+  updateHudPillVisibility();
+
+  function updateHudPillVisibility(){{
+    if(!pillBags) return;
+    var shouldShow = activeHudTab === "bags";
+    pillBags.style.display = shouldShow ? "inline-flex" : "none";
+    if(hudRight) hudRight.classList.toggle("stacked", false);
+    if(hudWrap && !shouldShow){{
+      hudWrap.style.removeProperty("--hud-pill-target-width");
+    }}
+  }}
 
   window.addEventListener("message", function(ev){{
     var d = ev.data || {{}};
@@ -1272,30 +1326,25 @@ iframe{{border:0; display:block; width:100%; height:100%}}
     }}
 
     if(d.bags !== undefined && d.bags !== null) lastBags = d.bags;
-    if(d.overflow !== undefined && d.overflow !== null) lastOverflow = d.overflow;
     if(d.bags_loaded !== undefined && d.bags_loaded !== null) lastBagsLoaded = d.bags_loaded;
-    if(d.overflow_loaded !== undefined && d.overflow_loaded !== null) lastOverflowLoaded = d.overflow_loaded;
     if(d.footer_pill_width !== undefined && d.footer_pill_width !== null) lastFooterWidth = d.footer_pill_width;
 
     var bags = lastBags;
-    var ov = lastOverflow;
     var bagsLoaded = lastBagsLoaded;
-    var overflowLoaded = lastOverflowLoaded;
     if(pillBags) pillBags.textContent = formatProgress(bags, bagsLoaded, "bags");
-    if(pillOverflow) pillOverflow.textContent = formatProgress(ov, overflowLoaded, "overflow");
     setPillProgress(pillBags, bags, bagsLoaded);
-    setPillProgress(pillOverflow, ov, overflowLoaded);
     var selectedCount = parseInt(bagsLoaded || 0, 10);
-    var overflowSelectedCount = parseInt(overflowLoaded || 0, 10);
     var footerWidth = parseInt(lastFooterWidth || 0, 10);
-    var shouldStack = selectedCount > 0 || overflowSelectedCount > 0;
-    if(hudRight) hudRight.classList.toggle("stacked", shouldStack);
-    if(hudWrap){{
+    var shouldStack = selectedCount > 0;
+    if(hudRight) hudRight.classList.toggle("stacked", shouldStack && activeHudTab === "bags");
+    if(hudWrap && activeHudTab === "bags"){{
       if(shouldStack && footerWidth > 0){{
         hudWrap.style.setProperty("--hud-pill-target-width", footerWidth + "px");
       }}else if(!shouldStack){{
         hudWrap.style.removeProperty("--hud-pill-target-width");
       }}
+    }}else if(hudWrap){{
+      hudWrap.style.removeProperty("--hud-pill-target-width");
     }}
 
   }});
