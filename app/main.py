@@ -1220,6 +1220,11 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   var hudRight = document.querySelector(".hudRight");
   var hudWrap = document.getElementById("bannerHUD");
   var iframe = document.getElementById("orgFrame");
+  var lastBags = null;
+  var lastOverflow = null;
+  var lastBagsLoaded = 0;
+  var lastOverflowLoaded = 0;
+  var lastFooterWidth = 0;
 
   document.querySelectorAll(".hudTab").forEach(function(btn){{
     btn.addEventListener("click", function(){{
@@ -1266,15 +1271,24 @@ iframe{{border:0; display:block; width:100%; height:100%}}
       pill.style.setProperty("--pill-progress", (pct * 100).toFixed(1) + "%");
     }}
 
-    var bags = (d.bags !== undefined && d.bags !== null) ? d.bags : null;
-    var ov = (d.overflow !== undefined && d.overflow !== null) ? d.overflow : null;
-    if(pillBags) pillBags.textContent = formatProgress(bags, d.bags_loaded, "bags");
-    if(pillOverflow) pillOverflow.textContent = formatProgress(ov, d.overflow_loaded, "overflow");
-    setPillProgress(pillBags, bags, d.bags_loaded);
-    setPillProgress(pillOverflow, ov, d.overflow_loaded);
-    var selectedCount = parseInt(d.bags_loaded || 0, 10);
-    var footerWidth = parseInt(d.footer_pill_width || 0, 10);
-    var shouldStack = selectedCount > 0;
+    if(d.bags !== undefined && d.bags !== null) lastBags = d.bags;
+    if(d.overflow !== undefined && d.overflow !== null) lastOverflow = d.overflow;
+    if(d.bags_loaded !== undefined && d.bags_loaded !== null) lastBagsLoaded = d.bags_loaded;
+    if(d.overflow_loaded !== undefined && d.overflow_loaded !== null) lastOverflowLoaded = d.overflow_loaded;
+    if(d.footer_pill_width !== undefined && d.footer_pill_width !== null) lastFooterWidth = d.footer_pill_width;
+
+    var bags = lastBags;
+    var ov = lastOverflow;
+    var bagsLoaded = lastBagsLoaded;
+    var overflowLoaded = lastOverflowLoaded;
+    if(pillBags) pillBags.textContent = formatProgress(bags, bagsLoaded, "bags");
+    if(pillOverflow) pillOverflow.textContent = formatProgress(ov, overflowLoaded, "overflow");
+    setPillProgress(pillBags, bags, bagsLoaded);
+    setPillProgress(pillOverflow, ov, overflowLoaded);
+    var selectedCount = parseInt(bagsLoaded || 0, 10);
+    var overflowSelectedCount = parseInt(overflowLoaded || 0, 10);
+    var footerWidth = parseInt(lastFooterWidth || 0, 10);
+    var shouldStack = selectedCount > 0 || overflowSelectedCount > 0;
     if(hudRight) hudRight.classList.toggle("stacked", shouldStack);
     if(hudWrap){{
       if(shouldStack && footerWidth > 0){{
