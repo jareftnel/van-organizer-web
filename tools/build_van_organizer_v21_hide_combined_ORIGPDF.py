@@ -824,8 +824,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   border-radius:999px;
   font-size:calc(12px * var(--card-scale));
   padding:0 6px;
-  bottom:10px;
-  left:10px;
+  position:static;
 }
 .toteStar.on{
   border-color: rgba(255,75,75,.45);
@@ -1698,10 +1697,10 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
     const pkgHtml = pkgText ? `<div class="totePkg toteBubble">${pkgText}</div>` : ``;
     const pkgClass = pkgText ? "hasPkg" : "";
     const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
-    const combineHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
+    const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
     const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}</div>`;
     const barHtml = `<div class="card-bar">
-      <span class="bar-left-icon"></span>
+      <span class="bar-left-icon">${starHtml}</span>
       <div class="bar-track"><div class="bar-fill"></div></div>
       <span class="bar-count">${pkgHtml}</span>
     </div>`;
@@ -1714,7 +1713,6 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
       const minusHtml = `<div class="toteStar on" data-action="uncombine" data-second="${it.secondIdx}" title="Uncombine">-</div>`;
       const chipBorder = chipBorderColor(chip1, chip2);
       return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip2};--chipBorder:${chipBorder};">
-        ${combineHtml}
         ${minusHtml}
         <div class="toteTopRow">
           ${badgeGroupHtml}
@@ -1732,7 +1730,6 @@ function buildToteLayout(items, routeShort, getSubLine, getBadgeText, getPkgCoun
 
     const chipBorder = chipBorderColor(chip1, chip1);
     return `<div class="toteCard ${loadedClass} ${pkgClass} ${sortZoneClass}" data-idx="${it.idx}" style="--chipL:${chip1};--chipR:${chip1};--chipBorder:${chipBorder};">
-      ${combineHtml}
       <div class="toteTopRow">
         ${badgeGroupHtml}
         ${barHtml}
