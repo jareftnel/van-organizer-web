@@ -1351,9 +1351,32 @@ function sumOverflowCountsForBag(entry, ovMap){
   if(!entry || !ovMap) return 0;
   const label = String(entry.bag || entry.bag_id || "").trim();
   if(!label) return 0;
-  const list = ovMap.get(label);
+  const list = ovMap.get(bagKey(label));
   if(!list || !list.length) return 0;
   return list.reduce((acc, item)=>acc + (parseInt(item.count || 0, 10) || 0), 0);
+}
+
+function pkgFooterCounts(bag){
+  if(!bag) return { base: null, overflow: 0 };
+  const val = bag.pkgs;
+  if(val === undefined || val === null || val === "") return { base: null, overflow: 0 };
+  const str = String(val);
+  const baseMatch = str.match(/^\s*(-?\d+)/);
+  const base = baseMatch ? parseInt(baseMatch[1], 10) : null;
+  const overflowMatch = str.match(/\((\d+)\)/);
+  const overflow = overflowMatch ? parseInt(overflowMatch[1], 10) || 0 : 0;
+  return { base, overflow };
+}
+
+function pkgOverflowValue(bag){
+  return pkgFooterCounts(bag).overflow;
+}
+
+function overflowCountForEntry(entry, ovMap){
+  if(!entry) return 0;
+  const fromMap = sumOverflowCountsForBag(entry, ovMap);
+  const fromFooter = pkgOverflowValue(entry);
+  return Math.max(fromMap, fromFooter);
 }
 
 function pkgCountNumber(anchor, other){
@@ -1381,16 +1404,16 @@ function getLoadedStats(r){
     if(isSecond){
       const first = byIdx[idx - 1];
       if(!first && !cur) return;
-      overflowLoaded += sumOverflowCountsForBag(first, ovMap);
-      overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
+      overflowLoaded += overflowCountForEntry(first, ovMap);
+      overflowLoaded += overflowCountForEntry(cur, ovMap);
       pkgLoaded += pkgCountNumber(first, cur);
       loadedCards += 2;
       return;
     }
     const secondIdx = idx + 1;
     const second = isCombinedSecond(routeShort, secondIdx) ? byIdx[secondIdx] : null;
-    overflowLoaded += sumOverflowCountsForBag(cur, ovMap);
-    if(second) overflowLoaded += sumOverflowCountsForBag(second, ovMap);
+    overflowLoaded += overflowCountForEntry(cur, ovMap);
+    if(second) overflowLoaded += overflowCountForEntry(second, ovMap);
     pkgLoaded += pkgCountNumber(cur, second);
     loadedCards += second ? 2 : 1;
   });
@@ -1646,11 +1669,9 @@ function buildDisplayItems(r, q, ovMap){
 }
 
 function pkgCountValue(bag){
-  if(!bag) return null;
-  const val = bag.pkgs;
-  if(val === undefined || val === null || val === "") return null;
-  const num = parseInt(val, 10);
-  return Number.isNaN(num) ? null : num;
+  const counts = pkgFooterCounts(bag);
+  if(counts.base === null || Number.isNaN(counts.base)) return null;
+  return counts.base;
 }
 
 function combinedPkgSum(anchor, other){
