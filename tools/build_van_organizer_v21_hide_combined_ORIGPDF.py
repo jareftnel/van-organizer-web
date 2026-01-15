@@ -2322,13 +2322,11 @@ const routeShort = r.short || r.route_short || "";
     <div class="ovHeader">
       <div>
         <div class="ovTitleRow">
-          <div style="font-weight:900">Overflow</div>
           <button class="syncBtn" id="ovSync" type="button">Sync</button>
         </div>
       </div>
       <div class="ovHeaderRight">
         ${modeHtml}
-        <div class="badge"><span class="dot"></span>${r.overflow_total||0} overflow</div>
       </div>
     </div>
 
