@@ -1171,6 +1171,49 @@ def organizer_raw(jid: str):
             "</script>"
             "</body>",
         )
+    if "</body>" in html and "overflow-table-column-patch" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "/* overflow-table-column-patch */"
+            "(function(){"
+            "  function norm(text){"
+            "    return String(text || '').replace(/\\s+/g, ' ').trim().toLowerCase();"
+            "  }"
+            "  function removeColumns(table, matchers){"
+            "    if(!table) return;"
+            "    var headerRow = table.querySelector('thead tr') || table.querySelector('tr');"
+            "    if(!headerRow) return;"
+            "    var headers = Array.prototype.slice.call(headerRow.children || []);"
+            "    var indexes = [];"
+            "    headers.forEach(function(cell, idx){"
+            "      var label = norm(cell.textContent);"
+            "      if(matchers.some(function(m){ return m === label; })){"
+            "        indexes.push(idx);"
+            "      }"
+            "    });"
+            "    if(!indexes.length) return;"
+            "    indexes.sort(function(a,b){ return b - a; });"
+            "    Array.prototype.slice.call(table.querySelectorAll('tr')).forEach(function(row){"
+            "      indexes.forEach(function(idx){"
+            "        var cells = row.children || [];"
+            "        if(cells[idx]) cells[idx].remove();"
+            "      });"
+            "    });"
+            "  }"
+            "  function scrubOverflowTables(){"
+            "    var selectors = ['#overflowPanel table', '[data-panel=\"overflow\"] table', '.overflowPanel table'];"
+            "    selectors.forEach(function(sel){"
+            "      Array.prototype.slice.call(document.querySelectorAll(sel)).forEach(function(table){"
+            "        removeColumns(table, ['overflow', 'overflow total']);"
+            "      });"
+            "    });"
+            "  }"
+            "  window.addEventListener('load', scrubOverflowTables);"
+            "})();"
+            "</script>"
+            "</body>",
+        )
     # Explicit no-cache for embedded content too
     resp = HTMLResponse(html)
     resp.headers["Cache-Control"] = "no-store"
