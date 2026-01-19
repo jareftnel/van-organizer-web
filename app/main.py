@@ -284,6 +284,11 @@ form{display:flex;flex-direction:column;gap:16px}
   font-size:clamp(16px, 2.4vh, 20px);
   border-radius:16px;
 }
+@media (min-width: 768px){
+  .uploadBtn{
+    height:clamp(56px, 8vh, 72px);
+  }
+}
 button{
   width:100%;
   padding:14px;
