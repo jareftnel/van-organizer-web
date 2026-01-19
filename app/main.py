@@ -2364,6 +2364,11 @@ body{{
     font-size:15px;
     max-width:100%;
   }}
+  .customSelectMenu{{
+    max-height:50vh;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }}
   .actionRow{{
     grid-area:action;
     margin-top:4px;
