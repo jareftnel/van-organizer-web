@@ -2676,20 +2676,29 @@ body{{
 
   function positionRouteMenu(){{
     if(!routeMenu || !routeControl || routeMenu.hidden) return;
+    var viewport = window.visualViewport;
     var rect = routeControl.getBoundingClientRect();
-    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    var viewportHeight = viewport ? viewport.height : (window.innerHeight || document.documentElement.clientHeight);
+    var viewportTop = viewport ? viewport.offsetTop : 0;
+    var viewportBottom = viewportTop + viewportHeight;
     var spacing = 8;
-    var spaceBelow = viewportHeight - rect.bottom - spacing;
-    var spaceAbove = rect.top - spacing;
+    var minTop = viewportTop + spacing;
+    var maxBottom = viewportBottom - spacing;
+    var spaceBelow = maxBottom - rect.bottom;
+    var spaceAbove = rect.top - minTop;
     var menuHeight = routeMenu.scrollHeight || 0;
     var placeAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
     var available = placeAbove ? spaceAbove : spaceBelow;
     var maxHeight = Math.max(available, 0);
     var desiredHeight = menuHeight ? Math.min(menuHeight, maxHeight) : maxHeight;
+    var top = placeAbove
+      ? (rect.top - spacing - desiredHeight)
+      : (rect.bottom + spacing);
+    if(desiredHeight > 0){{
+      top = Math.min(Math.max(top, minTop), maxBottom - desiredHeight);
+    }}
     routeMenu.style.position = "fixed";
-    routeMenu.style.top = placeAbove
-      ? (rect.top - spacing - desiredHeight) + "px"
-      : (rect.bottom + spacing) + "px";
+    routeMenu.style.top = top + "px";
     routeMenu.style.left = rect.left + "px";
     routeMenu.style.width = rect.width + "px";
     routeMenu.style.maxHeight = desiredHeight + "px";
