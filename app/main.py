@@ -372,12 +372,10 @@ button{
     box-sizing:border-box;
   }
   .brandBanner{
-    max-height:56px;
-    width:auto;
-    height:auto;
+    width:100%;
     max-width:100%;
+    height:auto;
     object-fit:contain;
-    margin:0 auto;
   }
   .tagGlass{
     padding:8px 0;
