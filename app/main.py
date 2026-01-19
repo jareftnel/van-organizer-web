@@ -2263,11 +2263,21 @@ body{{
 
   function timeKey(timeLabel){{
     if(!timeLabel) return "";
-    var match = String(timeLabel).match(/(\\d{{1,2}}):(\\d{{2}})/);
+    var match = String(timeLabel).match(/(\\d{{1,2}})\\s*[:.]\\s*(\\d{{2}})\\s*([AaPp])?\\s*([Mm])?/);
     if(!match) return "";
-    var hh = match[1].padStart(2, "0");
+    var hh = parseInt(match[1], 10);
     var mm = match[2];
-    return hh + ":" + mm;
+    var ampm = "";
+    if(match[3] && match[4]){{
+      ampm = (match[3] + match[4]).toUpperCase();
+    }}
+    if(ampm === "PM" && hh !== 12){{
+      hh += 12;
+    }}
+    if(ampm === "AM" && hh === 12){{
+      hh = 0;
+    }}
+    return String(hh).padStart(2, "0") + ":" + mm;
   }}
 
   function waveLabel(timeLabel){{
