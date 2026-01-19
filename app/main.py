@@ -403,8 +403,9 @@ button{
     margin:0 auto;
   }
   .tagGlass{
-    padding:6px 0;
+    padding:4px 0;
     margin-top:-6px;
+    background:rgba(255,255,255,0.05);
   }
   .taglineText{
     letter-spacing:1.2px;
@@ -412,6 +413,7 @@ button{
     line-height:1.2;
     margin-top:4px;
     margin-bottom:0;
+    opacity:0.8;
   }
   .uploadCard{
     width:100%;
