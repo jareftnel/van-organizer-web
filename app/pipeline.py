@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+import colorsys
 import json
 import re
 import threading
 import time
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any, Optional, Callable
 
 import numpy as np
 import pdfplumber
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageOps
+import pytesseract
+from pytesseract import TesseractNotFoundError
 
 # we vendor these scripts into /tools
 import sys
@@ -71,13 +75,20 @@ def _monotonic_seconds() -> float:
     return time.monotonic()
 
 
-def _time_key(label: str) -> str:
-    match = re.search(r"(\d{1,2}):(\d{2})\s*([AP]M)?", label or "", re.I)
+def _normalize_time_label(label: str, require_ampm: bool = False) -> str:
+    match = re.search(
+        r"(\d{1,2})\s*[:.]\s*(\d{2})\s*([AaPp])?\s*([Mm])?",
+        label or "",
+    )
     if not match:
         return ""
     hh = int(match.group(1))
     mm = int(match.group(2))
-    ampm = (match.group(3) or "").upper()
+    if require_ampm and not (match.group(3) and match.group(4)):
+        return ""
+    ampm = ""
+    if match.group(3) and match.group(4):
+        ampm = f"{match.group(3)}{match.group(4)}".upper()
 
     if ampm == "PM" and hh != 12:
         hh += 12
@@ -88,18 +99,11 @@ def _time_key(label: str) -> str:
 
 
 def _time_sort_key(label: str) -> int:
-    match = re.search(r"(\d{1,2}):(\d{2})\s*([AP]M)?", label or "", re.I)
-    if not match:
+    key = _normalize_time_label(label)
+    if not key:
         return 0
-    hh = int(match.group(1))
-    mm = int(match.group(2))
-    ampm = (match.group(3) or "").upper()
-
-    if ampm == "PM" and hh != 12:
-        hh += 12
-    if ampm == "AM" and hh == 12:
-        hh = 0
-    return hh * 60 + mm
+    hh, mm = key.split(":")
+    return int(hh) * 60 + int(mm)
 
 
 def _rgb_to_hex(rgb: np.ndarray) -> str:
@@ -107,90 +111,159 @@ def _rgb_to_hex(rgb: np.ndarray) -> str:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def _extract_color_bands(image_path: Path) -> list[str]:
-    try:
-        with Image.open(image_path) as img:
-            img = img.convert("RGB")
-            width, height = img.size
-            if width < 2 or height < 2:
-                return []
-            target_width = min(120, width)
-            if width != target_width:
-                img = img.resize((target_width, height))
-            arr = np.array(img)
-    except Exception:
+@dataclass(frozen=True)
+class WaveBand:
+    y_start: int
+    y_end: int
+    rgb: np.ndarray
+    color_name: str
+    ocr_text: str
+    time_key: str
+    confidence: float
+    image_path: Path
+
+
+def _median_color(block: np.ndarray) -> np.ndarray:
+    return np.median(block.reshape(-1, 3), axis=0)
+
+
+def _classify_color(rgb: np.ndarray) -> str:
+    r, g, b = [float(v) / 255.0 for v in rgb]
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+
+    if v >= 0.9 and s <= 0.12:
+        return "white"
+
+    hue = h * 360.0
+    if 250 <= hue < 310:
+        return "purple"
+    if 210 <= hue < 250:
+        return "blue"
+    if 120 <= hue < 180:
+        return "green"
+    if 40 <= hue < 70:
+        return "yellow"
+    if hue < 20 or hue >= 330:
+        return "red"
+    return "unknown"
+
+
+def _detect_color_bands(image: Image.Image) -> list[tuple[int, int, np.ndarray]]:
+    original = image.convert("RGB")
+    width, height = original.size
+    if width < 2 or height < 2:
         return []
 
-    row_colors = np.median(arr, axis=1)
-    threshold = 18.0
-    segments = []
+    target_width = min(300, width)
+    work_img = original
+    if width != target_width:
+        work_img = original.resize((target_width, height))
+    work_arr = np.array(work_img)
+    sample_x0 = int(work_arr.shape[1] * 0.2)
+    sample_x1 = max(sample_x0 + 1, int(work_arr.shape[1] * 0.8))
+    row_samples = work_arr[:, sample_x0:sample_x1, :]
+    row_colors = np.median(row_samples, axis=1)
+
+    threshold = 20.0
+    segments: list[tuple[int, int]] = []
     start = 0
     current = row_colors[0]
     for i in range(1, len(row_colors)):
         if np.linalg.norm(row_colors[i] - current) > threshold:
-            segments.append((start, i - 1, current))
-            current = row_colors[i]
+            segments.append((start, i - 1))
             start = i
-    segments.append((start, len(row_colors) - 1, current))
+            current = row_colors[i]
+    segments.append((start, len(row_colors) - 1))
 
-    merged = []
-    for seg in segments:
+    merged: list[tuple[int, int]] = []
+    prev_color = None
+    for seg_start, seg_end in segments:
+        seg_color = np.median(row_colors[seg_start : seg_end + 1], axis=0)
         if not merged:
-            merged.append(seg)
+            merged.append((seg_start, seg_end))
+            prev_color = seg_color
             continue
-        prev = merged[-1]
-        if np.linalg.norm(prev[2] - seg[2]) < threshold:
-            merged[-1] = (prev[0], seg[1], (prev[2] + seg[2]) / 2.0)
+        if prev_color is not None and np.linalg.norm(seg_color - prev_color) < threshold:
+            merged[-1] = (merged[-1][0], seg_end)
+            prev_color = np.median(row_colors[merged[-1][0] : seg_end + 1], axis=0)
         else:
-            merged.append(seg)
+            merged.append((seg_start, seg_end))
+            prev_color = seg_color
 
     min_height = max(6, int(len(row_colors) * 0.01))
-    colors = []
-    for start, end, color in merged:
-        if (end - start + 1) < min_height:
+    bands: list[tuple[int, int, np.ndarray]] = []
+    orig_arr = np.array(original)
+    sample_x0_orig = int(orig_arr.shape[1] * 0.2)
+    sample_x1_orig = max(sample_x0_orig + 1, int(orig_arr.shape[1] * 0.8))
+    for seg_start, seg_end in merged:
+        if (seg_end - seg_start + 1) < min_height:
             continue
-        band = arr[start : end + 1]
-        if band.size == 0:
+        band_height = seg_end - seg_start + 1
+        band_y0 = seg_start + int(band_height * 0.3)
+        band_y1 = seg_start + max(int(band_height * 0.7), int(band_height * 0.3) + 1)
+        band_y1 = min(band_y1, seg_end + 1)
+        band_patch = orig_arr[band_y0:band_y1, sample_x0_orig:sample_x1_orig, :]
+        if band_patch.size == 0:
             continue
-        band_color = np.median(band.reshape(-1, 3), axis=0)
-        brightness = float(np.mean(band_color))
-        if brightness > 245 or brightness < 10:
-            continue
-        colors.append(_rgb_to_hex(band_color))
-
-    cleaned = []
-    for color in colors:
-        if not cleaned or cleaned[-1] != color:
-            cleaned.append(color)
-    return cleaned
+        bands.append((seg_start, seg_end, _median_color(band_patch)))
+    return bands
 
 
-def _pick_distinct_colors_from_images(image_paths: list[Path], needed: int) -> list[str]:
-    used: set[str] = set()
-    picked: list[str] = []
-    for path in image_paths:
-        bands = _extract_color_bands(path)
-        if not bands:
-            continue
-        color = next((band for band in bands if band not in used), bands[0])
-        picked.append(color)
-        used.add(color)
-        if len(picked) >= needed:
-            return picked
+def _run_ocr(image: Image.Image) -> tuple[str, float]:
+    try:
+        data = pytesseract.image_to_data(
+            image,
+            output_type=pytesseract.Output.DICT,
+            config="--psm 6 -c tessedit_char_whitelist=0123456789:AMPamp.",
+        )
+    except TesseractNotFoundError as exc:
+        print(f"[wave-colors] OCR unavailable: {exc}")
+        return "", 0.0
+    except Exception as exc:
+        print(f"[wave-colors] OCR failed: {exc}")
+        return "", 0.0
 
-    if len(picked) >= needed:
-        return picked
+    texts = [text for text in data.get("text", []) if text and text.strip()]
+    ocr_text = " ".join(texts).strip()
+    confidences = [float(c) for c in data.get("conf", []) if str(c).strip() not in ("-1", "")]
+    confidence = float(np.mean(confidences)) if confidences else 0.0
+    return ocr_text, confidence
 
-    for path in image_paths:
-        for color in _extract_color_bands(path):
-            if color in used:
-                continue
-            picked.append(color)
-            used.add(color)
-            if len(picked) >= needed:
-                return picked
 
-    return picked
+def _ocr_time_from_band(
+    image: Image.Image,
+    y_start: int,
+    y_end: int,
+) -> tuple[str, str, float]:
+    width, height = image.size
+    band_height = y_end - y_start + 1
+    pad_y = max(2, int(band_height * 0.05))
+    pad_x = max(2, int(width * 0.03))
+    crop_box = (
+        max(0, pad_x),
+        max(0, y_start - pad_y),
+        min(width, width - pad_x),
+        min(height, y_end + pad_y),
+    )
+    crop = image.crop(crop_box)
+
+    raw_text, raw_conf = _run_ocr(crop)
+    time_key = _normalize_time_label(raw_text)
+    best_text = raw_text
+    best_conf = raw_conf
+
+    if not time_key:
+        gray = ImageOps.autocontrast(crop.convert("L"))
+        gray_arr = np.array(gray)
+        threshold = float(np.percentile(gray_arr, 60))
+        binary = np.where(gray_arr < threshold, 0, 255).astype("uint8")
+        processed = Image.fromarray(binary, mode="L")
+        proc_text, proc_conf = _run_ocr(processed)
+        proc_time_key = _normalize_time_label(proc_text)
+        if proc_time_key:
+            return proc_time_key, proc_text, proc_conf
+
+    return time_key, best_text, best_conf
 
 
 def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> dict[str, str]:
@@ -201,7 +274,7 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
     seen: set[str] = set()
     for entry in toc_entries:
         raw = entry.get("time_label", "") or ""
-        key = _time_key(raw)
+        key = _normalize_time_label(raw)
         if not key or key in seen:
             continue
         seen.add(key)
@@ -213,22 +286,112 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
     if not time_labels:
         return {}
 
-    sorted_images = sorted(image_paths, key=lambda p: p.name)
-    if len(sorted_images) >= len(time_labels):
-        colors = _pick_distinct_colors_from_images(sorted_images, len(time_labels))
-    else:
-        colors: list[str] = []
-        for path in sorted_images:
-            colors.extend(_extract_color_bands(path))
-        if len(colors) < len(time_labels):
-            fallback = _pick_distinct_colors_from_images(sorted_images, len(time_labels))
-            if len(fallback) > len(colors):
-                colors = fallback
+    detected_bands: list[WaveBand] = []
+    low_confidence_threshold = 30.0
 
-    if not colors:
+    for image_path in sorted(image_paths, key=lambda p: p.name):
+        try:
+            with Image.open(image_path) as img:
+                img = img.convert("RGB")
+                bands = _detect_color_bands(img)
+                for y_start, y_end, rgb in bands:
+                    time_key, ocr_text, confidence = _ocr_time_from_band(img, y_start, y_end)
+                    if time_key and time_key not in time_labels:
+                        print(
+                            "[wave-colors] OCR time not in TOC; leaving unmatched.",
+                            f"path={image_path.name}",
+                            f"y={y_start}-{y_end}",
+                            f"ocr='{ocr_text}'",
+                            f"time={time_key}",
+                        )
+                        time_key = ""
+                    if confidence < low_confidence_threshold and time_key:
+                        print(
+                            "[wave-colors] Low OCR confidence; keeping band but flagging warning.",
+                            f"path={image_path.name}",
+                            f"y={y_start}-{y_end}",
+                            f"ocr='{ocr_text}'",
+                            f"time={time_key}",
+                            f"conf={confidence:.1f}",
+                        )
+                    if not time_key:
+                        print(
+                            "[wave-colors] Missing time in band; leaving unmatched.",
+                            f"path={image_path.name}",
+                            f"y={y_start}-{y_end}",
+                            f"ocr='{ocr_text}'",
+                        )
+                    color_name = _classify_color(rgb)
+                    detected_bands.append(
+                        WaveBand(
+                            y_start=y_start,
+                            y_end=y_end,
+                            rgb=rgb,
+                            color_name=color_name,
+                            ocr_text=ocr_text,
+                            time_key=time_key,
+                            confidence=confidence,
+                            image_path=image_path,
+                        )
+                    )
+        except Exception as exc:
+            print(f"[wave-colors] Failed to process {image_path.name}: {exc}")
+
+    if not detected_bands:
         return {}
 
-    return {time_label: color for time_label, color in zip(time_labels, colors)}
+    bands_with_time = [band for band in detected_bands if band.time_key]
+    if len(bands_with_time) != len(detected_bands):
+        print(
+            "[wave-colors] Some bands missing time; leaving unmatched waves uncolored.",
+            f"bands={len(detected_bands)}",
+            f"times={len(bands_with_time)}",
+        )
+
+    mapping: dict[str, WaveBand] = {}
+    for band in bands_with_time:
+        if band.time_key in mapping:
+            existing = mapping[band.time_key]
+            better = band
+            if band.confidence == existing.confidence:
+                if (band.y_end - band.y_start) < (existing.y_end - existing.y_start):
+                    better = existing
+            else:
+                if band.confidence < existing.confidence:
+                    better = existing
+            mapping[band.time_key] = better
+            print(
+                "[wave-colors] Duplicate time detected; keeping higher confidence band",
+                f"time={band.time_key}",
+                f"kept={better.image_path.name} {better.y_start}-{better.y_end}",
+            )
+        else:
+            mapping[band.time_key] = band
+
+    if len(mapping) != len(bands_with_time):
+        print(
+            "[wave-colors] Duplicate wave times detected; using best matches.",
+            f"unique={len(mapping)}",
+            f"total={len(bands_with_time)}",
+        )
+
+    if len(bands_with_time) != len(time_labels):
+        print(
+            "[wave-colors] Band/time count mismatch; mapping by time only.",
+            f"bands={len(bands_with_time)}",
+            f"toc_times={len(time_labels)}",
+        )
+
+    print("[wave-colors] Final mapping:")
+    print("timeKey | colorName | rgb | bandY | ocrText")
+    for time_key in sorted(mapping.keys()):
+        band = mapping[time_key]
+        rgb = [int(round(v)) for v in band.rgb]
+        print(
+            f"{time_key} | {band.color_name} | {rgb} | {band.y_start}-{band.y_end} | {band.ocr_text}"
+        )
+
+    return {time_key: _rgb_to_hex(band.rgb) for time_key, band in mapping.items()}
 
 
 def generate_bags_xlsx_from_routesheets(
