@@ -369,13 +369,32 @@ button{
     align-items:center;
     justify-content:center;
     padding:16px;
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+    padding-top:16px;
+    padding-bottom:16px;
+    box-sizing:border-box;
+  }
+  .heroWrap{
+    min-height:100dvh;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    width:100% !important;
+    max-width:420px;
+    margin:0 auto;
     box-sizing:border-box;
   }
   .brandBanner{
     width:100%;
     max-width:100%;
+    max-height:54px;
     height:auto;
     object-fit:contain;
+    display:block;
+    margin:0 auto;
   }
   .tagGlass{
     padding:8px 0;
@@ -385,11 +404,40 @@ button{
     letter-spacing:1.2px;
     font-size:12px;
     line-height:1.2;
+    margin-top:6px;
+    margin-bottom:0;
   }
   .uploadCard{
+    width:100%;
+    max-width:420px;
     padding-top:12px;
     margin-top:0;
     margin-bottom:0;
+  }
+  form{
+    gap:12px;
+  }
+  .fileRow{
+    margin-top:12px;
+    margin-bottom:12px;
+  }
+  .buildBtn{
+    font-size:18px;
+    line-height:1.1;
+    padding-top:14px;
+    padding-bottom:14px;
+    border-radius:18px;
+  }
+  .uploadPage,
+  .heroWrap,
+  .uploadCard,
+  .brandBanner{
+    width:100% !important;
+  }
+  .uploadCard *,
+  .heroWrap *{
+    max-width:100%;
+    box-sizing:border-box;
   }
 }
 </style>
