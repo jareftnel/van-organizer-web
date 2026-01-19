@@ -358,15 +358,23 @@ button{
   }
 }
 @media (max-width: 480px){
-  .brandBanner{
-    max-height:56px;
-    width:auto;
-    height:auto;
+  .heroWrap{
     max-width:100%;
+    width:100%;
+  }
+  .brandBanner{
+    width:100%;
+    max-width:100%;
+    margin-left:0;
+    margin-right:0;
+    height:auto;
     object-fit:contain;
-    margin:0 auto;
   }
   .tagGlass{
+    width:100%;
+    max-width:100%;
+    margin-left:0;
+    margin-right:0;
     padding:8px 0;
     margin-top:-8px;
   }
