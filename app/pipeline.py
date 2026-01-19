@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional, Callable
 import numpy as np
 import pdfplumber
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageOps
 import pytesseract
 from pytesseract import TesseractNotFoundError
 
@@ -209,6 +209,27 @@ def _detect_color_bands(image: Image.Image) -> list[tuple[int, int, np.ndarray]]
     return bands
 
 
+def _run_ocr(image: Image.Image) -> tuple[str, float]:
+    try:
+        data = pytesseract.image_to_data(
+            image,
+            output_type=pytesseract.Output.DICT,
+            config="--psm 6 -c tessedit_char_whitelist=0123456789:AMPamp.",
+        )
+    except TesseractNotFoundError as exc:
+        print(f"[wave-colors] OCR unavailable: {exc}")
+        return "", 0.0
+    except Exception as exc:
+        print(f"[wave-colors] OCR failed: {exc}")
+        return "", 0.0
+
+    texts = [text for text in data.get("text", []) if text and text.strip()]
+    ocr_text = " ".join(texts).strip()
+    confidences = [float(c) for c in data.get("conf", []) if str(c).strip() not in ("-1", "")]
+    confidence = float(np.mean(confidences)) if confidences else 0.0
+    return ocr_text, confidence
+
+
 def _ocr_time_from_band(
     image: Image.Image,
     y_start: int,
@@ -225,21 +246,24 @@ def _ocr_time_from_band(
         min(height, y_end + pad_y),
     )
     crop = image.crop(crop_box)
-    try:
-        data = pytesseract.image_to_data(crop, output_type=pytesseract.Output.DICT, config="--psm 6")
-    except TesseractNotFoundError as exc:
-        print(f"[wave-colors] OCR unavailable: {exc}")
-        return "", "", 0.0
-    except Exception as exc:
-        print(f"[wave-colors] OCR failed: {exc}")
-        return "", "", 0.0
 
-    texts = [text for text in data.get("text", []) if text and text.strip()]
-    ocr_text = " ".join(texts).strip()
-    confidences = [float(c) for c in data.get("conf", []) if str(c).strip() not in ("-1", "")]
-    confidence = float(np.mean(confidences)) if confidences else 0.0
-    time_key = _normalize_time_label(ocr_text, require_ampm=True)
-    return time_key, ocr_text, confidence
+    raw_text, raw_conf = _run_ocr(crop)
+    time_key = _normalize_time_label(raw_text)
+    best_text = raw_text
+    best_conf = raw_conf
+
+    if not time_key:
+        gray = ImageOps.autocontrast(crop.convert("L"))
+        gray_arr = np.array(gray)
+        threshold = float(np.percentile(gray_arr, 60))
+        binary = np.where(gray_arr < threshold, 0, 255).astype("uint8")
+        processed = Image.fromarray(binary, mode="L")
+        proc_text, proc_conf = _run_ocr(processed)
+        proc_time_key = _normalize_time_label(proc_text)
+        if proc_time_key:
+            return proc_time_key, proc_text, proc_conf
+
+    return time_key, best_text, best_conf
 
 
 def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> dict[str, str]:
@@ -263,7 +287,7 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
         return {}
 
     detected_bands: list[WaveBand] = []
-    low_confidence_threshold = 40.0
+    low_confidence_threshold = 30.0
 
     for image_path in sorted(image_paths, key=lambda p: p.name):
         try:
@@ -272,15 +296,24 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
                 bands = _detect_color_bands(img)
                 for y_start, y_end, rgb in bands:
                     time_key, ocr_text, confidence = _ocr_time_from_band(img, y_start, y_end)
-                    if confidence < low_confidence_threshold and time_key:
+                    if time_key and time_key not in time_labels:
                         print(
-                            "[wave-colors] Low OCR confidence; skipping band",
+                            "[wave-colors] OCR time not in TOC; leaving unmatched.",
                             f"path={image_path.name}",
                             f"y={y_start}-{y_end}",
                             f"ocr='{ocr_text}'",
-                            f"conf={confidence:.1f}",
+                            f"time={time_key}",
                         )
                         time_key = ""
+                    if confidence < low_confidence_threshold and time_key:
+                        print(
+                            "[wave-colors] Low OCR confidence; keeping band but flagging warning.",
+                            f"path={image_path.name}",
+                            f"y={y_start}-{y_end}",
+                            f"ocr='{ocr_text}'",
+                            f"time={time_key}",
+                            f"conf={confidence:.1f}",
+                        )
                     if not time_key:
                         print(
                             "[wave-colors] Missing time in band; leaving unmatched.",
