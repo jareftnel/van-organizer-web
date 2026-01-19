@@ -599,6 +599,12 @@ def job_status(jid: str):
     if j.get("status") == "missing":
         return JSONResponse({"status": "missing"}, status_code=404)
 
+    progress_percent, stage_text = store.compute_progress_percent(jid)
+    progress = j.get("progress") or {}
+    last_reported = progress.get("last_reported_percent") or 0
+    if progress_percent > last_reported and j.get("status") != "done":
+        store.set_progress(jid, {"last_reported_percent": progress_percent})
+
     job_dir = store.path(jid)
     out_pdf = job_dir / "STACKED.pdf"
     out_xlsx = job_dir / "Bags_with_Overflow.xlsx"
@@ -606,8 +612,11 @@ def job_status(jid: str):
 
     return {
         "status": j.get("status", ""),
+        "done": j.get("status") == "done",
         "error": j.get("error"),
         "progress": j.get("progress") or {},
+        "progress_percent": progress_percent,
+        "stage_text": stage_text,
         "has_pdf": out_pdf.exists(),
         "has_xlsx": out_xlsx.exists(),
         "has_html": out_html.exists(),
@@ -632,20 +641,12 @@ def job_page(jid: str):
         return HTMLResponse("<h3>Job not found</h3>", status_code=404)
 
     status = j.get("status", "")
-    prog = j.get("progress") or {}
-
-    pct = int(prog.get("pct", 0) or 0)
+    pct, stage_text = store.compute_progress_percent(jid)
     pct = max(0, min(100, pct))
 
-    status_line = ""
-    if prog.get("page") is not None and prog.get("pages") is not None:
-        status_line = f"Processing route {prog.get('page')} of {prog.get('pages')}"
-    elif prog.get("msg"):
-        status_line = str(prog.get("msg"))
-    elif status:
-        status_line = "Running . . ." if status == "running" else str(status)
-    else:
-        status_line = "Working…"
+    status_line = stage_text
+    if status == "error":
+        status_line = str(j.get("error") or "Error")
 
     html = """<!doctype html><html>
 <head>
@@ -810,6 +811,7 @@ body{
   var root = document.getElementById("jobProgress");
   var pctEl = document.getElementById("pctText");
   var statusEl = document.getElementById("statusText");
+  var doneHandled = false;
 
   function setProgress(pct, statusText){
     var clamped = Math.max(0, Math.min(100, Number(pct) || 0));
@@ -830,10 +832,6 @@ body{
     if (clamped >= 100){
       root.classList.add("job-complete");
       van.classList.remove("moving");
-
-      setTimeout(function(){
-        if (typeof openVanOrganizer === "function") openVanOrganizer();
-      }, 600);
     }
   }
 
@@ -848,27 +846,20 @@ body{
       if(!r.ok) return;
       var s = await r.json();
 
-      var nextLine = "";
-      if(s.progress && typeof s.progress.page !== "undefined" && typeof s.progress.pages !== "undefined"){
-        nextLine = "Processing route " + s.progress.page + " of " + s.progress.pages;
-      }else if(s.progress && s.progress.msg){
-        nextLine = s.progress.msg;
-      }else if(s.status){
-        nextLine = s.status === "running" ? "Running . . ." : s.status;
-      }else{
-        nextLine = "Working…";
-      }
-
-      var pct = 0;
-      if(s.progress && typeof s.progress.pct !== "undefined") pct = parseInt(s.progress.pct, 10) || 0;
+      var nextLine = s.stage_text || (s.progress && s.progress.msg) || "Working…";
+      var pct = Number(s.progress_percent || 0);
       setProgress(pct, nextLine);
 
-      var stage = s.progress ? s.progress.stage : "";
-      if(s.status === "done" || s.has_toc){
+      if((s.done || s.status === "done" || s.has_toc) && !doneHandled){
+        doneHandled = true;
+        van.style.transition = "left 0.5s ease";
+        setProgress(100, "Done");
         // Cache-bust so mobile browsers don't show old files
         var bust = "v=" + Date.now();
         var nextUrl = s.has_toc ? s.toc_url : s.organizer_url;
-        window.location.replace(nextUrl + "?" + bust);
+        setTimeout(function(){
+          window.location.replace(nextUrl + "?" + bust);
+        }, 500);
         clearInterval(timer);
       } else if(s.status === "error"){
         showErr(s.error);

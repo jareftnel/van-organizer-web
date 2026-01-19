@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Dict, Any, Optional, Callable
@@ -25,13 +26,24 @@ from route_stacker import (
 
 DATE_RE = re.compile(r"\b(?:MON|TUE|WED|THU|FRI|SAT|SUN),\s+[A-Z]{3}\s+\d{1,2},\s+\d{4}\b")
 
-# Pipeline progress allocation (overall bar)
-# Excel:   0% -> 20%
-# HTML:   20% -> 30%
-# Stacker:30% -> 100%
-P_EXCEL_START, P_EXCEL_END = 0, 20
-P_HTML_START, P_HTML_END = 20, 30
-P_STACK_START, P_STACK_END = 30, 100
+STAGE_WEIGHTS = {
+    "parse_pdf": 0.25,
+    "excel": 0.35,
+    "build_html": 0.40,
+}
+STAGE_TEXT = {
+    "parse_pdf": "Parsing PDF…",
+    "excel": "Generating Excel…",
+    "build_html": "Building organizer…",
+}
+DEFAULT_STAGE_SECONDS = {
+    "parse_pdf": 25.0,
+    "excel": 15.0,
+    "build_html": 35.0,
+}
+PROGRESS_SLACK = 1.25
+STAGE_PROGRESS_CAP = 0.98
+EMA_ALPHA = 0.25
 
 
 def auto_detect_date_label(pdf_path: str) -> str:
@@ -55,12 +67,8 @@ def _clamp_pct(x: int) -> int:
     return max(0, min(100, x))
 
 
-def _map_stage_pct(stage_pct: int, a: int, b: int) -> int:
-    """
-    Map stage_pct (0..100) into overall [a..b]
-    """
-    stage_pct = _clamp_pct(stage_pct)
-    return int(a + (b - a) * (stage_pct / 100.0))
+def _monotonic_seconds() -> float:
+    return time.monotonic()
 
 
 def _time_key(label: str) -> str:
@@ -239,27 +247,29 @@ def generate_bags_xlsx_from_routesheets(
 
     wb_routes = []
 
-    def report(stage_pct: int, msg: str, extra: Optional[dict] = None):
+    def report(stage: str, msg: str, extra: Optional[dict] = None):
         if not progress_cb:
             return
         payload = {
-            "stage": "excel",
+            "stage": stage,
             "msg": msg,
-            "pct": _map_stage_pct(stage_pct, P_EXCEL_START, P_EXCEL_END),
         }
         if extra:
             payload.update(extra)
         progress_cb(**payload)
 
-    report(0, "Reading PDF pages for bags/overflow…")
+    report("parse_pdf", "Parsing PDF…")
 
     with pdfplumber.open(pdf_path) as pdf:
         total_pages = len(pdf.pages) or 1
 
         for i, page in enumerate(pdf.pages, start=1):
             # progress update
-            stage_pct = int((i / total_pages) * 100)
-            report(stage_pct, f"Parsing routesheets… ({i}/{total_pages})", {"page": i, "pages": total_pages})
+            report(
+                "parse_pdf",
+                f"Parsing PDF… ({i}/{total_pages})",
+                {"page": i, "pages": total_pages},
+            )
 
             text = page.extract_text() or ""
             parsed = parse_route_page(text)
@@ -283,7 +293,7 @@ def generate_bags_xlsx_from_routesheets(
     if out["routes"] == 0:
         raise RuntimeError("No routes were parsed from the uploaded PDF.")
 
-    report(95, f"Writing Excel… ({out['routes']} routes)")
+    report("excel", f"Generating Excel… ({out['routes']} routes)")
 
     Path(out_xlsx).parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
@@ -294,7 +304,7 @@ def generate_bags_xlsx_from_routesheets(
         idx = pd.DataFrame([[name] for name, _df in wb_routes], columns=["Sheets"])
         idx.to_excel(writer, sheet_name="INDEX", index=False)
 
-    report(100, "Excel ready.")
+    report("excel", "Excel ready.")
     return out
 
 
@@ -309,19 +319,18 @@ def run_builder_html(
     """
     import subprocess
 
-    def report(stage_pct: int, msg: str, extra: Optional[dict] = None):
+    def report(msg: str, extra: Optional[dict] = None):
         if not progress_cb:
             return
         payload = {
-            "stage": "html",
+            "stage": "build_html",
             "msg": msg,
-            "pct": _map_stage_pct(stage_pct, P_HTML_START, P_HTML_END),
         }
         if extra:
             payload.update(extra)
         progress_cb(**payload)
 
-    report(0, "Building Van Organizer HTML…")
+    report("Building organizer…")
 
     builder = Path(__file__).resolve().parents[1] / "tools" / "build_van_organizer_v21_hide_combined_ORIGPDF.py"
     cmd = [
@@ -334,9 +343,9 @@ def run_builder_html(
     ]
 
     # quick mid-progress marker (this step is usually short)
-    report(40, "Running builder…")
+    report("Building organizer…")
     subprocess.check_call(cmd)
-    report(100, "HTML ready.")
+    report("Organizer ready.")
 
 
 def run_stacker(
@@ -353,6 +362,48 @@ def run_stacker(
     )
 
 
+class ProgressEmaStore:
+    def __init__(self, path: Path, alpha: float = EMA_ALPHA):
+        self.path = path
+        self.alpha = alpha
+        self._lock = threading.Lock()
+        self._data: Dict[str, float] = {}
+        self._load()
+
+    def _load(self) -> None:
+        if not self.path.exists():
+            return
+        try:
+            raw = json.loads(self.path.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        if isinstance(raw, dict):
+            for key, value in raw.items():
+                try:
+                    self._data[str(key)] = float(value)
+                except Exception:
+                    continue
+
+    def _save(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {k: round(v, 3) for k, v in self._data.items()}
+        self.path.write_text(json.dumps(payload), encoding="utf-8")
+
+    def expected(self, stage: str) -> float:
+        if stage in self._data:
+            return float(self._data[stage])
+        return float(DEFAULT_STAGE_SECONDS.get(stage, 10.0))
+
+    def update(self, stage: str, observed: float) -> None:
+        if observed <= 0:
+            return
+        with self._lock:
+            old = self._data.get(stage, DEFAULT_STAGE_SECONDS.get(stage, observed))
+            new = (self.alpha * observed) + ((1 - self.alpha) * old)
+            self._data[stage] = float(new)
+            self._save()
+
+
 class JobStore:
     """
     Persist jobs to disk so they survive Render restarts.
@@ -363,6 +414,7 @@ class JobStore:
         self.root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
         self._jobs: Dict[str, Dict[str, Any]] = {}
+        self._ema = ProgressEmaStore(self.root / "progress_ema.json")
 
     def _job_dir(self, jid: str) -> Path:
         return self.root / jid
@@ -422,15 +474,95 @@ class JobStore:
             self._jobs[jid] = payload
 
     def set_progress(self, jid: str, payload: Dict[str, Any]):
-        # Ensure pct exists and stays 0..100
-        if "pct" in payload:
-            payload["pct"] = _clamp_pct(payload["pct"])
-        self.set(jid, progress=payload)
+        existing = (self.get(jid).get("progress") or {})
+        merged = dict(existing)
+        merged.update(payload)
+
+        new_stage = merged.get("stage")
+        old_stage = existing.get("stage")
+        if new_stage and new_stage != old_stage:
+            now = _monotonic_seconds()
+            old_started = existing.get("stage_started_at")
+            if old_stage and old_started is not None:
+                self._ema.update(old_stage, max(0.0, now - float(old_started)))
+                completed = list(existing.get("completed_stages") or [])
+                if old_stage not in completed and old_stage in STAGE_WEIGHTS:
+                    completed.append(old_stage)
+                merged["completed_stages"] = completed
+            merged["stage_started_at"] = now
+        elif "stage_started_at" not in merged and existing.get("stage_started_at") is not None:
+            merged["stage_started_at"] = existing.get("stage_started_at")
+
+        if "completed_stages" not in merged and existing.get("completed_stages") is not None:
+            merged["completed_stages"] = existing.get("completed_stages")
+
+        if "last_reported_percent" not in merged and existing.get("last_reported_percent") is not None:
+            merged["last_reported_percent"] = existing.get("last_reported_percent")
+
+        # Ensure pct exists and stays 0..100 (legacy fields)
+        if "pct" in merged:
+            merged["pct"] = _clamp_pct(merged["pct"])
+        self.set(jid, progress=merged)
+
+    def complete_current_stage(self, jid: str) -> None:
+        progress = self.get(jid).get("progress") or {}
+        stage = progress.get("stage")
+        started = progress.get("stage_started_at")
+        if not stage or started is None:
+            return
+        now = _monotonic_seconds()
+        self._ema.update(stage, max(0.0, now - float(started)))
+        completed = list(progress.get("completed_stages") or [])
+        if stage not in completed and stage in STAGE_WEIGHTS:
+            completed.append(stage)
+        progress["completed_stages"] = completed
+        progress["stage_started_at"] = started
+        self.set(jid, progress=progress)
+
+    def compute_progress_percent(self, jid: str) -> tuple[int, str]:
+        job = self.get(jid)
+        status = job.get("status")
+        progress = job.get("progress") or {}
+        stage = progress.get("stage")
+        if status == "error":
+            stage_text = "Error"
+        else:
+            stage_text = STAGE_TEXT.get(stage, "Working…")
+
+        if status == "done":
+            return 100, "Done"
+
+        completed = progress.get("completed_stages") or []
+        completed_weight = sum(STAGE_WEIGHTS.get(s, 0.0) for s in completed)
+        stage_weight = STAGE_WEIGHTS.get(stage, 0.0)
+
+        stage_progress = 0.0
+        started_at = progress.get("stage_started_at")
+        if stage and started_at is not None and stage_weight > 0:
+            elapsed = max(0.0, _monotonic_seconds() - float(started_at))
+            expected = max(0.1, self._ema.expected(stage))
+            stage_progress = min(elapsed / (expected * PROGRESS_SLACK), STAGE_PROGRESS_CAP)
+
+        total = 100 * (completed_weight + (stage_weight * stage_progress))
+        last_reported = float(progress.get("last_reported_percent") or 0.0)
+        total = max(total, last_reported)
+        total = min(total, 99.0)
+        return int(total), stage_text
 
 
 def process_job(store: JobStore, jid: str) -> None:
     try:
-        store.set(jid, status="running", progress={"pct": 1, "stage": "start", "msg": "Starting…"})
+        store.set(
+            jid,
+            status="running",
+            progress={
+                "stage": "parse_pdf",
+                "stage_started_at": _monotonic_seconds(),
+                "msg": STAGE_TEXT["parse_pdf"],
+                "last_reported_percent": 0,
+                "completed_stages": [],
+            },
+        )
 
         job_dir = store.path(jid)
         pdf_path = job_dir / "routesheets.pdf"
@@ -449,15 +581,12 @@ def process_job(store: JobStore, jid: str) -> None:
         run_builder_html(str(pdf_path), str(xlsx_path), str(html_path), progress_cb=cb)
 
         # 3) Stacked PDF (with progress callback)
-        cb(stage="stacked", msg="Detecting date label…", pct=_map_stage_pct(0, P_STACK_START, P_STACK_END))
+        cb(stage="build_html", msg=STAGE_TEXT["build_html"])
         date_label = auto_detect_date_label(str(pdf_path))
 
         def stack_cb(**payload):
-            # route_stacker likely sends pct 0..100 — map into 30..100
-            sp = payload.get("pct", 0)
-            mapped = _map_stage_pct(sp, P_STACK_START, P_STACK_END)
-            payload["stage"] = payload.get("stage") or "stacked"
-            payload["pct"] = mapped
+            payload["stage"] = "build_html"
+            payload.setdefault("msg", STAGE_TEXT["build_html"])
             store.set_progress(jid, payload)
 
         stack_results = run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
@@ -465,6 +594,7 @@ def process_job(store: JobStore, jid: str) -> None:
         wave_images = list(job_dir.glob("wave_image_*"))
         wave_colors = extract_wave_color_map(wave_images, toc_entries)
 
+        store.complete_current_stage(jid)
         store.set(
             jid,
             status="done",
@@ -489,4 +619,5 @@ def process_job(store: JobStore, jid: str) -> None:
             },
         )
     except Exception as e:
-        store.set(jid, status="error", error=str(e), progress={"pct": 100, "stage": "error", "msg": "Error"})
+        store.set(jid, status="error", error=str(e))
+        store.set_progress(jid, {"stage": "error", "msg": "Error"})
