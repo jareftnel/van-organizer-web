@@ -358,6 +358,19 @@ button{
   }
 }
 @media (max-width: 480px){
+  html, body{
+    height:100%;
+  }
+  .uploadPage{
+    min-height:100dvh;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    box-sizing:border-box;
+  }
   .brandBanner{
     max-height:56px;
     width:auto;
@@ -377,6 +390,8 @@ button{
   }
   .uploadCard{
     padding-top:12px;
+    margin-top:0;
+    margin-bottom:0;
   }
 }
 </style>
