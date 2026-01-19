@@ -92,11 +92,13 @@ body{
   --glassBorder:rgba(255,255,255,0.10);
 }
 .uploadPage{
-  height:100svh;
+  min-height:100svh;
+  min-height:100dvh;
+  height:auto;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:36px 18px 18px;
+  padding:calc(36px + env(safe-area-inset-top, 0px)) 18px calc(18px + env(safe-area-inset-bottom, 0px));
   box-sizing:border-box;
 }
 .heroWrap{
@@ -325,7 +327,7 @@ button{
 @media (orientation: landscape) and (max-height: 560px){
   html, body{
     height:100%;
-    overflow:hidden;
+    overflow:auto;
   }
   .brandBanner{
     height:auto;
@@ -334,10 +336,12 @@ button{
     object-position:center;
   }
   .uploadPage{
-    height:100svh;
+    min-height:100svh;
+    min-height:100dvh;
+    height:auto;
     align-items:center;
-    padding-top:6px;
-    padding-bottom:6px;
+    padding-top:calc(6px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));
   }
   .heroWrap{
     width:100%;
@@ -371,8 +375,10 @@ button{
   .uploadPage{
     height:auto;
     min-height:100svh;
+    min-height:100dvh;
     align-items:flex-start;
-    padding-top:20px;
+    padding-top:calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(18px + env(safe-area-inset-bottom, 0px));
   }
 }
 @media (max-width: 480px){
@@ -380,8 +386,8 @@ button{
     height:100%;
   }
   .uploadPage{
+    min-height:100svh;
     min-height:100dvh;
-    min-height:100vh;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -389,13 +395,13 @@ button{
     padding:16px;
     padding-left:max(16px, env(safe-area-inset-left));
     padding-right:max(16px, env(safe-area-inset-right));
-    padding-top:16px;
-    padding-bottom:16px;
+    padding-top:calc(16px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
     box-sizing:border-box;
   }
   .heroWrap{
+    min-height:100svh;
     min-height:100dvh;
-    min-height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
