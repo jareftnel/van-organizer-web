@@ -2199,22 +2199,45 @@ body{{
     padding:20px 16px;
   }}
   .heroWrap{{
-    max-width:380px;
-    margin:0 auto;
+    max-width:100%;
+    margin:0;
   }}
   .uploadCard{{
     padding:16px;
+    box-shadow:none;
+    display:grid;
+    grid-template-columns:1fr auto;
+    grid-template-areas:
+      "header indicator"
+      "divider divider"
+      "select select"
+      "action action"
+      "status status";
+    row-gap:6px;
   }}
   .tocHeader{{
-    padding:4px 0 8px;
-    gap:4px;
+    grid-area:header;
+    padding:2px 0 4px;
+    gap:6px;
+    align-items:flex-start;
+    text-align:left;
   }}
   .tocTitle{{
-    font-size:20px;
-    letter-spacing:0.6px;
+    font-size:16px;
+    letter-spacing:0.3px;
+    font-weight:600;
   }}
   .tocMetaRow{{
-    gap:8px;
+    gap:6px;
+    justify-content:flex-start;
+  }}
+  .mismatchIndicator{{
+    grid-area:indicator;
+    position:static;
+    margin:2px 0 0;
+    width:26px;
+    height:26px;
+    font-size:14px;
   }}
   .tocCount{{
     font-size:11px;
@@ -2222,30 +2245,39 @@ body{{
     padding:3px 10px;
   }}
   .divider{{
+    grid-area:divider;
     margin:10px 0 12px;
   }}
   .selectRow{{
+    grid-area:select;
     gap:6px;
-    margin-bottom:8px;
+    margin-bottom:4px;
+    align-items:stretch;
   }}
   .selectRow--dual{{
-    gap:12px;
+    flex-direction:column;
+    gap:10px;
   }}
   .selectGroup{{
     gap:6px;
+    align-items:stretch;
   }}
   .selectLabel{{
     font-size:11px;
+    text-align:left;
   }}
   .selectInput{{
     height:42px;
     font-size:15px;
+    max-width:100%;
   }}
   .actionRow{{
-    margin-top:6px;
-    gap:8px;
+    grid-area:action;
+    margin-top:4px;
+    gap:6px;
   }}
   .statusLine{{
+    grid-area:status;
     margin-top:10px;
   }}
 }}
