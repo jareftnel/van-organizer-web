@@ -172,11 +172,11 @@ form{display:flex;flex-direction:column;gap:16px}
 }
 .fileBtn{
   position:relative;
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
   height:40px;
-  padding:0 16px;
+  padding:0 48px;
   border-radius:12px;
   cursor:pointer;
   border:1px solid rgba(255,255,255,0.10);
@@ -194,11 +194,15 @@ form{display:flex;flex-direction:column;gap:16px}
   pointer-events:none;
 }
 .uploadText{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
   font-size:clamp(10px, 1.6vh, 12px);
-  max-width:160px;
+  max-width:calc(100% - 96px);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  pointer-events:none;
 }
 .fileBtn:hover{
   transform:translateY(-1px);
@@ -465,13 +469,7 @@ button{
     flex-shrink:0;
   }
   .uploadText{
-    flex:1;
-    min-width:0;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
-    max-width:100%;
-    padding-left:26px;
+    max-width:calc(100% - 96px);
   }
   .fileIcon,
   .plusIcon{
