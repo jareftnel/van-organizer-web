@@ -2199,6 +2199,18 @@ body{{
   padding:6px 0;
   z-index:20;
 }}
+.customSelectMenu--portal{{
+  position:fixed;
+  top:0;
+  left:0;
+  right:auto;
+}}
+.customSelectBackdrop{{
+  position:fixed;
+  inset:0;
+  background:transparent;
+  z-index:19;
+}}
 .customSelectOption{{
   padding:10px 12px;
   text-align:center;
@@ -2425,6 +2437,9 @@ body{{
   var waveColors = {{}};
   var stackedUrl = "/job/" + jid + "/download/STACKED.pdf";
   var verificationUrl = "/job/" + jid + "/verification";
+  var waveMenuHome = waveDropdown;
+  var waveMenuBackdrop = null;
+  var isWaveMenuPositioned = false;
 
   tocCount.addEventListener("click", function(){{
     window.open(stackedUrl, "_blank", "noopener");
@@ -2596,14 +2611,40 @@ body{{
 
   function openWaveMenu(){{
     if(!waveMenu || !waveControl || waveControl.disabled) return;
+    if(waveMenu.parentNode !== document.body){{
+      document.body.appendChild(waveMenu);
+    }}
+    waveMenu.classList.add("customSelectMenu--portal");
+    positionWaveMenu();
+    startWaveMenuPositioning();
+    if(!waveMenuBackdrop){{
+      waveMenuBackdrop = document.createElement("div");
+      waveMenuBackdrop.className = "customSelectBackdrop";
+      waveMenuBackdrop.addEventListener("click", closeWaveMenu);
+    }}
+    if(!waveMenuBackdrop.parentNode){{
+      document.body.appendChild(waveMenuBackdrop);
+    }}
     waveMenu.hidden = false;
     waveControl.setAttribute("aria-expanded", "true");
+    positionWaveMenu();
   }}
 
   function closeWaveMenu(){{
     if(!waveMenu || !waveControl) return;
     waveMenu.hidden = true;
     waveControl.setAttribute("aria-expanded", "false");
+    stopWaveMenuPositioning();
+    if(waveMenuBackdrop && waveMenuBackdrop.parentNode){{
+      waveMenuBackdrop.parentNode.removeChild(waveMenuBackdrop);
+    }}
+    waveMenu.classList.remove("customSelectMenu--portal");
+    waveMenu.style.left = "";
+    waveMenu.style.top = "";
+    waveMenu.style.width = "";
+    if(waveMenuHome && waveMenu.parentNode !== waveMenuHome){{
+      waveMenuHome.appendChild(waveMenu);
+    }}
   }}
 
   function toggleWaveMenu(){{
@@ -2621,6 +2662,28 @@ body{{
     syncWaveFromSelect();
   }}
 
+  function positionWaveMenu(){{
+    if(!waveMenu || !waveControl) return;
+    var rect = waveControl.getBoundingClientRect();
+    waveMenu.style.left = rect.left + "px";
+    waveMenu.style.top = (rect.bottom + 8) + "px";
+    waveMenu.style.width = rect.width + "px";
+  }}
+
+  function startWaveMenuPositioning(){{
+    if(isWaveMenuPositioned) return;
+    isWaveMenuPositioned = true;
+    window.addEventListener("resize", positionWaveMenu);
+    window.addEventListener("scroll", positionWaveMenu, true);
+  }}
+
+  function stopWaveMenuPositioning(){{
+    if(!isWaveMenuPositioned) return;
+    isWaveMenuPositioned = false;
+    window.removeEventListener("resize", positionWaveMenu);
+    window.removeEventListener("scroll", positionWaveMenu, true);
+  }}
+
   if(waveControl){{
     waveControl.addEventListener("click", function(){{
       toggleWaveMenu();
@@ -2628,7 +2691,7 @@ body{{
   }}
 
   document.addEventListener("click", function(event){{
-    if(waveDropdown && !waveDropdown.contains(event.target)){{
+    if(waveDropdown && !waveDropdown.contains(event.target) && (!waveMenu || !waveMenu.contains(event.target))){{
       closeWaveMenu();
     }}
   }});
