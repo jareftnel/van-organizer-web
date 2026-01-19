@@ -2664,8 +2664,10 @@ body{{
     var display = selected ? selected.textContent : "Select route";
     var value = selected ? selected.value : "";
     var color = selected ? selected.style.color : "";
+    var waveSelected = waveSelect.options[waveSelect.selectedIndex];
+    var waveColor = waveSelected && waveSelected.dataset ? waveSelected.dataset.color : "";
     routeControl.textContent = display || "Select route";
-    routeControl.style.color = color || "";
+    routeControl.style.color = color || waveColor || "";
     Array.prototype.forEach.call(routeMenu.querySelectorAll(".customSelectOption"), function(option){{
       var isSelected = option.dataset.value === value;
       option.setAttribute("aria-selected", isSelected ? "true" : "false");
@@ -2807,6 +2809,7 @@ body{{
       if(routeControl) {{
         routeControl.disabled = true;
         routeControl.textContent = "Select a wave first";
+        routeControl.style.color = "";
       }}
       rebuildRouteMenuFromSelect();
       return;
