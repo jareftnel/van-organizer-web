@@ -453,6 +453,30 @@ button{
     max-width:100%;
     box-sizing:border-box;
   }
+  .fileRow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .fileBtn{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    flex-shrink:0;
+  }
+  .uploadText{
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    max-width:100%;
+    padding-left:26px;
+  }
+  .fileIcon,
+  .plusIcon{
+    flex-shrink:0;
+  }
 }
 </style>
 </head>
