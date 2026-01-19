@@ -253,6 +253,11 @@ form{display:flex;flex-direction:column;gap:16px}
   transition:transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
 .waveBadge .plusIcon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
   font-size:18px;
   font-weight:700;
   line-height:1;
@@ -383,9 +388,10 @@ button{
     justify-content:center;
     align-items:center;
     width:100% !important;
-    max-width:420px;
+    max-width:390px;
     margin:0 auto;
     box-sizing:border-box;
+    transform:translateY(-14px);
   }
   .brandBanner{
     width:100%;
@@ -397,36 +403,37 @@ button{
     margin:0 auto;
   }
   .tagGlass{
-    padding:8px 0;
-    margin-top:-8px;
+    padding:6px 0;
+    margin-top:-6px;
   }
   .taglineText{
     letter-spacing:1.2px;
     font-size:12px;
     line-height:1.2;
-    margin-top:6px;
+    margin-top:4px;
     margin-bottom:0;
   }
   .uploadCard{
     width:100%;
-    max-width:420px;
+    max-width:390px;
     padding-top:12px;
     margin-top:0;
     margin-bottom:0;
   }
   form{
-    gap:12px;
+    gap:10px;
   }
   .fileRow{
-    margin-top:12px;
-    margin-bottom:12px;
+    margin-top:10px;
+    margin-bottom:6px;
   }
   .buildBtn{
     font-size:18px;
     line-height:1.1;
-    padding-top:14px;
-    padding-bottom:14px;
+    padding-top:12px;
+    padding-bottom:12px;
     border-radius:18px;
+    font-weight:600;
   }
   .uploadPage,
   .heroWrap,
