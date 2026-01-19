@@ -737,9 +737,11 @@ body{
   position:absolute;
   top:0;
   left:0%;
-  transform:translate(-50%,-80%);
+  transform:translate3d(-50%,-80%,0);
   transition:left .35s ease;
   filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+  will-change:left, transform;
+  backface-visibility:hidden;
   pointer-events:none;
 }
 .van img{
@@ -747,9 +749,11 @@ body{
   height:auto;
   display:block;
   filter:drop-shadow(0 0 10px rgba(255,152,0,.85));
+  transform:translateZ(0);
+  backface-visibility:hidden;
 }
 .van.moving img{ animation:vanBob 1.2s ease-in-out infinite; }
-@keyframes vanBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+@keyframes vanBob{ 0%,100%{ transform:translate3d(0,0,0); } 50%{ transform:translate3d(0,-2px,0); } }
 .van.parsing{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)) grayscale(0.5); }
 .van.building{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
 .van.organizing{ filter:drop-shadow(0 6px 14px rgba(0,0,0,.45)) saturate(1.2); }
