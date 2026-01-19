@@ -307,6 +307,10 @@ button{
 .buildBtn{
   width:100%;
   max-width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
   transition:transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
 .buildBtn:hover{
@@ -325,15 +329,15 @@ button{
   }
   .brandBanner{
     height:auto;
-    max-height:min(180px, 28svh);
+    max-height:120px;
     object-fit:contain;
     object-position:center;
   }
   .uploadPage{
     height:100svh;
     align-items:center;
-    padding-top:8px;
-    padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+    padding-top:6px;
+    padding-bottom:6px;
   }
   .heroWrap{
     width:100%;
@@ -342,10 +346,10 @@ button{
     padding:6px 0;
   }
   .uploadCard{
-    padding:10px;
+    padding:12px;
   }
   form{
-    gap:6px;
+    gap:8px;
   }
   .fileRow{
     padding:6px;
