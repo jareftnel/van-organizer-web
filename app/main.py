@@ -357,6 +357,28 @@ button{
     padding-top:20px;
   }
 }
+@media (max-width: 480px){
+  .brandBanner{
+    max-height:56px;
+    width:auto;
+    height:auto;
+    max-width:100%;
+    object-fit:contain;
+    margin:0 auto;
+  }
+  .tagGlass{
+    padding:8px 0;
+    margin-top:-8px;
+  }
+  .taglineText{
+    letter-spacing:1.2px;
+    font-size:12px;
+    line-height:1.2;
+  }
+  .uploadCard{
+    padding-top:12px;
+  }
+}
 </style>
 </head>
 <body>
