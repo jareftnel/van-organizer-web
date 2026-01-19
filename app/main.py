@@ -2190,6 +2190,65 @@ body{{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:20px;}}
 }}
+@media (max-width: 480px){{
+  html, body{{height:auto; min-height:100%; overflow:auto;}}
+  .uploadPage{{
+    height:auto;
+    min-height:0;
+    display:block;
+    padding:20px 16px;
+  }}
+  .heroWrap{{
+    max-width:380px;
+    margin:0 auto;
+  }}
+  .uploadCard{{
+    padding:16px;
+  }}
+  .tocHeader{{
+    padding:4px 0 8px;
+    gap:4px;
+  }}
+  .tocTitle{{
+    font-size:20px;
+    letter-spacing:0.6px;
+  }}
+  .tocMetaRow{{
+    gap:8px;
+  }}
+  .tocCount{{
+    font-size:11px;
+    letter-spacing:1.1px;
+    padding:3px 10px;
+  }}
+  .divider{{
+    margin:10px 0 12px;
+  }}
+  .selectRow{{
+    gap:6px;
+    margin-bottom:8px;
+  }}
+  .selectRow--dual{{
+    gap:12px;
+  }}
+  .selectGroup{{
+    gap:6px;
+  }}
+  .selectLabel{{
+    font-size:11px;
+  }}
+  .selectInput{{
+    height:42px;
+    font-size:15px;
+  }}
+  .actionRow{{
+    margin-top:6px;
+    gap:8px;
+  }}
+  .statusLine{{
+    margin-top:10px;
+  }}
+}}
 </style>
 </head>
 <body>
