@@ -2150,6 +2150,68 @@ body{{
   font-weight:600;
   text-align:center;
 }}
+.selectInput--hidden{{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0, 0, 0, 0);
+  border:0;
+  opacity:0;
+  pointer-events:none;
+}}
+.customSelect{{
+  position:relative;
+  width:100%;
+  max-width:420px;
+}}
+.customSelectControl{{
+  width:100%;
+  cursor:pointer;
+  padding:0 40px 0 12px;
+  position:relative;
+}}
+.customSelectControl::after{{
+  content:"";
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-top:7px solid rgba(232,238,246,0.9);
+}}
+.customSelectControl:disabled{{
+  opacity:0.5;
+  cursor:default;
+}}
+.customSelectMenu{{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:0;
+  right:0;
+  background:#0b0f14;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;
+  box-shadow:0 18px 36px rgba(0,0,0,0.35);
+  padding:6px 0;
+  z-index:20;
+}}
+.customSelectOption{{
+  padding:10px 12px;
+  text-align:center;
+  font-weight:600;
+  cursor:pointer;
+  user-select:none;
+}}
+.customSelectOption:hover{{
+  background:rgba(255,255,255,0.08);
+}}
+.customSelectOption--active{{
+  background:rgba(255,255,255,0.12);
+}}
 .selectInput option{{
   background:#0b0f14;
   color:#e8eef6;
@@ -2322,7 +2384,11 @@ body{{
         <div class="selectRow selectRow--dual">
           <div class="selectGroup">
             <label class="selectLabel" for="waveSelect">Wave</label>
-            <select id="waveSelect" class="selectInput">
+            <div class="customSelect" id="waveDropdown">
+              <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false" aria-controls="waveMenu">Loading…</button>
+              <div class="customSelectMenu" id="waveMenu" role="listbox" hidden></div>
+            </div>
+            <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
               <option value="">Loading…</option>
             </select>
           </div>
@@ -2344,6 +2410,9 @@ body{{
 (function(){{
   var jid = "{jid}";
   var waveSelect = document.getElementById("waveSelect");
+  var waveDropdown = document.getElementById("waveDropdown");
+  var waveControl = document.getElementById("waveControl");
+  var waveMenu = document.getElementById("waveMenu");
   var routeSelect = document.getElementById("routeSelect");
   var routeGroup = document.getElementById("routeGroup");
   var openRoute = document.getElementById("openRoute");
@@ -2433,16 +2502,24 @@ body{{
 
   function populateWaves(){{
     waveSelect.innerHTML = "";
+    waveMenu.innerHTML = "";
+    closeWaveMenu();
     var labels = Object.keys(groupedRoutes);
     if(!labels.length){{
       waveSelect.innerHTML = "<option value=''>No waves found</option>";
       waveSelect.disabled = true;
+      if(waveControl) {{
+        waveControl.disabled = true;
+        waveControl.textContent = "No waves found";
+      }}
       return;
     }}
     labels.sort();
     waveSelect.appendChild(new Option("Select Wave", ""));
+    waveMenu.appendChild(buildWaveMenuOption("Select Wave", "", ""));
     labels.forEach(function(label, index){{
       var opt = new Option(ordinalize(index + 1) + " " + label, label);
+      var displayText = opt.textContent;
       var key = label.replace("Wave: ", "");
       var color = waveColors[key];
       if(color){{
@@ -2450,8 +2527,11 @@ body{{
         opt.dataset.color = color;
       }}
       waveSelect.appendChild(opt);
+      waveMenu.appendChild(buildWaveMenuOption(displayText, label, color));
     }});
     waveSelect.disabled = false;
+    if(waveControl) waveControl.disabled = false;
+    syncWaveFromSelect();
   }}
 
   function populateRoutes(label){{
@@ -2480,12 +2560,89 @@ body{{
     var selected = waveSelect.options[waveSelect.selectedIndex];
     var color = selected && selected.dataset ? selected.dataset.color : "";
     waveSelect.style.color = color || "";
+    if(waveControl) waveControl.style.color = color || "";
     routeSelect.style.color = color || "";
   }}
+
+  function buildWaveMenuOption(label, value, color){{
+    var option = document.createElement("div");
+    option.className = "customSelectOption";
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
+    option.dataset.value = value;
+    option.textContent = label;
+    if(color) option.style.color = color;
+    option.addEventListener("click", function(){{
+      selectWaveValue(value);
+      closeWaveMenu();
+    }});
+    return option;
+  }}
+
+  function syncWaveFromSelect(){{
+    if(!waveControl || !waveMenu) return;
+    var selected = waveSelect.options[waveSelect.selectedIndex];
+    var display = selected ? selected.textContent : "Select Wave";
+    var value = selected ? selected.value : "";
+    var color = selected && selected.dataset ? selected.dataset.color : "";
+    waveControl.textContent = display || "Select Wave";
+    waveControl.style.color = color || "";
+    Array.prototype.forEach.call(waveMenu.querySelectorAll(".customSelectOption"), function(option){{
+      var isSelected = option.dataset.value === value;
+      option.setAttribute("aria-selected", isSelected ? "true" : "false");
+      option.classList.toggle("customSelectOption--active", isSelected);
+    }});
+  }}
+
+  function openWaveMenu(){{
+    if(!waveMenu || !waveControl || waveControl.disabled) return;
+    waveMenu.hidden = false;
+    waveControl.setAttribute("aria-expanded", "true");
+  }}
+
+  function closeWaveMenu(){{
+    if(!waveMenu || !waveControl) return;
+    waveMenu.hidden = true;
+    waveControl.setAttribute("aria-expanded", "false");
+  }}
+
+  function toggleWaveMenu(){{
+    if(!waveMenu) return;
+    if(waveMenu.hidden){{
+      openWaveMenu();
+    }} else {{
+      closeWaveMenu();
+    }}
+  }}
+
+  function selectWaveValue(value){{
+    waveSelect.value = value;
+    waveSelect.dispatchEvent(new Event("change", {{ bubbles: true }}));
+    syncWaveFromSelect();
+  }}
+
+  if(waveControl){{
+    waveControl.addEventListener("click", function(){{
+      toggleWaveMenu();
+    }});
+  }}
+
+  document.addEventListener("click", function(event){{
+    if(waveDropdown && !waveDropdown.contains(event.target)){{
+      closeWaveMenu();
+    }}
+  }});
+
+  document.addEventListener("keydown", function(event){{
+    if(event.key === "Escape"){{
+      closeWaveMenu();
+    }}
+  }});
 
   waveSelect.addEventListener("change", function(){{
     populateRoutes(waveSelect.value);
     applyWaveColor();
+    syncWaveFromSelect();
   }});
 
   routeSelect.addEventListener("change", function(){{
