@@ -812,24 +812,40 @@ body{
   var pctEl = document.getElementById("pctText");
   var statusEl = document.getElementById("statusText");
   var doneHandled = false;
+  var minLeftPct = 0;
+  var maxLeftPct = 100;
+
+  function updateVanBounds(){
+    var road = root.querySelector(".road");
+    if (!road || !van) return;
+    var roadWidth = road.getBoundingClientRect().width || 0;
+    var vanWidth = van.getBoundingClientRect().width || 0;
+    if (roadWidth <= 0 || vanWidth <= 0) return;
+    var halfPct = (vanWidth / roadWidth) * 50;
+    minLeftPct = halfPct;
+    maxLeftPct = 100 - halfPct;
+  }
 
   function setProgress(pct, statusText){
-    var clamped = Math.max(0, Math.min(100, Number(pct) || 0));
-    van.style.left = clamped + "%";
-    pctEl.textContent = clamped.toFixed(0) + "%";
+    updateVanBounds();
+    var rawPct = Number(pct) || 0;
+    var displayPct = Math.max(0, Math.min(100, rawPct));
+    var positionPct = minLeftPct + ((maxLeftPct - minLeftPct) * (displayPct / 100));
+    van.style.left = positionPct + "%";
+    pctEl.textContent = displayPct.toFixed(0) + "%";
     if (typeof statusText === "string") statusEl.textContent = statusText;
 
     van.className = "van";
     root.classList.remove("job-complete");
 
-    if (clamped < 100) van.classList.add("moving");
+    if (displayPct < 100) van.classList.add("moving");
 
-    if (clamped < 25) van.classList.add("parsing");
-    else if (clamped < 60) van.classList.add("building");
-    else if (clamped < 95) van.classList.add("organizing");
+    if (displayPct < 25) van.classList.add("parsing");
+    else if (displayPct < 60) van.classList.add("building");
+    else if (displayPct < 95) van.classList.add("organizing");
     else van.classList.add("complete");
 
-    if (clamped >= 100){
+    if (displayPct >= 100){
       root.classList.add("job-complete");
       van.classList.remove("moving");
     }
@@ -870,6 +886,8 @@ body{
     }
   }
 
+  updateVanBounds();
+  window.addEventListener("resize", updateVanBounds);
   tick();
   var timer = setInterval(tick, 1000);
 })();
