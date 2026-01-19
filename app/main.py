@@ -642,6 +642,19 @@ body{
   font-weight:600;
   opacity:.9;
 }
+@media (max-width: 480px){
+  .page{
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+    padding-top:16px;
+    box-sizing:border-box;
+  }
+  .card{
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+  }
+}
 </style>
 </head>
 <body>
