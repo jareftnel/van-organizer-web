@@ -2209,6 +2209,7 @@ body{{
   padding:6px 0;
   z-index:9999;
   overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }}
 
 .customSelectBackdrop{{
@@ -2569,13 +2570,22 @@ body{{
     }});
   }}
 
+  function positionMenuDown(controlEl, menuEl){{
+    if(!controlEl || !menuEl || menuEl.hidden) return;
+    var rect = controlEl.getBoundingClientRect();
+    var margin = 8;
+    menuEl.style.position = "fixed";
+    menuEl.style.left = rect.left + "px";
+    menuEl.style.width = rect.width + "px";
+    var top = rect.bottom + margin;
+    menuEl.style.top = top + "px";
+    var available = Math.max(120, window.innerHeight - top - margin);
+    var hardCap = Math.min(420, Math.floor(window.innerHeight * 0.60));
+    menuEl.style.maxHeight = Math.min(available, hardCap) + "px";
+  }}
+
   function positionWaveMenu(){{
-    if(!waveMenu || !waveControl || waveMenu.hidden) return;
-    var rect = waveControl.getBoundingClientRect();
-    waveMenu.style.position = "fixed";
-    waveMenu.style.top = (rect.bottom + 8) + "px";
-    waveMenu.style.left = rect.left + "px";
-    waveMenu.style.width = rect.width + "px";
+    positionMenuDown(waveControl, waveMenu);
   }}
 
   function startWaveMenuPositioning(){{
@@ -2615,6 +2625,7 @@ body{{
     }}
     waveMenu.hidden = false;
     waveControl.setAttribute("aria-expanded", "true");
+    positionMenuDown(waveControl, waveMenu);
     startWaveMenuPositioning();
   }}
 
@@ -2681,33 +2692,7 @@ body{{
   }}
 
   function positionRouteMenu(){{
-    if(!routeMenu || !routeControl || routeMenu.hidden) return;
-    var viewport = window.visualViewport;
-    var rect = routeControl.getBoundingClientRect();
-    var viewportHeight = viewport ? viewport.height : (window.innerHeight || document.documentElement.clientHeight);
-    var viewportTop = viewport ? viewport.offsetTop : 0;
-    var viewportBottom = viewportTop + viewportHeight;
-    var spacing = 8;
-    var minTop = viewportTop + spacing;
-    var maxBottom = viewportBottom - spacing;
-    var spaceBelow = maxBottom - rect.bottom;
-    var spaceAbove = rect.top - minTop;
-    var menuHeight = routeMenu.scrollHeight || 0;
-    var placeAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
-    var available = placeAbove ? spaceAbove : spaceBelow;
-    var maxHeight = Math.max(available, 0);
-    var desiredHeight = menuHeight ? Math.min(menuHeight, maxHeight) : maxHeight;
-    var top = placeAbove
-      ? (rect.top - spacing - desiredHeight)
-      : (rect.bottom + spacing);
-    if(desiredHeight > 0){{
-      top = Math.min(Math.max(top, minTop), maxBottom - desiredHeight);
-    }}
-    routeMenu.style.position = "fixed";
-    routeMenu.style.top = top + "px";
-    routeMenu.style.left = rect.left + "px";
-    routeMenu.style.width = rect.width + "px";
-    routeMenu.style.maxHeight = desiredHeight + "px";
+    positionMenuDown(routeControl, routeMenu);
   }}
 
   function startRouteMenuPositioning(){{
@@ -2747,6 +2732,7 @@ body{{
     }}
     routeMenu.hidden = false;
     routeControl.setAttribute("aria-expanded", "true");
+    positionMenuDown(routeControl, routeMenu);
     startRouteMenuPositioning();
   }}
 
