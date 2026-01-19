@@ -2198,6 +2198,7 @@ body{{
   box-shadow:0 18px 36px rgba(0,0,0,0.35);
   padding:6px 0;
   z-index:9999;
+  overflow-y:auto;
 }}
 
 .customSelectBackdrop{{
@@ -2672,10 +2673,22 @@ body{{
   function positionRouteMenu(){{
     if(!routeMenu || !routeControl || routeMenu.hidden) return;
     var rect = routeControl.getBoundingClientRect();
+    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    var spacing = 8;
+    var spaceBelow = viewportHeight - rect.bottom - spacing;
+    var spaceAbove = rect.top - spacing;
+    var menuHeight = routeMenu.scrollHeight || 0;
+    var placeAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
+    var available = placeAbove ? spaceAbove : spaceBelow;
+    var maxHeight = Math.max(available, 0);
+    var desiredHeight = menuHeight ? Math.min(menuHeight, maxHeight) : maxHeight;
     routeMenu.style.position = "fixed";
-    routeMenu.style.top = (rect.bottom + 8) + "px";
+    routeMenu.style.top = placeAbove
+      ? (rect.top - spacing - desiredHeight) + "px"
+      : (rect.bottom + spacing) + "px";
     routeMenu.style.left = rect.left + "px";
     routeMenu.style.width = rect.width + "px";
+    routeMenu.style.maxHeight = desiredHeight + "px";
   }}
 
   function startRouteMenuPositioning(){{
