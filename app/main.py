@@ -2109,6 +2109,19 @@ body{{
   flex-direction:column;
   gap:12px;
 }}
+.metaRow{{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  min-height:32px;
+}}
+.metaRow .mismatchIndicator{{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+}}
 .tocStatusRow{{
   display:flex;
   align-items:center;
@@ -2129,7 +2142,7 @@ body{{
   margin:0 auto;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:12px;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2139,11 +2152,11 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  font-size:clamp(18px, 2.4vw, 24px);
+  font-size:clamp(16px, 2.2vw, 22px);
   letter-spacing:2px;
   text-transform:uppercase;
   opacity:0.9;
-  padding:10px 22px;
+  padding:8px 18px;
   border-radius:999px;
   color:inherit;
   font:inherit;
@@ -2165,13 +2178,6 @@ body{{
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
   cursor:pointer;
-}}
-.mismatchIndicator--banner{{
-  position:absolute;
-  right:0;
-  bottom:0;
-  transform:translate(50%, 50%);
-  z-index:3;
 }}
 .mismatchIndicator:focus-visible{{
   outline:2px solid rgba(255,255,255,0.7);
@@ -2200,26 +2206,36 @@ body{{
   width:100%;
   border-radius:18px;
   padding:0;
-  min-height:220px;
+  min-height:200px;
   background:transparent;
   border:0;
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:18px;
+  gap:12px;
   max-width:100%;
   box-sizing:border-box;
 }}
-.selectBubble{{
+.selectionCard{{
   width:100%;
-  padding:18px 16px;
+  padding:16px;
   display:flex;
-  justify-content:center;
+  flex-direction:column;
+  gap:12px;
   box-sizing:border-box;
 }}
-.selectRow--bubble{{
+.fieldRow{{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}}
+.fieldRow[hidden]{{
+  display:none;
+}}
+.fieldDivider{{
+  height:1px;
   width:100%;
-  margin-bottom:0;
+  background:rgba(255,255,255,0.12);
 }}
 .divider{{
   height:1px;
@@ -2239,22 +2255,23 @@ body{{
 .selectGroup{{
   display:flex;
   flex-direction:column;
-  gap:8px;
-  align-items:center;
+  gap:6px;
+  align-items:flex-start;
   flex:1;
 }}
 .selectGroup[hidden]{{
   display:none;
 }}
 .selectLabel{{
-  font-size:clamp(12px, 1.6vw, 13px);
-  letter-spacing:1px;
+  font-size:clamp(10px, 1.4vw, 12px);
+  letter-spacing:0.8px;
   text-transform:uppercase;
-  opacity:0.7;
-  text-align:center;
+  opacity:0.72;
+  text-align:left;
+  margin-left:4px;
 }}
 .selectInput{{
-  height:54px;
+  height:46px;
   width:100%;
   max-width:100%;
   border-radius:14px;
@@ -2287,11 +2304,16 @@ body{{
 .customSelectControl{{
   width:100%;
   cursor:pointer;
-  padding:0 48px 0 16px;
+  padding:0 44px 0 16px;
   position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
+}}
+.fieldSurface{{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;
 }}
 .customSelectControl::after{{
   content:"";
@@ -2443,7 +2465,7 @@ body{{
   margin-top:16px;
 }}
 .buildBtn{{
-  height:clamp(48px, 7vh, 64px);
+  height:clamp(44px, 6vh, 56px);
   font-size:clamp(16px, 2.4vh, 20px);
   border-radius:16px;
   border:0;
@@ -2473,7 +2495,7 @@ body{{
   background:transparent;
 }}
 .statusLine{{
-  margin-top:12px;
+  margin-top:10px;
   font-size:13px;
   opacity:0.7;
   text-align:center;
@@ -2520,8 +2542,8 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .tocTop .tocCount{{
-    align-self:flex-start;
+  .metaRow .mismatchIndicator{{
+    left:0;
   }}
   .mismatchIndicator{{
     width:18px;
@@ -2529,15 +2551,15 @@ body{{
     font-size:10px;
   }}
   .tocCount{{
-    font-size:16px;
+    font-size:15px;
     letter-spacing:1.3px;
-    padding:8px 16px;
+    padding:7px 14px;
   }}
   .tocMiddle{{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:14px;
+    padding:12px;
     min-height:0;
     box-sizing:border-box;
   }}
@@ -2547,58 +2569,49 @@ body{{
     box-sizing:border-box;
     display:flex;
     flex-direction:column;
-    gap:16px;
+    gap:12px;
   }}
   .tocSelectorsPanel{{
     width:100%;
     border-radius:18px;
     padding:0;
-    min-height:220px;
+    min-height:200px;
     background:transparent;
     border:0;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    gap:16px;
+    gap:12px;
     max-width:100%;
     box-sizing:border-box;
   }}
-  .selectBubble{{
+  .selectionCard{{
     width:100%;
-    padding:16px 14px;
+    padding:14px 12px;
     display:flex;
-    justify-content:center;
+    flex-direction:column;
     box-sizing:border-box;
   }}
-  .selectRow{{
+  .fieldRow{{
     gap:6px;
-    margin-bottom:0;
-    align-items:center;
-  }}
-  .selectRow--bubble{{
-    width:100%;
-  }}
-  .selectRow--spaced{{
-    margin-top:16px;
   }}
   .selectGroup{{
     gap:6px;
-    align-items:center;
+    align-items:flex-start;
   }}
   .selectLabel{{
-    font-size:11px;
-    text-align:center;
-    margin-bottom:6px;
+    font-size:10px;
+    text-align:left;
+    margin-bottom:0;
     letter-spacing:0.04em;
   }}
   .selectInput{{
-    height:56px;
-    font-size:15px;
+    height:44px;
+    font-size:14px;
     max-width:100%;
   }}
   .customSelect{{
     max-width:100%;
-    margin:0 auto;
   }}
   .taglineText--desktop{{
     display:none;
@@ -2614,7 +2627,7 @@ body{{
   }}
   .tocBottom button{{
     width:100%;
-    height:50px;
+    height:46px;
   }}
   .statusLine{{
     margin-top:4px;
@@ -2630,34 +2643,33 @@ body{{
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
-            <span class="mismatchIndicator mismatchIndicator--ok mismatchIndicator--banner" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
           </div>
-          <div class="tocStatusRow">
+          <div class="metaRow">
+            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
             <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
           </div>
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
             <div class="tocSelectorsPanel">
-              <div class="selectBubble glassField">
-                <div class="selectRow selectRow--bubble">
+              <div class="selectionCard glassCard">
+                <div class="fieldRow">
                   <div class="selectGroup">
                     <label class="selectLabel" for="waveSelect">Wave</label>
                     <div class="customSelect" id="waveDropdown">
-                      <button class="selectInput customSelectControl glassField" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                      <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
                     </div>
                     <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
                       <option value="">Loading…</option>
                     </select>
                   </div>
                 </div>
-              </div>
-              <div class="selectBubble glassField" id="routeRow" hidden>
-                <div class="selectRow selectRow--bubble">
+                <div class="fieldDivider" id="routeDivider" aria-hidden="true" hidden></div>
+                <div class="fieldRow" id="routeRow" hidden>
                   <div class="selectGroup">
                     <label class="selectLabel" for="routeSelect">Route</label>
                     <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl glassField" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
                     </div>
                     <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
                       <option value="">Select a wave first</option>
@@ -2693,6 +2705,7 @@ body{{
   var routeControl = document.getElementById("routeControl");
   var routeSelect = document.getElementById("routeSelect");
   var routeRow = document.getElementById("routeRow");
+  var routeDivider = document.getElementById("routeDivider");
   var openRoute = document.getElementById("openRoute");
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
@@ -2763,9 +2776,12 @@ body{{
     if(!routeRow) return;
     if(hasWave){{
       routeRow.hidden = false;
+      if(routeDivider) routeDivider.hidden = false;
       return;
     }}
-    routeRow.hidden = !isVerticalMobile();
+    var hideRow = !isVerticalMobile();
+    routeRow.hidden = hideRow;
+    if(routeDivider) routeDivider.hidden = hideRow;
   }}
 
   function setMismatchIndicator(count){{
