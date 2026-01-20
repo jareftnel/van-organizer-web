@@ -2379,10 +2379,10 @@ body{{
   justify-content:space-between;
   height:clamp(40px, 7vh, 52px);
   padding:clamp(6px, 1.6vh, 12px) clamp(10px, 2.6vw, 16px);
-  border-bottom:1px solid rgba(255,255,255,0.1);
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }}
 .pickerTitle{{
-  font-weight:700;
+  font-weight:750;
   font-size:clamp(13px, 2.2vh, 17px);
   text-align:left;
 }}
