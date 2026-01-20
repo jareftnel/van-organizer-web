@@ -2430,7 +2430,7 @@ body{{
   color:#e8eef6;
   height:clamp(32px, 5.2vh, 44px);
   font-size:clamp(12px, 2vh, 16px);
-  font-weight:700;
+  font-weight:600;
   cursor:pointer;
   text-align:center;
   display:flex;
@@ -2452,6 +2452,7 @@ body{{
 }}
 .pickerRow--active{{
   background:rgba(255,255,255,0.12);
+  font-weight:700;
 }}
 .pickerRow--disabled{{
   opacity:0.5;
