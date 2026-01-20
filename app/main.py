@@ -2019,7 +2019,7 @@ body{{
   position:absolute;
   inset:0;
   display:flex;
-  align-items:flex-end;
+  align-items:center;
   justify-content:center;
   padding:12px 16px;
   font-size:13px;
