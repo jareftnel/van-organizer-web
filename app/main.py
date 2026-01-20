@@ -2010,7 +2010,7 @@ body{{
 .tocBanner{{
   position:relative;
   border-radius:var(--r);
-  overflow:hidden;
+  overflow:visible;
 }}
 .tocBanner .brandBanner{{
   border-radius:inherit;
@@ -2106,13 +2106,15 @@ body{{
 .tocMiddleInner{{
   width:100%;
   max-width:560px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }}
-.tocMetaRow{{
+.tocCountRow{{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:18px;
-  margin-bottom:20px;
+  margin:0;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2143,13 +2145,20 @@ body{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:32px;
-  height:32px;
+  width:20px;
+  height:20px;
   border-radius:999px;
-  font-size:18px;
+  font-size:11px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
   cursor:pointer;
+}}
+.mismatchIndicator--banner{{
+  position:absolute;
+  right:0;
+  bottom:0;
+  transform:translate(50%, 50%);
+  z-index:3;
 }}
 .mismatchIndicator:focus-visible{{
   outline:2px solid rgba(255,255,255,0.7);
@@ -2173,6 +2182,34 @@ body{{
 .tocCount--button:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
   outline-offset:2px;
+}}
+.tocSelectorsPanel{{
+  width:100%;
+  border-radius:18px;
+  padding:0;
+  min-height:220px;
+  background:transparent;
+  border:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:18px;
+  max-width:100%;
+  box-sizing:border-box;
+}}
+.selectBubble{{
+  width:100%;
+  border-radius:18px;
+  padding:18px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  display:flex;
+  justify-content:center;
+  box-sizing:border-box;
+}}
+.selectRow--bubble{{
+  width:100%;
+  margin-bottom:0;
 }}
 .divider{{
   height:1px;
@@ -2474,9 +2511,9 @@ body{{
     align-self:flex-start;
   }}
   .mismatchIndicator{{
-    width:26px;
-    height:26px;
-    font-size:14px;
+    width:18px;
+    height:18px;
+    font-size:10px;
   }}
   .tocCount{{
     font-size:16px;
@@ -2495,28 +2532,44 @@ body{{
     width:100%;
     max-width:100%;
     box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
   }}
-  .tocMetaRow{{
-    margin:0 0 16px 0;
+  .tocCountRow{{
+    margin:0;
   }}
   .tocSelectorsPanel{{
     width:100%;
     border-radius:18px;
-    padding:18px 16px;
+    padding:0;
     min-height:220px;
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.08);
+    background:transparent;
+    border:0;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    gap:14px;
+    gap:16px;
     max-width:100%;
+    box-sizing:border-box;
+  }}
+  .selectBubble{{
+    width:100%;
+    border-radius:16px;
+    padding:16px 14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    justify-content:center;
     box-sizing:border-box;
   }}
   .selectRow{{
     gap:6px;
     margin-bottom:0;
     align-items:center;
+  }}
+  .selectRow--bubble{{
+    width:100%;
   }}
   .selectRow--spaced{{
     margin-top:16px;
@@ -2566,39 +2619,43 @@ body{{
   <div class="uploadPage tocPage">
     <div class="heroWrap">
       <div class="uploadCard tocCard">
-          <div class="tocTop">
+        <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
+            <span class="mismatchIndicator mismatchIndicator--ok mismatchIndicator--banner" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
           </div>
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
-            <div class="tocMetaRow">
+            <div class="tocCountRow">
               <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-              <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
             </div>
             <div class="tocSelectorsPanel">
-              <div class="selectRow">
-                <div class="selectGroup">
-                  <label class="selectLabel" for="waveSelect">Wave</label>
-                  <div class="customSelect" id="waveDropdown">
-                    <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+              <div class="selectBubble">
+                <div class="selectRow selectRow--bubble">
+                  <div class="selectGroup">
+                    <label class="selectLabel" for="waveSelect">Wave</label>
+                    <div class="customSelect" id="waveDropdown">
+                      <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                    </div>
+                    <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
+                      <option value="">Loading…</option>
+                    </select>
                   </div>
-                  <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
-                    <option value="">Loading…</option>
-                  </select>
                 </div>
               </div>
-              <div class="selectRow selectRow--spaced" id="routeRow" hidden>
-                <div class="selectGroup">
-                  <label class="selectLabel" for="routeSelect">Route</label>
-                  <div class="customSelect" id="routeDropdown">
-                    <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+              <div class="selectBubble" id="routeRow" hidden>
+                <div class="selectRow selectRow--bubble">
+                  <div class="selectGroup">
+                    <label class="selectLabel" for="routeSelect">Route</label>
+                    <div class="customSelect" id="routeDropdown">
+                      <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                    </div>
+                    <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
+                      <option value="">Select a wave first</option>
+                    </select>
                   </div>
-                  <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                    <option value="">Select a wave first</option>
-                  </select>
                 </div>
               </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
