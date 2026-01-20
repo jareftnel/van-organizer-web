@@ -2223,40 +2223,45 @@ body{{
   display:flex;
   flex-direction:column;
   max-height:min(94svh, 680px);
+  overflow:hidden;
 }}
 .pickerHeader{{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  height:clamp(44px, 8vh, 56px);
-  padding:clamp(8px, 2vh, 14px) clamp(12px, 3vw, 18px);
+  height:clamp(40px, 7vh, 52px);
+  padding:clamp(6px, 1.6vh, 12px) clamp(10px, 2.6vw, 16px);
   border-bottom:1px solid rgba(255,255,255,0.1);
 }}
 .pickerTitle{{
   font-weight:700;
-  font-size:clamp(14px, 2.4vh, 18px);
+  font-size:clamp(13px, 2.2vh, 17px);
   text-align:left;
 }}
 .pickerClose{{
   background:transparent;
   border:0;
   color:#e8eef6;
-  font-size:clamp(16px, 2.6vh, 20px);
+  font-size:clamp(15px, 2.4vh, 18px);
   cursor:pointer;
   padding:0;
-  width:clamp(28px, 6vh, 34px);
-  height:clamp(28px, 6vh, 34px);
+  width:clamp(26px, 5.4vh, 32px);
+  height:clamp(26px, 5.4vh, 32px);
   display:flex;
   align-items:center;
   justify-content:center;
 }}
 .pickerList{{
-  max-height:calc(94svh - clamp(120px, 26vh, 190px));
-  overflow:auto;
+  max-height:none;
+  overflow:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:clamp(6px, 1.6vh, 12px) clamp(6px, 2vw, 12px) clamp(10px, 2.2vh, 16px);
+  padding:clamp(4px, 1.2vh, 10px) clamp(6px, 2vw, 12px) clamp(6px, 1.6vh, 12px);
   scrollbar-color:rgba(116,136,168,0.6) rgba(255,255,255,0.06);
   scrollbar-width:thin;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  overflow-x:hidden;
 }}
 .pickerList::-webkit-scrollbar{{
   width:8px;
@@ -2275,18 +2280,21 @@ body{{
   border:0;
   background:transparent;
   color:#e8eef6;
-  height:clamp(40px, 6vh, 52px);
-  font-size:clamp(14px, 2.2vh, 17px);
+  height:clamp(32px, 5.2vh, 44px);
+  font-size:clamp(12px, 2vh, 16px);
   font-weight:700;
   cursor:pointer;
   text-align:center;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:0 14px;
-  margin:clamp(2px, 0.8vh, 6px) clamp(4px, 1.2vw, 8px);
+  padding:0 12px;
+  margin:clamp(2px, 0.5vh, 4px) clamp(4px, 1vw, 6px);
   border-radius:12px;
   pointer-events:auto;
+  -webkit-tap-highlight-color:transparent;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }}
 .pickerRow:hover{{
   background:rgba(255,255,255,0.08);
@@ -2300,6 +2308,13 @@ body{{
 .pickerRow--disabled{{
   opacity:0.5;
   cursor:default;
+}}
+@media (hover:none){{
+  .pickerRow:hover,
+  .pickerRow:active,
+  .pickerRow--active{{
+    background:transparent;
+  }}
 }}
 .selectInput option{{
   background:#0b0f14;
