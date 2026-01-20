@@ -2019,6 +2019,12 @@ body{{
   font-size:13px;
   opacity:0.85;
 }}
+.taglineText--mobile{{
+  display:none;
+}}
+.taglineText--desktop{{
+  display:block;
+}}
 .heroWrap, .tagGlass, .uploadCard, .buildBtn{{
   box-sizing:border-box;
 }}
@@ -2442,7 +2448,9 @@ body{{
   }}
   .tocMetaRow{{
     gap:6px;
-    justify-content:flex-start;
+    justify-content:center;
+    align-self:center;
+    width:100%;
   }}
   .mismatchIndicator{{
     width:26px;
@@ -2468,7 +2476,7 @@ body{{
   .selectRow{{
     gap:6px;
     margin-bottom:0;
-    align-items:stretch;
+    align-items:center;
   }}
   .selectRow--dual{{
     flex-direction:column;
@@ -2476,16 +2484,28 @@ body{{
   }}
   .selectGroup{{
     gap:6px;
-    align-items:stretch;
+    align-items:center;
   }}
   .selectLabel{{
     font-size:11px;
-    text-align:left;
+    text-align:center;
   }}
   .selectInput{{
     height:42px;
     font-size:15px;
     max-width:100%;
+  }}
+  .customSelect{{
+    max-width:300px;
+    margin:0 auto;
+  }}
+  .taglineText--desktop{{
+    display:none;
+  }}
+  .taglineText--mobile{{
+    display:block;
+    font-weight:600;
+    letter-spacing:0.6px;
   }}
   .tocBottom{{
     padding:10px 14px calc(12px + env(safe-area-inset-bottom));
@@ -2507,7 +2527,8 @@ body{{
         <div class="tocTop">
           <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
           <div class="tagGlass">
-            <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
+            <div class="taglineText taglineText--desktop">OPTIMIZE YOUR ROUTE</div>
+            <div class="taglineText taglineText--mobile" id="tocDateBanner">Date</div>
           </div>
           <div class="tocHeader">
             <div class="tocTitle" id="tocDate">Date</div>
@@ -2516,7 +2537,7 @@ body{{
             </div>
           </div>
         </div>
-        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported" hidden>✓</span>
+        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
         <div class="tocMiddle">
           <div class="divider"></div>
           <div class="selectRow selectRow--dual">
@@ -2568,6 +2589,7 @@ body{{
   var openRoute = document.getElementById("openRoute");
   var tocDate = document.getElementById("tocDate");
   var tocCount = document.getElementById("tocCount");
+  var tocDateBanner = document.getElementById("tocDateBanner");
   var mismatchIndicator = document.getElementById("mismatchIndicator");
   var statusLine = document.getElementById("statusLine");
   var pickerBackdrop = document.getElementById("pickerBackdrop");
@@ -2579,19 +2601,19 @@ body{{
   var routeIndex = {{}};
   var waveColors = {{}};
   var stackedUrl = "/job/" + jid + "/download/STACKED.pdf";
-  var verificationUrl = "/job/" + jid + "/verification";
+  var summaryUrl = "/job/" + jid + "/verification";
 
   tocCount.addEventListener("click", function(){{
     window.open(stackedUrl, "_blank", "noopener");
   }});
   if(mismatchIndicator){{
     mismatchIndicator.addEventListener("click", function(){{
-      window.location.href = verificationUrl;
+      window.location.href = summaryUrl;
     }});
     mismatchIndicator.addEventListener("keydown", function(event){{
       if(event.key === "Enter" || event.key === " "){{
         event.preventDefault();
-        window.location.href = verificationUrl;
+        window.location.href = summaryUrl;
       }}
     }});
   }}
@@ -2627,10 +2649,13 @@ body{{
   function setMismatchIndicator(count){{
     if(!mismatchIndicator) return;
     if(typeof count !== "number"){{
-      mismatchIndicator.hidden = true;
+      mismatchIndicator.hidden = false;
+      mismatchIndicator.textContent = "✓";
+      mismatchIndicator.title = "View verification summary";
+      mismatchIndicator.classList.remove("mismatchIndicator--error");
+      mismatchIndicator.classList.add("mismatchIndicator--ok");
       return;
     }}
-    mismatchIndicator.hidden = false;
     if(count === 0){{
       mismatchIndicator.textContent = "✓";
       mismatchIndicator.title = "No mismatches reported";
@@ -2891,6 +2916,7 @@ body{{
         return;
       }}
       tocDate.textContent = data.date_label || "Date";
+      if(tocDateBanner) tocDateBanner.textContent = data.date_label || "Date";
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
       waveColors = data.wave_colors ?? {{}};
