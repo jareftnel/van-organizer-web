@@ -2104,10 +2104,10 @@ body{{
   min-height:calc(100dvh - 96px);
 }}
 .tocTop{{
-  padding:22px 22px 12px;
+  padding:20px 22px 8px;
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:6px;
 }}
 .metaRow{{
   display:flex;
@@ -2115,7 +2115,7 @@ body{{
   justify-content:center;
   position:relative;
   min-height:28px;
-  margin-top:-4px;
+  margin-top:-2px;
 }}
 .metaRow .mismatchIndicator{{
   position:absolute;
@@ -2134,7 +2134,7 @@ body{{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:12px;
+  gap:8px;
 }}
 .tocMiddleInner{{
   width:100%;
@@ -2143,7 +2143,7 @@ body{{
   margin:0 auto;
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:8px;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2230,7 +2230,7 @@ body{{
   box-shadow:0 10px 30px rgba(0,0,0,0.35);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  transform:translateY(-8px);
+  transform:translateY(-12px);
 }}
 .fieldRow{{
   display:flex;
@@ -2327,6 +2327,9 @@ body{{
 }}
 .fieldSurface[data-has-value="true"]{{
   border-color:var(--wave-border, rgba(255,255,255,0.12));
+  background:linear-gradient(180deg, var(--wave-fill, rgba(255,255,255,0.16)) 0%, rgba(255,255,255,0.04) 100%);
+  box-shadow:0 10px 24px rgba(0,0,0,0.28);
+  transform:translateY(-1px);
 }}
 .customSelectControl::after{{
   content:"";
@@ -2870,6 +2873,7 @@ body{{
     waveControl.style.color = color || "";
     waveControl.style.setProperty("--wave-accent", color || "transparent");
     waveControl.style.setProperty("--wave-border", color ? toRgba(color, 0.65) : "");
+    waveControl.style.setProperty("--wave-fill", color ? toRgba(color, 0.2) : "");
     waveControl.dataset.hasValue = selected && selected.value ? "true" : "false";
   }}
 
@@ -2879,8 +2883,12 @@ body{{
     var display = selected ? selected.textContent : "Select route";
     var color = selected ? selected.style.color : "";
     var waveColor = getSelectedWaveColor();
+    var accent = color || waveColor || "";
     routeControl.textContent = display || "Select route";
-    routeControl.style.color = color || waveColor || "";
+    routeControl.style.color = accent || "";
+    routeControl.style.setProperty("--wave-border", accent ? toRgba(accent, 0.65) : "");
+    routeControl.style.setProperty("--wave-fill", accent ? toRgba(accent, 0.2) : "");
+    routeControl.dataset.hasValue = selected && selected.value ? "true" : "false";
   }}
 
   function closePicker(){{
