@@ -2197,42 +2197,88 @@ body{{
   opacity:0.5;
   cursor:default;
 }}
-.customSelectMenu{{
-  position:absolute;
-  top:calc(100% + 8px);
-  left:0;
-  right:0;
-  background:#0b0f14;
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:12px;
-  box-shadow:0 18px 36px rgba(0,0,0,0.35);
-  padding:6px 0;
-  z-index:9999;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}}
-
-.customSelectBackdrop{{
+.pickerBackdrop{{
   position:fixed;
   inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:9000;
+}}
+.pickerBackdrop[hidden],
+.pickerModal[hidden]{{
+  display:none;
+}}
+.pickerModal{{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:min(92vw, 420px);
+  background:#0b0f14;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 24px 60px rgba(0,0,0,0.45);
+  z-index:9001;
+  display:flex;
+  flex-direction:column;
+  max-height:calc(90vh - 20px);
+}}
+.pickerHeader{{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height:54px;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}}
+.pickerTitle{{
+  font-weight:800;
+  font-size:16px;
+}}
+.pickerClose{{
   background:transparent;
-  z-index:9998;
-}}
-.customSelectOption{{
-  padding:10px 12px;
-  text-align:center;
-  font-weight:600;
+  border:0;
+  color:#e8eef6;
+  font-size:20px;
   cursor:pointer;
-  user-select:none;
+  padding:0;
+  width:32px;
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }}
-.customSelectOption:hover{{
+.pickerList{{
+  max-height:min(55vh, 360px);
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:6px 0;
+}}
+.pickerRow{{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#e8eef6;
+  height:52px;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:auto;
+}}
+.pickerRow:hover{{
   background:rgba(255,255,255,0.08);
 }}
-.customSelectOption--active{{
+.pickerRow:active{{
+  background:rgba(255,255,255,0.14);
+}}
+.pickerRow--active{{
   background:rgba(255,255,255,0.12);
 }}
-.customSelectOption--disabled{{
-  opacity:0.6;
+.pickerRow--disabled{{
+  opacity:0.5;
   cursor:default;
 }}
 .selectInput option{{
@@ -2376,11 +2422,6 @@ body{{
     font-size:15px;
     max-width:100%;
   }}
-  .customSelectMenu{{
-    max-height:50vh;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-  }}
   .actionRow{{
     grid-area:action;
     margin-top:4px;
@@ -2413,8 +2454,7 @@ body{{
           <div class="selectGroup">
             <label class="selectLabel" for="waveSelect">Wave</label>
             <div class="customSelect" id="waveDropdown">
-              <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false" aria-controls="waveMenu">Loading…</button>
-              <div class="customSelectMenu" id="waveMenu" role="listbox" hidden></div>
+              <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
             </div>
             <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
               <option value="">Loading…</option>
@@ -2423,8 +2463,7 @@ body{{
           <div class="selectGroup" id="routeGroup" hidden>
             <label class="selectLabel" for="routeSelect">Route</label>
             <div class="customSelect" id="routeDropdown">
-              <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" aria-controls="routeMenu" disabled>Select route</button>
-              <div class="customSelectMenu" id="routeMenu" role="listbox" hidden></div>
+              <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
             </div>
             <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
               <option value="">Select a wave first</option>
@@ -2438,16 +2477,20 @@ body{{
       </div>
     </div>
   </div>
+  <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
+  <div id="pickerModal" class="pickerModal" role="dialog" aria-modal="true" hidden>
+    <div class="pickerHeader">
+      <div id="pickerTitle" class="pickerTitle">Select</div>
+      <button id="pickerClose" class="pickerClose" type="button" aria-label="Close">✕</button>
+    </div>
+    <div id="pickerList" class="pickerList" role="listbox"></div>
+  </div>
 <script>
 (function(){{
   var jid = "{jid}";
   var waveSelect = document.getElementById("waveSelect");
-  var waveDropdown = document.getElementById("waveDropdown");
   var waveControl = document.getElementById("waveControl");
-  var waveMenu = document.getElementById("waveMenu");
-  var routeDropdown = document.getElementById("routeDropdown");
   var routeControl = document.getElementById("routeControl");
-  var routeMenu = document.getElementById("routeMenu");
   var routeSelect = document.getElementById("routeSelect");
   var routeGroup = document.getElementById("routeGroup");
   var openRoute = document.getElementById("openRoute");
@@ -2455,6 +2498,11 @@ body{{
   var tocCount = document.getElementById("tocCount");
   var mismatchIndicator = document.getElementById("mismatchIndicator");
   var statusLine = document.getElementById("statusLine");
+  var pickerBackdrop = document.getElementById("pickerBackdrop");
+  var pickerModal = document.getElementById("pickerModal");
+  var pickerTitle = document.getElementById("pickerTitle");
+  var pickerClose = document.getElementById("pickerClose");
+  var pickerList = document.getElementById("pickerList");
   var groupedRoutes = {{}};
   var routeIndex = {{}};
   var waveColors = {{}};
@@ -2535,249 +2583,101 @@ body{{
     }}
   }}
 
-  var waveMenuPositionTimer = null;
-  var waveBackdrop = null;
-  var routeMenuPositionTimer = null;
-  var routeBackdrop = null;
-
-  function buildWaveMenuOption(label, value, color){{
-    var option = document.createElement("div");
-    option.className = "customSelectOption";
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", "false");
-    option.dataset.value = value;
-    option.textContent = label;
-    if(color) option.style.color = color;
-    option.addEventListener("click", function(){{
-      selectWaveValue(value);
-      closeWaveMenu();
-    }});
-    return option;
+  function getSelectedWaveColor(){{
+    var selected = waveSelect.options[waveSelect.selectedIndex];
+    return selected && selected.dataset ? selected.dataset.color : "";
   }}
 
-  function syncWaveFromSelect(){{
-    if(!waveControl || !waveMenu) return;
+  function syncWaveControl(){{
+    if(!waveControl) return;
     var selected = waveSelect.options[waveSelect.selectedIndex];
     var display = selected ? selected.textContent : "Select Wave";
-    var value = selected ? selected.value : "";
     var color = selected && selected.dataset ? selected.dataset.color : "";
     waveControl.textContent = display || "Select Wave";
     waveControl.style.color = color || "";
-    Array.prototype.forEach.call(waveMenu.querySelectorAll(".customSelectOption"), function(option){{
-      var isSelected = option.dataset.value === value;
-      option.setAttribute("aria-selected", isSelected ? "true" : "false");
-      option.classList.toggle("customSelectOption--active", isSelected);
+  }}
+
+  function syncRouteControl(){{
+    if(!routeControl) return;
+    var selected = routeSelect.options[routeSelect.selectedIndex];
+    var display = selected ? selected.textContent : "Select route";
+    var color = selected ? selected.style.color : "";
+    var waveColor = getSelectedWaveColor();
+    routeControl.textContent = display || "Select route";
+    routeControl.style.color = color || waveColor || "";
+  }}
+
+  function closePicker(){{
+    if(pickerModal) pickerModal.hidden = true;
+    if(pickerBackdrop) pickerBackdrop.hidden = true;
+    if(pickerList) pickerList.innerHTML = "";
+    if(waveControl) waveControl.setAttribute("aria-expanded", "false");
+    if(routeControl) routeControl.setAttribute("aria-expanded", "false");
+  }}
+
+  function openPicker(kind){{
+    if(!pickerModal || !pickerList) return;
+    var selectEl = kind === "route" ? routeSelect : waveSelect;
+    if(!selectEl || selectEl.disabled) return;
+    if(pickerTitle){{
+      pickerTitle.textContent = kind === "route" ? "Select Route" : "Select Wave";
+    }}
+    pickerList.innerHTML = "";
+    var selectedValue = selectEl.value;
+    var waveColor = getSelectedWaveColor();
+    Array.prototype.forEach.call(selectEl.options, function(option){{
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pickerRow";
+      btn.textContent = option.textContent;
+      btn.dataset.value = option.value;
+      if(option.value === selectedValue){{
+        btn.classList.add("pickerRow--active");
+      }}
+      if(option.disabled){{
+        btn.classList.add("pickerRow--disabled");
+        btn.disabled = true;
+      }}
+      var color = "";
+      if(kind === "wave"){{
+        color = option.dataset ? option.dataset.color : "";
+      }} else {{
+        color = option.style && option.style.color ? option.style.color : "";
+        if(!color) color = waveColor;
+      }}
+      if(color) btn.style.color = color;
+      if(!option.disabled){{
+        btn.addEventListener("click", function(){{
+          if(kind === "wave"){{
+            selectWaveValue(option.value);
+          }} else {{
+            selectRouteValue(option.value);
+          }}
+          closePicker();
+        }});
+      }}
+      pickerList.appendChild(btn);
     }});
-  }}
-
-  function positionMenuDown(controlEl, menuEl){{
-    if(!controlEl || !menuEl || menuEl.hidden) return;
-    var rect = controlEl.getBoundingClientRect();
-    var margin = 8;
-    menuEl.style.position = "fixed";
-    menuEl.style.left = rect.left + "px";
-    menuEl.style.width = rect.width + "px";
-    var top = rect.bottom + margin;
-    menuEl.style.top = top + "px";
-    var available = Math.max(120, window.innerHeight - top - margin);
-    var hardCap = Math.min(420, Math.floor(window.innerHeight * 0.60));
-    menuEl.style.maxHeight = Math.min(available, hardCap) + "px";
-  }}
-
-  function positionWaveMenu(){{
-    positionMenuDown(waveControl, waveMenu);
-  }}
-
-  function startWaveMenuPositioning(){{
-    positionWaveMenu();
-    if(waveMenuPositionTimer) window.clearInterval(waveMenuPositionTimer);
-    waveMenuPositionTimer = window.setInterval(positionWaveMenu, 200);
-    window.addEventListener("resize", positionWaveMenu);
-    window.addEventListener("scroll", positionWaveMenu, true);
-  }}
-
-  function stopWaveMenuPositioning(){{
-    if(waveMenuPositionTimer){{
-      window.clearInterval(waveMenuPositionTimer);
-      waveMenuPositionTimer = null;
-    }}
-    window.removeEventListener("resize", positionWaveMenu);
-    window.removeEventListener("scroll", positionWaveMenu, true);
-  }}
-
-  function ensureWaveBackdrop(){{
-    if(waveBackdrop) return;
-    waveBackdrop = document.createElement("div");
-    waveBackdrop.className = "customSelectBackdrop";
-    waveBackdrop.addEventListener("click", function(){{
-      closeWaveMenu();
-    }});
-  }}
-
-  function openWaveMenu(){{
-    if(!waveMenu || !waveControl || waveControl.disabled) return;
-    ensureWaveBackdrop();
-    if(waveBackdrop && !document.body.contains(waveBackdrop)){{
-      document.body.appendChild(waveBackdrop);
-    }}
-    if(waveMenu && !document.body.contains(waveMenu)){{
-      document.body.appendChild(waveMenu);
-    }}
-    waveMenu.hidden = false;
-    waveControl.setAttribute("aria-expanded", "true");
-    positionMenuDown(waveControl, waveMenu);
-    startWaveMenuPositioning();
-  }}
-
-  function closeWaveMenu(){{
-    if(!waveMenu || !waveControl) return;
-    waveMenu.hidden = true;
-    waveControl.setAttribute("aria-expanded", "false");
-    stopWaveMenuPositioning();
-    if(waveBackdrop && document.body.contains(waveBackdrop)) document.body.removeChild(waveBackdrop);
-    if(waveDropdown && waveMenu && !waveDropdown.contains(waveMenu)){{
-      waveDropdown.appendChild(waveMenu);
-    }}
-  }}
-
-  function toggleWaveMenu(){{
-    if(!waveMenu) return;
-    if(waveMenu.hidden){{
-      openWaveMenu();
-    }} else {{
-      closeWaveMenu();
-    }}
+    if(pickerBackdrop) pickerBackdrop.hidden = false;
+    pickerModal.hidden = false;
+    if(waveControl) waveControl.setAttribute("aria-expanded", kind === "wave" ? "true" : "false");
+    if(routeControl) routeControl.setAttribute("aria-expanded", kind === "route" ? "true" : "false");
   }}
 
   function selectWaveValue(value){{
     waveSelect.value = value;
     waveSelect.dispatchEvent(new Event("change", {{ bubbles: true }}));
-    syncWaveFromSelect();
-  }}
-
-  function buildRouteMenuOption(label, value, isDisabled){{
-    var option = document.createElement("div");
-    option.className = "customSelectOption";
-    option.setAttribute("role", "option");
-    option.setAttribute("aria-selected", "false");
-    option.dataset.value = value;
-    option.textContent = label;
-    if(isDisabled){{
-      option.classList.add("customSelectOption--disabled");
-      option.setAttribute("aria-disabled", "true");
-      return option;
-    }}
-    option.addEventListener("click", function(){{
-      selectRouteValue(value);
-      closeRouteMenu();
-    }});
-    return option;
-  }}
-
-  function syncRouteFromSelect(){{
-    if(!routeControl || !routeMenu) return;
-    var selected = routeSelect.options[routeSelect.selectedIndex];
-    var display = selected ? selected.textContent : "Select route";
-    var value = selected ? selected.value : "";
-    var color = selected ? selected.style.color : "";
-    var waveSelected = waveSelect.options[waveSelect.selectedIndex];
-    var waveColor = waveSelected && waveSelected.dataset ? waveSelected.dataset.color : "";
-    routeControl.textContent = display || "Select route";
-    routeControl.style.color = color || waveColor || "";
-    Array.prototype.forEach.call(routeMenu.querySelectorAll(".customSelectOption"), function(option){{
-      var isSelected = option.dataset.value === value;
-      option.setAttribute("aria-selected", isSelected ? "true" : "false");
-      option.classList.toggle("customSelectOption--active", isSelected);
-    }});
-  }}
-
-  function positionRouteMenu(){{
-    positionMenuDown(routeControl, routeMenu);
-  }}
-
-  function startRouteMenuPositioning(){{
-    positionRouteMenu();
-    if(routeMenuPositionTimer) window.clearInterval(routeMenuPositionTimer);
-    routeMenuPositionTimer = window.setInterval(positionRouteMenu, 200);
-    window.addEventListener("resize", positionRouteMenu);
-    window.addEventListener("scroll", positionRouteMenu, true);
-  }}
-
-  function stopRouteMenuPositioning(){{
-    if(routeMenuPositionTimer){{
-      window.clearInterval(routeMenuPositionTimer);
-      routeMenuPositionTimer = null;
-    }}
-    window.removeEventListener("resize", positionRouteMenu);
-    window.removeEventListener("scroll", positionRouteMenu, true);
-  }}
-
-  function ensureRouteBackdrop(){{
-    if(routeBackdrop) return;
-    routeBackdrop = document.createElement("div");
-    routeBackdrop.className = "customSelectBackdrop";
-    routeBackdrop.addEventListener("click", function(){{
-      closeRouteMenu();
-    }});
-  }}
-
-  function openRouteMenu(){{
-    if(!routeMenu || !routeControl || routeControl.disabled) return;
-    ensureRouteBackdrop();
-    if(routeBackdrop && !document.body.contains(routeBackdrop)){{
-      document.body.appendChild(routeBackdrop);
-    }}
-    if(routeMenu && !document.body.contains(routeMenu)){{
-      document.body.appendChild(routeMenu);
-    }}
-    routeMenu.hidden = false;
-    routeControl.setAttribute("aria-expanded", "true");
-    positionMenuDown(routeControl, routeMenu);
-    startRouteMenuPositioning();
-  }}
-
-  function closeRouteMenu(){{
-    if(!routeMenu || !routeControl) return;
-    routeMenu.hidden = true;
-    routeControl.setAttribute("aria-expanded", "false");
-    stopRouteMenuPositioning();
-    if(routeBackdrop && document.body.contains(routeBackdrop)) document.body.removeChild(routeBackdrop);
-    if(routeDropdown && routeMenu && !routeDropdown.contains(routeMenu)){{
-      routeDropdown.appendChild(routeMenu);
-    }}
-  }}
-
-  function toggleRouteMenu(){{
-    if(!routeMenu) return;
-    if(routeMenu.hidden){{
-      openRouteMenu();
-    }} else {{
-      closeRouteMenu();
-    }}
+    syncWaveControl();
   }}
 
   function selectRouteValue(value){{
     routeSelect.value = value;
     routeSelect.dispatchEvent(new Event("change", {{ bubbles: true }}));
-    syncRouteFromSelect();
-  }}
-
-  function rebuildRouteMenuFromSelect(){{
-    if(!routeMenu) return;
-    routeMenu.innerHTML = "";
-    Array.prototype.forEach.call(routeSelect.options, function(option){{
-      var customOption = buildRouteMenuOption(option.textContent, option.value, option.disabled);
-      if(option.style && option.style.color){{
-        customOption.style.color = option.style.color;
-      }}
-      routeMenu.appendChild(customOption);
-    }});
-    syncRouteFromSelect();
+    syncRouteControl();
   }}
 
   function populateWaves(){{
     waveSelect.innerHTML = "";
-    closeWaveMenu();
     var labels = Object.keys(groupedRoutes);
     if(!labels.length){{
       waveSelect.innerHTML = "<option value=''>No waves found</option>";
@@ -2786,15 +2686,13 @@ body{{
         waveControl.disabled = true;
         waveControl.textContent = "No waves found";
       }}
+      closePicker();
       return;
     }}
     labels.sort();
     waveSelect.appendChild(new Option("Select Wave", ""));
-    waveMenu.innerHTML = "";
-    waveMenu.appendChild(buildWaveMenuOption("Select Wave", "", ""));
     labels.forEach(function(label, index){{
       var opt = new Option(ordinalize(index + 1) + " " + label, label);
-      var displayText = opt.textContent;
       var key = label.replace("Wave: ", "");
       var color = waveColors[key];
       if(color){{
@@ -2802,11 +2700,10 @@ body{{
         opt.dataset.color = color;
       }}
       waveSelect.appendChild(opt);
-      waveMenu.appendChild(buildWaveMenuOption(displayText, label, color));
     }});
     waveSelect.disabled = false;
     if(waveControl) waveControl.disabled = false;
-    syncWaveFromSelect();
+    syncWaveControl();
   }}
 
   function populateRoutes(label){{
@@ -2823,7 +2720,7 @@ body{{
         routeControl.textContent = "Select a wave first";
         routeControl.style.color = "";
       }}
-      rebuildRouteMenuFromSelect();
+      closePicker();
       return;
     }}
     if(routeGroup) routeGroup.hidden = false;
@@ -2842,7 +2739,7 @@ body{{
     }});
     routeSelect.value = "";
     if(routeControl) routeControl.style.color = waveColor || "";
-    rebuildRouteMenuFromSelect();
+    syncRouteControl();
   }}
 
   function applyWaveColor(){{
@@ -2855,44 +2752,48 @@ body{{
 
   if(waveControl){{
     waveControl.addEventListener("click", function(){{
-      toggleWaveMenu();
+      openPicker("wave");
     }});
   }}
 
   if(routeControl){{
     routeControl.addEventListener("click", function(){{
-      toggleRouteMenu();
+      openPicker("route");
     }});
   }}
-  document.addEventListener("click", function(event){{
-    if(waveDropdown && !waveDropdown.contains(event.target) && (!waveMenu || !waveMenu.contains(event.target))){{
-      closeWaveMenu();
-    }}
-  }});
-  document.addEventListener("click", function(event){{
-    if(routeDropdown && !routeDropdown.contains(event.target) && (!routeMenu || !routeMenu.contains(event.target))){{
-      closeRouteMenu();
-    }}
-  }});
+  if(pickerBackdrop){{
+    pickerBackdrop.addEventListener("click", function(){{
+      closePicker();
+    }});
+  }}
+  if(pickerClose){{
+    pickerClose.addEventListener("click", function(){{
+      closePicker();
+    }});
+  }}
+  if(pickerModal){{
+    pickerModal.addEventListener("click", function(event){{
+      event.stopPropagation();
+    }});
+  }}
 
   document.addEventListener("keydown", function(event){{
     if(event.key === "Escape"){{
-      closeWaveMenu();
-      closeRouteMenu();
+      closePicker();
     }}
   }});
 
   waveSelect.addEventListener("change", function(){{
     populateRoutes(waveSelect.value);
     applyWaveColor();
-    syncWaveFromSelect();
+    syncWaveControl();
+    syncRouteControl();
   }});
 
   routeSelect.addEventListener("change", function(){{
     openRoute.disabled = !routeSelect.value;
+    syncRouteControl();
   }});
-
-  rebuildRouteMenuFromSelect();
 
   openRoute.addEventListener("click", function(){{
     var key = routeSelect.value;
