@@ -1981,6 +1981,9 @@ body{{
   padding:36px 18px 18px;
   box-sizing:border-box;
 }}
+.tocPage{{
+  align-items:flex-start;
+}}
 .heroWrap{{
   width:100%;
   max-width:1100px;
@@ -2061,30 +2064,6 @@ body{{
 }}
 .tocBottom .actionRow{{
   margin-top:0;
-}}
-.tocHeader{{
-  text-align:center;
-  padding:6px 0 12px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-}}
-.tocMetaRow{{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-}}
-.tocTitle{{
-  font-size:26px;
-  font-weight:800;
-  letter-spacing:1px;
-}}
-.tocDate{{
-  margin-top:0;
-  font-size:16px;
-  opacity:0.85;
 }}
 .tocCount{{
   margin-top:0;
@@ -2421,8 +2400,8 @@ body{{
   .tocCard{{
     width:min(94vw, 360px);
     min-height:calc(100dvh - 24px);
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
     box-shadow:none;
   }}
   .tocTop{{
@@ -2435,22 +2414,8 @@ body{{
     object-fit:cover;
     border-radius:12px;
   }}
-  .tocHeader{{
-    padding:0;
-    gap:6px;
-    align-items:flex-start;
-    text-align:left;
-  }}
-  .tocTitle{{
-    font-size:16px;
-    letter-spacing:0.3px;
-    font-weight:600;
-  }}
-  .tocMetaRow{{
-    gap:6px;
-    justify-content:center;
-    align-self:center;
-    width:100%;
+  .tocTop .tocCount{{
+    align-self:flex-start;
   }}
   .mismatchIndicator{{
     width:26px;
@@ -2463,15 +2428,20 @@ body{{
     padding:3px 10px;
   }}
   .tocMiddle{{
-    flex:1;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    gap:12px;
     padding:8px 14px;
   }}
-  .divider{{
-    margin:6px 0 4px;
+  .tocSelectorsPanel{{
+    width:100%;
+    border-radius:16px;
+    padding:14px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
   }}
   .selectRow{{
     gap:6px;
@@ -2530,37 +2500,33 @@ body{{
             <div class="taglineText taglineText--desktop">OPTIMIZE YOUR ROUTE</div>
             <div class="taglineText taglineText--mobile" id="tocDateBanner">Date</div>
           </div>
-          <div class="tocHeader">
-            <div class="tocTitle" id="tocDate">Date</div>
-            <div class="tocMetaRow">
-              <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-            </div>
-          </div>
+          <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
         </div>
         <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
         <div class="tocMiddle">
-          <div class="divider"></div>
-          <div class="selectRow selectRow--dual">
-            <div class="selectGroup">
-              <label class="selectLabel" for="waveSelect">Wave</label>
-              <div class="customSelect" id="waveDropdown">
-                <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+          <div class="tocSelectorsPanel">
+            <div class="selectRow selectRow--dual">
+              <div class="selectGroup">
+                <label class="selectLabel" for="waveSelect">Wave</label>
+                <div class="customSelect" id="waveDropdown">
+                  <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                </div>
+                <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
+                  <option value="">Loading…</option>
+                </select>
               </div>
-              <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
-                <option value="">Loading…</option>
-              </select>
-            </div>
-            <div class="selectGroup" id="routeGroup" hidden>
-              <label class="selectLabel" for="routeSelect">Route</label>
-              <div class="customSelect" id="routeDropdown">
-                <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+              <div class="selectGroup" id="routeGroup" hidden>
+                <label class="selectLabel" for="routeSelect">Route</label>
+                <div class="customSelect" id="routeDropdown">
+                  <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                </div>
+                <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
+                  <option value="">Select a wave first</option>
+                </select>
               </div>
-              <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                <option value="">Select a wave first</option>
-              </select>
             </div>
+            <div class="statusLine" id="statusLine">Loading table of contents…</div>
           </div>
-          <div class="statusLine" id="statusLine">Loading table of contents…</div>
         </div>
         <div class="tocBottom">
           <div class="actionRow">
@@ -2587,7 +2553,6 @@ body{{
   var routeSelect = document.getElementById("routeSelect");
   var routeGroup = document.getElementById("routeGroup");
   var openRoute = document.getElementById("openRoute");
-  var tocDate = document.getElementById("tocDate");
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var mismatchIndicator = document.getElementById("mismatchIndicator");
@@ -2915,7 +2880,6 @@ body{{
         setStatus("Table of contents not ready yet.");
         return;
       }}
-      tocDate.textContent = data.date_label || "Date";
       if(tocDateBanner) tocDateBanner.textContent = data.date_label || "Date";
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
