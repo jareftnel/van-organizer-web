@@ -2451,7 +2451,7 @@ body{{
     box-shadow:none;
   }}
   .tocTop{{
-    padding:12px 14px 8px;
+    padding:16px 14px 10px;
     gap:10px;
   }}
   .tocTop .bannerImg{{
@@ -2478,10 +2478,9 @@ body{{
   }}
   .tocMiddle{{
     display:flex;
-    flex-direction:column;
-    justify-content:center;
     align-items:center;
-    padding:12px 14px;
+    justify-content:center;
+    padding:14px;
     min-height:0;
     box-sizing:border-box;
   }}
@@ -2495,13 +2494,15 @@ body{{
   }}
   .tocSelectorsPanel{{
     width:100%;
-    border-radius:16px;
-    padding:14px;
+    border-radius:18px;
+    padding:18px 16px;
+    min-height:220px;
     background:rgba(255,255,255,0.04);
     border:1px solid rgba(255,255,255,0.08);
     display:flex;
     flex-direction:column;
-    gap:12px;
+    justify-content:center;
+    gap:14px;
     max-width:100%;
     box-sizing:border-box;
   }}
@@ -2521,9 +2522,11 @@ body{{
   .selectLabel{{
     font-size:11px;
     text-align:center;
+    margin-bottom:6px;
+    letter-spacing:0.04em;
   }}
   .selectInput{{
-    height:42px;
+    height:50px;
     font-size:15px;
     max-width:100%;
   }}
@@ -2540,11 +2543,12 @@ body{{
     letter-spacing:0.6px;
   }}
   .tocBottom{{
-    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+    padding:14px 14px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid rgba(255,255,255,0.06);
   }}
   .tocBottom button{{
     width:100%;
-    height:48px;
+    height:50px;
   }}
   .statusLine{{
     margin-top:4px;
