@@ -2021,9 +2021,9 @@ body{{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:12px 16px;
-  font-size:13px;
-  letter-spacing:2px;
+  padding:10px 18px;
+  font-size:clamp(18px, 3vw, 30px);
+  letter-spacing:3px;
   font-weight:700;
   text-transform:uppercase;
   color:#e8eef6;
@@ -2041,6 +2041,10 @@ body{{
 .tocDateOverlay > span{{
   position:relative;
   z-index:1;
+  max-width:90%;
+  text-align:center;
+  line-height:1.2;
+  text-wrap:balance;
 }}
 .tagGlass{{
   width:100%;
