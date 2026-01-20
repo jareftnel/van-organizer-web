@@ -2021,8 +2021,8 @@ body{{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:10px 18px;
-  font-size:clamp(18px, 3vw, 30px);
+  padding:10px 20px;
+  font-size:clamp(16px, 2.6vw, 26px);
   letter-spacing:3px;
   font-weight:700;
   text-transform:uppercase;
@@ -2041,10 +2041,13 @@ body{{
 .tocDateOverlay > span{{
   position:relative;
   z-index:1;
-  max-width:90%;
+  max-width:95%;
   text-align:center;
   line-height:1.2;
-  text-wrap:balance;
+  text-wrap:nowrap;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }}
 .tagGlass{{
   width:100%;
@@ -2107,8 +2110,9 @@ body{{
 .tocMetaRow{{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  margin-bottom:12px;
+  justify-content:center;
+  gap:18px;
+  margin-bottom:20px;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2118,17 +2122,18 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  font-size:12px;
-  letter-spacing:1.4px;
+  font-size:clamp(18px, 2.4vw, 24px);
+  letter-spacing:2px;
   text-transform:uppercase;
-  opacity:0.8;
+  opacity:0.9;
   background:rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.12);
-  padding:4px 12px;
+  padding:10px 22px;
   border-radius:999px;
   color:inherit;
   font:inherit;
-  line-height:1.2;
+  line-height:1.1;
+  font-weight:700;
 }}
 .tocCount--button{{
   cursor:pointer;
@@ -2181,14 +2186,8 @@ body{{
   margin-bottom:14px;
   align-items:center;
 }}
-.selectRow--dual{{
-  flex-direction:row;
-  align-items:flex-end;
-  gap:16px;
-}}
-.selectRow--dual .selectInput,
-.selectRow--dual .customSelect{{
-  max-width:none;
+.selectRow--spaced{{
+  margin-top:22px;
 }}
 .selectGroup{{
   display:flex;
@@ -2480,9 +2479,9 @@ body{{
     font-size:14px;
   }}
   .tocCount{{
-    font-size:11px;
-    letter-spacing:1.1px;
-    padding:3px 10px;
+    font-size:16px;
+    letter-spacing:1.3px;
+    padding:8px 16px;
   }}
   .tocMiddle{{
     display:flex;
@@ -2498,7 +2497,7 @@ body{{
     box-sizing:border-box;
   }}
   .tocMetaRow{{
-    margin:0 0 10px 0;
+    margin:0 0 16px 0;
   }}
   .tocSelectorsPanel{{
     width:100%;
@@ -2519,9 +2518,8 @@ body{{
     margin-bottom:0;
     align-items:center;
   }}
-  .selectRow--dual{{
-    flex-direction:column;
-    gap:10px;
+  .selectRow--spaced{{
+    margin-top:16px;
   }}
   .selectGroup{{
     gap:6px;
@@ -2581,7 +2579,7 @@ body{{
               <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
             </div>
             <div class="tocSelectorsPanel">
-              <div class="selectRow selectRow--dual">
+              <div class="selectRow">
                 <div class="selectGroup">
                   <label class="selectLabel" for="waveSelect">Wave</label>
                   <div class="customSelect" id="waveDropdown">
@@ -2591,7 +2589,9 @@ body{{
                     <option value="">Loading…</option>
                   </select>
                 </div>
-                <div class="selectGroup" id="routeGroup" hidden>
+              </div>
+              <div class="selectRow selectRow--spaced" id="routeRow" hidden>
+                <div class="selectGroup">
                   <label class="selectLabel" for="routeSelect">Route</label>
                   <div class="customSelect" id="routeDropdown">
                     <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
@@ -2628,7 +2628,7 @@ body{{
   var waveControl = document.getElementById("waveControl");
   var routeControl = document.getElementById("routeControl");
   var routeSelect = document.getElementById("routeSelect");
-  var routeGroup = document.getElementById("routeGroup");
+  var routeRow = document.getElementById("routeRow");
   var openRoute = document.getElementById("openRoute");
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
@@ -2696,12 +2696,12 @@ body{{
   }}
 
   function setRouteGroupVisibility(hasWave){{
-    if(!routeGroup) return;
+    if(!routeRow) return;
     if(hasWave){{
-      routeGroup.hidden = false;
+      routeRow.hidden = false;
       return;
     }}
-    routeGroup.hidden = !isVerticalMobile();
+    routeRow.hidden = !isVerticalMobile();
   }}
 
   function setMismatchIndicator(count){{
