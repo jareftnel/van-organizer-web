@@ -2115,6 +2115,7 @@ body{{
   justify-content:center;
   position:relative;
   min-height:28px;
+  margin-top:-4px;
 }}
 .metaRow .mismatchIndicator{{
   position:absolute;
@@ -2156,7 +2157,7 @@ body{{
   letter-spacing:2px;
   text-transform:uppercase;
   opacity:0.9;
-  padding:8px 18px;
+  padding:6px 18px;
   border-radius:999px;
   color:inherit;
   font:inherit;
@@ -2224,11 +2225,12 @@ body{{
   gap:12px;
   box-sizing:border-box;
   border-radius:18px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.047);
+  border:1px solid rgba(255,255,255,0.07);
   box-shadow:0 10px 30px rgba(0,0,0,0.35);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
+  transform:translateY(-8px);
 }}
 .fieldRow{{
   display:flex;
@@ -2323,6 +2325,9 @@ body{{
   display:flex;
   align-items:center;
 }}
+.fieldSurface[data-has-value="true"]{{
+  border-color:var(--wave-border, rgba(255,255,255,0.12));
+}}
 .customSelectControl::after{{
   content:"";
   position:absolute;
@@ -2332,27 +2337,6 @@ body{{
   border-left:6px solid transparent;
   border-right:6px solid transparent;
   border-top:7px solid rgba(232,238,246,0.9);
-}}
-#waveControl{{
-  position:relative;
-}}
-#waveControl::before{{
-  content:"";
-  position:absolute;
-  left:16px;
-  right:16px;
-  bottom:8px;
-  height:2px;
-  border-radius:999px;
-  background:var(--wave-accent, transparent);
-  opacity:0.65;
-  box-shadow:0 0 8px var(--wave-accent, transparent);
-  transition:opacity 0.2s ease, transform 0.2s ease;
-  pointer-events:none;
-}}
-#waveControl[data-has-value="false"]::before{{
-  opacity:0;
-  transform:translateY(4px);
 }}
 .customSelectControl:disabled{{
   opacity:0.5;
@@ -2583,7 +2567,7 @@ body{{
   .tocCount{{
     font-size:15px;
     letter-spacing:1.3px;
-    padding:7px 14px;
+    padding:6px 14px;
   }}
   .tocMiddle{{
     display:flex;
@@ -2853,6 +2837,30 @@ body{{
     return selected && selected.dataset ? selected.dataset.color : "";
   }}
 
+  function toRgba(color, alpha){{
+    if(!color) return "";
+    var trimmed = String(color).trim();
+    var hex = trimmed.match(/^#([0-9a-f]{{3}}|[0-9a-f]{{6}})$/i);
+    if(hex){{
+      var value = hex[1];
+      if(value.length === 3){{
+        value = value.split("").map(function(ch){{ return ch + ch; }}).join("");
+      }}
+      var r = parseInt(value.slice(0, 2), 16);
+      var g = parseInt(value.slice(2, 4), 16);
+      var b = parseInt(value.slice(4, 6), 16);
+      return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+    }}
+    var rgb = trimmed.match(/^rgba?\\(([^)]+)\\)$/i);
+    if(rgb){{
+      var parts = rgb[1].split(",").map(function(part){{ return parseFloat(part); }});
+      if(parts.length >= 3){{
+        return "rgba(" + parts[0] + ", " + parts[1] + ", " + parts[2] + ", " + alpha + ")";
+      }}
+    }}
+    return trimmed;
+  }}
+
   function syncWaveControl(){{
     if(!waveControl) return;
     var selected = waveSelect.options[waveSelect.selectedIndex];
@@ -2861,6 +2869,7 @@ body{{
     waveControl.textContent = display || "Select Wave";
     waveControl.style.color = color || "";
     waveControl.style.setProperty("--wave-accent", color || "transparent");
+    waveControl.style.setProperty("--wave-border", color ? toRgba(color, 0.65) : "");
     waveControl.dataset.hasValue = selected && selected.value ? "true" : "false";
   }}
 
