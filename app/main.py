@@ -2107,14 +2107,14 @@ body{{
   padding:22px 22px 12px;
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:8px;
 }}
 .metaRow{{
   display:flex;
-  align-items:center;
+  align-items:baseline;
   justify-content:center;
   position:relative;
-  min-height:32px;
+  min-height:28px;
 }}
 .metaRow .mismatchIndicator{{
   position:absolute;
@@ -2138,7 +2138,7 @@ body{{
 .tocMiddleInner{{
   width:100%;
   max-width:100%;
-  width:min(520px, 100%);
+  width:min(560px, 100%);
   margin:0 auto;
   display:flex;
   flex-direction:column;
@@ -2218,11 +2218,17 @@ body{{
 }}
 .selectionCard{{
   width:100%;
-  padding:16px;
+  padding:20px;
   display:flex;
   flex-direction:column;
   gap:12px;
   box-sizing:border-box;
+  border-radius:18px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
 }}
 .fieldRow{{
   display:flex;
@@ -2263,10 +2269,10 @@ body{{
   display:none;
 }}
 .selectLabel{{
-  font-size:clamp(10px, 1.4vw, 12px);
-  letter-spacing:0.8px;
+  font-size:12px;
+  letter-spacing:0.12em;
   text-transform:uppercase;
-  opacity:0.72;
+  opacity:0.75;
   text-align:left;
   margin-left:4px;
 }}
@@ -2314,6 +2320,8 @@ body{{
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;
+  display:flex;
+  align-items:center;
 }}
 .customSelectControl::after{{
   content:"";
@@ -2324,6 +2332,27 @@ body{{
   border-left:6px solid transparent;
   border-right:6px solid transparent;
   border-top:7px solid rgba(232,238,246,0.9);
+}}
+#waveControl{{
+  position:relative;
+}}
+#waveControl::before{{
+  content:"";
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:8px;
+  height:2px;
+  border-radius:999px;
+  background:var(--wave-accent, transparent);
+  opacity:0.65;
+  box-shadow:0 0 8px var(--wave-accent, transparent);
+  transition:opacity 0.2s ease, transform 0.2s ease;
+  pointer-events:none;
+}}
+#waveControl[data-has-value="false"]::before{{
+  opacity:0;
+  transform:translateY(4px);
 }}
 .customSelectControl:disabled{{
   opacity:0.5;
@@ -2465,14 +2494,15 @@ body{{
   margin-top:16px;
 }}
 .buildBtn{{
-  height:clamp(44px, 6vh, 56px);
+  height:clamp(40px, 5.2vh, 50px);
   font-size:clamp(16px, 2.4vh, 20px);
-  border-radius:16px;
+  border-radius:18px;
   border:0;
   background:#3fa7ff;
   color:#001018;
   font-weight:800;
   cursor:pointer;
+  box-shadow:0 12px 24px rgba(0,0,0,0.25);
 }}
 .buildBtn:disabled{{
   opacity:0.6;
@@ -2531,7 +2561,7 @@ body{{
   }}
   .tocTop{{
     padding:16px 14px 10px;
-    gap:10px;
+    gap:8px;
   }}
   .tocTop .bannerImg{{
     width:100%;
@@ -2587,7 +2617,7 @@ body{{
   }}
   .selectionCard{{
     width:100%;
-    padding:14px 12px;
+    padding:16px 14px;
     display:flex;
     flex-direction:column;
     box-sizing:border-box;
@@ -2600,10 +2630,10 @@ body{{
     align-items:flex-start;
   }}
   .selectLabel{{
-    font-size:10px;
+    font-size:11px;
     text-align:left;
     margin-bottom:0;
-    letter-spacing:0.04em;
+    letter-spacing:0.12em;
   }}
   .selectInput{{
     height:44px;
@@ -2627,7 +2657,7 @@ body{{
   }}
   .tocBottom button{{
     width:100%;
-    height:46px;
+    height:44px;
   }}
   .statusLine{{
     margin-top:4px;
@@ -2830,6 +2860,8 @@ body{{
     var color = selected && selected.dataset ? selected.dataset.color : "";
     waveControl.textContent = display || "Select Wave";
     waveControl.style.color = color || "";
+    waveControl.style.setProperty("--wave-accent", color || "transparent");
+    waveControl.dataset.hasValue = selected && selected.value ? "true" : "false";
   }}
 
   function syncRouteControl(){{
