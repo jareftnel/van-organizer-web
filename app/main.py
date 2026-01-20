@@ -2200,7 +2200,9 @@ body{{
 .pickerBackdrop{{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.45);
+  background:rgba(8,12,18,0.5);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
   z-index:9000;
 }}
 .pickerBackdrop[hidden],
@@ -2213,10 +2215,10 @@ body{{
   left:50%;
   transform:translate(-50%, -50%);
   width:min(92vw, 420px);
-  background:#0b0f14;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 24px 60px rgba(0,0,0,0.45);
+  background:rgba(12,16,24,0.95);
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow:0 24px 50px rgba(0,0,0,0.4);
   z-index:9001;
   display:flex;
   flex-direction:column;
@@ -2226,19 +2228,19 @@ body{{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  height:54px;
-  padding:14px 16px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  height:48px;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
 }}
 .pickerTitle{{
-  font-weight:800;
-  font-size:16px;
+  font-weight:700;
+  font-size:15px;
 }}
 .pickerClose{{
   background:transparent;
   border:0;
   color:#e8eef6;
-  font-size:20px;
+  font-size:18px;
   cursor:pointer;
   padding:0;
   width:32px;
@@ -2251,21 +2253,38 @@ body{{
   max-height:min(55vh, 360px);
   overflow:auto;
   -webkit-overflow-scrolling:touch;
-  padding:6px 0;
+  padding:8px 6px 12px;
+  scrollbar-color:rgba(116,136,168,0.6) rgba(255,255,255,0.06);
+  scrollbar-width:thin;
+}}
+.pickerList::-webkit-scrollbar{{
+  width:8px;
+}}
+.pickerList::-webkit-scrollbar-track{{
+  background:rgba(255,255,255,0.06);
+  border-radius:999px;
+}}
+.pickerList::-webkit-scrollbar-thumb{{
+  background:rgba(116,136,168,0.65);
+  border-radius:999px;
+  border:2px solid rgba(12,16,24,0.95);
 }}
 .pickerRow{{
   width:100%;
   border:0;
   background:transparent;
   color:#e8eef6;
-  height:52px;
-  font-size:16px;
-  font-weight:800;
+  height:44px;
+  font-size:15px;
+  font-weight:700;
   cursor:pointer;
-  text-align:center;
+  text-align:left;
   display:flex;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-start;
+  padding:0 14px;
+  margin:4px 6px;
+  border-radius:12px;
   pointer-events:auto;
 }}
 .pickerRow:hover{{
@@ -2626,6 +2645,9 @@ body{{
     var selectedValue = selectEl.value;
     var waveColor = getSelectedWaveColor();
     Array.prototype.forEach.call(selectEl.options, function(option){{
+      if(!option.value || option.disabled){{
+        return;
+      }}
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "pickerRow";
@@ -2690,7 +2712,10 @@ body{{
       return;
     }}
     labels.sort();
-    waveSelect.appendChild(new Option("Select Wave", ""));
+    var placeholder = new Option("Select Wave", "");
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    waveSelect.appendChild(placeholder);
     labels.forEach(function(label, index){{
       var opt = new Option(ordinalize(index + 1) + " " + label, label);
       var key = label.replace("Wave: ", "");
@@ -2729,6 +2754,8 @@ body{{
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
     var placeholder = new Option("Select route", "");
     if(waveColor) placeholder.style.color = waveColor;
+    placeholder.disabled = true;
+    placeholder.selected = true;
     routeSelect.appendChild(placeholder);
     groupedRoutes[label].forEach(function(route){{
       var opt = new Option(route.title, route.key);
