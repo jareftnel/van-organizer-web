@@ -2059,6 +2059,16 @@ body{{
   flex-direction:column;
   gap:12px;
 }}
+.tocMiddleInner{{
+  width:100%;
+  max-width:560px;
+}}
+.tocMetaRow{{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}}
 .tocBottom{{
   padding:0 22px 22px;
 }}
@@ -2093,9 +2103,6 @@ body{{
   font-size:18px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
-  position:absolute;
-  top:16px;
-  right:16px;
   cursor:pointer;
 }}
 .mismatchIndicator:focus-visible{{
@@ -2392,16 +2399,18 @@ body{{
     justify-content:center;
     align-items:flex-start;
     padding:12px;
+    overflow-x:hidden;
   }}
   .heroWrap{{
     max-width:100%;
     margin:0;
   }}
   .tocCard{{
-    width:min(94vw, 360px);
+    width:min(94vw, 380px);
     min-height:calc(100dvh - 24px);
     display:grid;
     grid-template-rows:auto 1fr auto;
+    box-sizing:border-box;
     box-shadow:none;
   }}
   .tocTop{{
@@ -2431,7 +2440,18 @@ body{{
     display:flex;
     flex-direction:column;
     justify-content:center;
-    padding:8px 14px;
+    align-items:center;
+    padding:12px 14px;
+    min-height:0;
+    box-sizing:border-box;
+  }}
+  .tocMiddleInner{{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+  }}
+  .tocMetaRow{{
+    margin:0 0 10px 0;
   }}
   .tocSelectorsPanel{{
     width:100%;
@@ -2442,6 +2462,8 @@ body{{
     display:flex;
     flex-direction:column;
     gap:12px;
+    max-width:100%;
+    box-sizing:border-box;
   }}
   .selectRow{{
     gap:6px;
@@ -2478,7 +2500,7 @@ body{{
     letter-spacing:0.6px;
   }}
   .tocBottom{{
-    padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
   }}
   .tocBottom button{{
     width:100%;
@@ -2500,32 +2522,36 @@ body{{
             <div class="taglineText taglineText--desktop">OPTIMIZE YOUR ROUTE</div>
             <div class="taglineText taglineText--mobile" id="tocDateBanner">Date</div>
           </div>
-          <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
         </div>
-        <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
         <div class="tocMiddle">
-          <div class="tocSelectorsPanel">
-            <div class="selectRow selectRow--dual">
-              <div class="selectGroup">
-                <label class="selectLabel" for="waveSelect">Wave</label>
-                <div class="customSelect" id="waveDropdown">
-                  <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
-                </div>
-                <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
-                  <option value="">Loading…</option>
-                </select>
-              </div>
-              <div class="selectGroup" id="routeGroup" hidden>
-                <label class="selectLabel" for="routeSelect">Route</label>
-                <div class="customSelect" id="routeDropdown">
-                  <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
-                </div>
-                <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                  <option value="">Select a wave first</option>
-                </select>
-              </div>
+          <div class="tocMiddleInner">
+            <div class="tocMetaRow">
+              <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+              <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
             </div>
-            <div class="statusLine" id="statusLine">Loading table of contents…</div>
+            <div class="tocSelectorsPanel">
+              <div class="selectRow selectRow--dual">
+                <div class="selectGroup">
+                  <label class="selectLabel" for="waveSelect">Wave</label>
+                  <div class="customSelect" id="waveDropdown">
+                    <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                  </div>
+                  <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
+                    <option value="">Loading…</option>
+                  </select>
+                </div>
+                <div class="selectGroup" id="routeGroup" hidden>
+                  <label class="selectLabel" for="routeSelect">Route</label>
+                  <div class="customSelect" id="routeDropdown">
+                    <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                  </div>
+                  <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
+                    <option value="">Select a wave first</option>
+                  </select>
+                </div>
+              </div>
+              <div class="statusLine" id="statusLine">Loading table of contents…</div>
+            </div>
           </div>
         </div>
         <div class="tocBottom">
