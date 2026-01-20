@@ -1753,10 +1753,18 @@ body{{
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:12px;
-  padding:10px 12px;
+  padding:14px 12px;
   text-align:left;
   color:inherit;
   cursor:pointer;
+  transition:background 0.2s ease, border-color 0.2s ease;
+}}
+.routeRow:hover{{
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.16);
+}}
+.routeRow:active{{
+  background:rgba(255,255,255,0.12);
 }}
 .routeRow:focus-visible{{
   outline:2px solid rgba(63,167,255,0.6);
@@ -2428,7 +2436,7 @@ body{{
   border:0;
   background:transparent;
   color:#e8eef6;
-  height:clamp(32px, 5.2vh, 44px);
+  height:clamp(40px, 6vh, 52px);
   font-size:clamp(12px, 2vh, 16px);
   font-weight:700;
   cursor:pointer;
@@ -2436,7 +2444,7 @@ body{{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:0 12px;
+  padding:6px 12px;
   margin:clamp(2px, 0.5vh, 4px) clamp(4px, 1vw, 6px);
   border-radius:12px;
   pointer-events:auto;
