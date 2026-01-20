@@ -2186,6 +2186,10 @@ body{{
   align-items:flex-end;
   gap:16px;
 }}
+.selectRow--dual .selectInput,
+.selectRow--dual .customSelect{{
+  max-width:none;
+}}
 .selectGroup{{
   display:flex;
   flex-direction:column;
