@@ -2628,6 +2628,7 @@ body{{
   var pickerTitle = document.getElementById("pickerTitle");
   var pickerClose = document.getElementById("pickerClose");
   var pickerList = document.getElementById("pickerList");
+  var mobileMedia = window.matchMedia ? window.matchMedia("(max-width: 600px) and (orientation: portrait)") : null;
   var groupedRoutes = {{}};
   var routeIndex = {{}};
   var waveColors = {{}};
@@ -2675,6 +2676,20 @@ body{{
 
   function setStatus(msg){{
     if(statusLine) statusLine.textContent = msg;
+  }}
+
+  function isVerticalMobile(){{
+    if(mobileMedia) return mobileMedia.matches;
+    return window.innerWidth <= 600 && window.innerHeight >= window.innerWidth;
+  }}
+
+  function setRouteGroupVisibility(hasWave){{
+    if(!routeGroup) return;
+    if(hasWave){{
+      routeGroup.hidden = false;
+      return;
+    }}
+    routeGroup.hidden = !isVerticalMobile();
   }}
 
   function setMismatchIndicator(count){{
@@ -2848,7 +2863,7 @@ body{{
       placeholder.disabled = true;
       routeSelect.appendChild(placeholder);
       routeSelect.disabled = true;
-      if(routeGroup) routeGroup.hidden = true;
+      setRouteGroupVisibility(false);
       if(routeControl) {{
         routeControl.disabled = true;
         routeControl.textContent = "Select a wave first";
@@ -2857,7 +2872,7 @@ body{{
       closePicker();
       return;
     }}
-    if(routeGroup) routeGroup.hidden = false;
+    setRouteGroupVisibility(true);
     routeSelect.disabled = false;
     if(routeControl) routeControl.disabled = false;
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
@@ -2910,6 +2925,15 @@ body{{
   if(pickerModal){{
     pickerModal.addEventListener("click", function(event){{
       event.stopPropagation();
+    }});
+  }}
+  if(mobileMedia){{
+    mobileMedia.addEventListener("change", function(){{
+      setRouteGroupVisibility(Boolean(waveSelect && waveSelect.value));
+    }});
+  }} else {{
+    window.addEventListener("resize", function(){{
+      setRouteGroupVisibility(Boolean(waveSelect && waveSelect.value));
     }});
   }}
 
@@ -2986,6 +3010,7 @@ body{{
       }});
 
       populateWaves();
+      populateRoutes("");
       setStatus("");
     }})
     .catch(function(){{
