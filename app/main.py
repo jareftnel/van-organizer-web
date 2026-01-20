@@ -2005,6 +2005,35 @@ body{{
   border-radius:var(--r) var(--r) 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
 }}
+.tocBanner{{
+  position:relative;
+}}
+.tocDateOverlay{{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:12px 16px;
+  font-size:13px;
+  letter-spacing:2px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:#e8eef6;
+  border-radius:var(--r) var(--r) 0 0;
+}}
+.tocDateOverlay::before{{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  border-radius:inherit;
+}}
+.tocDateOverlay > span{{
+  position:relative;
+  z-index:1;
+}}
 .tagGlass{{
   width:100%;
   margin-top:-12px;
@@ -2516,11 +2545,14 @@ body{{
   <div class="uploadPage tocPage">
     <div class="heroWrap">
       <div class="uploadCard tocCard">
-        <div class="tocTop">
-          <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+          <div class="tocTop">
+          <div class="tocBanner">
+            <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+            <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
+          </div>
           <div class="tagGlass">
             <div class="taglineText taglineText--desktop">OPTIMIZE YOUR ROUTE</div>
-            <div class="taglineText taglineText--mobile" id="tocDateBanner">Date</div>
+            <div class="taglineText taglineText--mobile">OPTIMIZE YOUR ROUTE</div>
           </div>
         </div>
         <div class="tocMiddle">
