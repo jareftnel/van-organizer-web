@@ -2214,7 +2214,7 @@ body{{
   top:50%;
   left:50%;
   transform:translate(-50%, -50%);
-  width:min(92vw, 420px);
+  width:min(92vw, 460px);
   background:rgba(12,16,24,0.95);
   border-radius:20px;
   border:1px solid rgba(255,255,255,0.16);
@@ -2222,38 +2222,39 @@ body{{
   z-index:9001;
   display:flex;
   flex-direction:column;
-  max-height:calc(90vh - 20px);
+  max-height:min(94svh, 680px);
 }}
 .pickerHeader{{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  height:48px;
-  padding:12px 16px;
+  height:clamp(44px, 8vh, 56px);
+  padding:clamp(8px, 2vh, 14px) clamp(12px, 3vw, 18px);
   border-bottom:1px solid rgba(255,255,255,0.1);
 }}
 .pickerTitle{{
   font-weight:700;
-  font-size:15px;
+  font-size:clamp(14px, 2.4vh, 18px);
+  text-align:left;
 }}
 .pickerClose{{
   background:transparent;
   border:0;
   color:#e8eef6;
-  font-size:18px;
+  font-size:clamp(16px, 2.6vh, 20px);
   cursor:pointer;
   padding:0;
-  width:32px;
-  height:32px;
+  width:clamp(28px, 6vh, 34px);
+  height:clamp(28px, 6vh, 34px);
   display:flex;
   align-items:center;
   justify-content:center;
 }}
 .pickerList{{
-  max-height:min(55vh, 360px);
+  max-height:calc(94svh - clamp(120px, 26vh, 190px));
   overflow:auto;
   -webkit-overflow-scrolling:touch;
-  padding:8px 6px 12px;
+  padding:clamp(6px, 1.6vh, 12px) clamp(6px, 2vw, 12px) clamp(10px, 2.2vh, 16px);
   scrollbar-color:rgba(116,136,168,0.6) rgba(255,255,255,0.06);
   scrollbar-width:thin;
 }}
@@ -2274,16 +2275,16 @@ body{{
   border:0;
   background:transparent;
   color:#e8eef6;
-  height:44px;
-  font-size:15px;
+  height:clamp(40px, 6vh, 52px);
+  font-size:clamp(14px, 2.2vh, 17px);
   font-weight:700;
   cursor:pointer;
-  text-align:left;
+  text-align:center;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:center;
   padding:0 14px;
-  margin:4px 6px;
+  margin:clamp(2px, 0.8vh, 6px) clamp(4px, 1.2vw, 8px);
   border-radius:12px;
   pointer-events:auto;
 }}
