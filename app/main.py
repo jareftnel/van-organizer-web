@@ -2009,6 +2009,11 @@ body{{
 }}
 .tocBanner{{
   position:relative;
+  border-radius:var(--r);
+  overflow:hidden;
+}}
+.tocBanner .brandBanner{{
+  border-radius:inherit;
 }}
 .tocDateOverlay{{
   position:absolute;
@@ -2022,7 +2027,7 @@ body{{
   font-weight:700;
   text-transform:uppercase;
   color:#e8eef6;
-  border-radius:var(--r) var(--r) 0 0;
+  border-radius:inherit;
   z-index:2;
 }}
 .tocDateOverlay::before{{
@@ -2455,6 +2460,9 @@ body{{
     object-fit:cover;
     border-radius:12px;
   }}
+  .tocTop .tocBanner{{
+    border-radius:12px;
+  }}
   .tocTop .tocCount{{
     align-self:flex-start;
   }}
@@ -2612,6 +2620,7 @@ body{{
   var openRoute = document.getElementById("openRoute");
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
+  var tocDateText = tocDateBanner ? tocDateBanner.querySelector("span") : null;
   var mismatchIndicator = document.getElementById("mismatchIndicator");
   var statusLine = document.getElementById("statusLine");
   var pickerBackdrop = document.getElementById("pickerBackdrop");
@@ -2937,7 +2946,7 @@ body{{
         setStatus("Table of contents not ready yet.");
         return;
       }}
-      if(tocDateBanner) tocDateBanner.textContent = data.date_label || "Date";
+      if(tocDateText) tocDateText.textContent = data.date_label || "Date";
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
       waveColors = data.wave_colors ?? {{}};
