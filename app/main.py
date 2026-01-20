@@ -1974,15 +1974,16 @@ body{{
   --glassBorder:rgba(255,255,255,0.10);
 }}
 .uploadPage{{
-  height:100svh;
+  min-height:100dvh;
+  height:auto;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
-  padding:36px 18px 18px;
+  padding:calc(24px + env(safe-area-inset-top, 0px)) 18px calc(24px + env(safe-area-inset-bottom, 0px));
   box-sizing:border-box;
 }}
 .tocPage{{
-  align-items:flex-start;
+  align-items:stretch;
 }}
 .heroWrap{{
   width:100%;
@@ -1992,6 +1993,7 @@ body{{
   flex-direction:column;
   align-items:stretch;
   gap:0;
+  flex:1;
 }}
 .heroWrap > *{{width:100%;}}
 .brandBanner{{
@@ -2075,21 +2077,31 @@ body{{
 .heroWrap, .tagGlass, .uploadCard, .buildBtn{{
   box-sizing:border-box;
 }}
+.glassCard{{
+  background:rgba(10,16,26,0.55);
+  border:1px solid var(--glassBorder);
+  box-shadow:0 18px 45px rgba(0,0,0,0.35);
+}}
+.glassField{{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;
+}}
 .uploadCard{{
   width:100%;
   max-width:100%;
-  background:rgba(10,16,26,0.55);
-  border:1px solid var(--glassBorder);
   border-radius:0 0 var(--r) var(--r);
   padding:22px;
   margin-top:0;
   position:relative;
-  box-shadow:0 18px 45px rgba(0,0,0,0.35);
 }}
 .tocCard{{
   padding:0;
   border-radius:var(--r);
   overflow:hidden;
+  display:grid;
+  grid-template-rows:auto minmax(0, 1fr) auto;
+  min-height:calc(100dvh - 96px);
 }}
 .tocTop{{
   padding:22px 22px 12px;
@@ -2097,24 +2109,27 @@ body{{
   flex-direction:column;
   gap:12px;
 }}
+.tocStatusRow{{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+}}
 .tocMiddle{{
-  padding:0 22px 16px;
+  padding:0 22px;
   display:flex;
   flex-direction:column;
+  align-items:center;
+  justify-content:center;
   gap:12px;
 }}
 .tocMiddleInner{{
   width:100%;
-  max-width:560px;
+  max-width:100%;
+  width:min(520px, 100%);
+  margin:0 auto;
   display:flex;
   flex-direction:column;
   gap:18px;
-}}
-.tocCountRow{{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2128,8 +2143,6 @@ body{{
   letter-spacing:2px;
   text-transform:uppercase;
   opacity:0.9;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.12);
   padding:10px 22px;
   border-radius:999px;
   color:inherit;
@@ -2199,10 +2212,7 @@ body{{
 }}
 .selectBubble{{
   width:100%;
-  border-radius:18px;
   padding:18px 16px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
   display:flex;
   justify-content:center;
   box-sizing:border-box;
@@ -2244,17 +2254,18 @@ body{{
   text-align:center;
 }}
 .selectInput{{
-  height:46px;
+  height:54px;
   width:100%;
-  max-width:420px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.04);
+  max-width:100%;
+  border-radius:14px;
+  border:0;
+  background:transparent;
   color:#e8eef6;
   padding:0 12px;
   font-size:clamp(14px, 2.1vw, 16px);
   font-weight:600;
   text-align:center;
+  line-height:1;
 }}
 .selectInput--hidden{{
   position:absolute;
@@ -2271,18 +2282,21 @@ body{{
 .customSelect{{
   position:relative;
   width:100%;
-  max-width:420px;
+  max-width:100%;
 }}
 .customSelectControl{{
   width:100%;
   cursor:pointer;
-  padding:0 40px 0 12px;
+  padding:0 48px 0 16px;
   position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }}
 .customSelectControl::after{{
   content:"";
   position:absolute;
-  right:14px;
+  right:18px;
   top:50%;
   transform:translateY(-50%);
   border-left:6px solid transparent;
@@ -2492,7 +2506,6 @@ body{{
     display:grid;
     grid-template-rows:auto 1fr auto;
     box-sizing:border-box;
-    box-shadow:none;
   }}
   .tocTop{{
     padding:16px 14px 10px;
@@ -2536,9 +2549,6 @@ body{{
     flex-direction:column;
     gap:16px;
   }}
-  .tocCountRow{{
-    margin:0;
-  }}
   .tocSelectorsPanel{{
     width:100%;
     border-radius:18px;
@@ -2555,10 +2565,7 @@ body{{
   }}
   .selectBubble{{
     width:100%;
-    border-radius:16px;
     padding:16px 14px;
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.08);
     display:flex;
     justify-content:center;
     box-sizing:border-box;
@@ -2585,12 +2592,12 @@ body{{
     letter-spacing:0.04em;
   }}
   .selectInput{{
-    height:50px;
+    height:56px;
     font-size:15px;
     max-width:100%;
   }}
   .customSelect{{
-    max-width:300px;
+    max-width:100%;
     margin:0 auto;
   }}
   .taglineText--desktop{{
@@ -2618,26 +2625,26 @@ body{{
 <body>
   <div class="uploadPage tocPage">
     <div class="heroWrap">
-      <div class="uploadCard tocCard">
+      <div class="uploadCard tocCard glassCard">
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
             <span class="mismatchIndicator mismatchIndicator--ok mismatchIndicator--banner" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
           </div>
+          <div class="tocStatusRow">
+            <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+          </div>
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
-            <div class="tocCountRow">
-              <button class="tocCount tocCount--button" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-            </div>
             <div class="tocSelectorsPanel">
-              <div class="selectBubble">
+              <div class="selectBubble glassField">
                 <div class="selectRow selectRow--bubble">
                   <div class="selectGroup">
                     <label class="selectLabel" for="waveSelect">Wave</label>
                     <div class="customSelect" id="waveDropdown">
-                      <button class="selectInput customSelectControl" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                      <button class="selectInput customSelectControl glassField" id="waveControl" type="button" aria-expanded="false">Loading…</button>
                     </div>
                     <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
                       <option value="">Loading…</option>
@@ -2645,12 +2652,12 @@ body{{
                   </div>
                 </div>
               </div>
-              <div class="selectBubble" id="routeRow" hidden>
+              <div class="selectBubble glassField" id="routeRow" hidden>
                 <div class="selectRow selectRow--bubble">
                   <div class="selectGroup">
                     <label class="selectLabel" for="routeSelect">Route</label>
                     <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                      <button class="selectInput customSelectControl glassField" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
                     </div>
                     <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
                       <option value="">Select a wave first</option>
