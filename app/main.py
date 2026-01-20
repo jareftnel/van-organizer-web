@@ -2004,6 +2004,8 @@ body{{
   border:1px solid var(--glassBorder);
   border-radius:var(--r) var(--r) 0 0;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
+  position:relative;
+  z-index:1;
 }}
 .tocBanner{{
   position:relative;
@@ -2021,6 +2023,7 @@ body{{
   text-transform:uppercase;
   color:#e8eef6;
   border-radius:var(--r) var(--r) 0 0;
+  z-index:2;
 }}
 .tocDateOverlay::before{{
   content:"";
@@ -2549,10 +2552,6 @@ body{{
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
-          </div>
-          <div class="tagGlass">
-            <div class="taglineText taglineText--desktop">OPTIMIZE YOUR ROUTE</div>
-            <div class="taglineText taglineText--mobile">OPTIMIZE YOUR ROUTE</div>
           </div>
         </div>
         <div class="tocMiddle">
