@@ -2188,7 +2188,12 @@ body{{
   color:#e8eef6;
   cursor:pointer;
   transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
-  margin-left:auto;
+  margin-left:0;
+}}
+.summaryRow{{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:8px;
 }}
 .summaryPill:active{{
   transform:translateY(1px) scale(0.98);
@@ -2699,10 +2704,6 @@ body{{
           </div>
           <div class="metaRow">
             <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-            <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-              <span class="summaryLabel">Summary</span>
-              <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
-            </button>
           </div>
         </div>
         <div class="tocMiddle">
@@ -2734,6 +2735,12 @@ body{{
                 </div>
               </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
+            </div>
+            <div class="summaryRow">
+              <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+                <span class="summaryLabel">Summary</span>
+                <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
+              </button>
             </div>
           </div>
         </div>
