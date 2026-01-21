@@ -2200,9 +2200,9 @@ body{{
   outline-offset:2px;
 }}
 .mismatchIndicator--ok{{
-  background:rgba(22, 185, 78, 0.16);
-  border:1px solid rgba(22, 185, 78, 0.7);
-  color:#16b94e;
+  background:#16b94e;
+  border:1px solid #16b94e;
+  color:#ffffff;
 }}
 .mismatchIndicator--error{{
   background:rgba(248, 113, 113, 0.16);
