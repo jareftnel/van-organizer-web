@@ -2008,7 +2008,8 @@ body{{
   display:block;
   width:100%;
   height:auto;
-  object-fit:contain;
+  max-height:180px;
+  object-fit:cover;
   object-position:center;
   box-sizing:border-box;
   border:1px solid var(--glassBorder);
@@ -2020,7 +2021,7 @@ body{{
 .tocBanner{{
   position:relative;
   border-radius:var(--r);
-  overflow:visible;
+  overflow:hidden;
 }}
 .tocBanner .brandBanner{{
   border-radius:inherit;
