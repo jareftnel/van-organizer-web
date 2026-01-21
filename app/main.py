@@ -2242,8 +2242,8 @@ body{{
   border:1px solid rgba(22, 185, 78, 0.9);
 }}
 .summaryBadge--warn{{
-  background:#f59e0b;
-  border:1px solid rgba(245, 158, 11, 0.9);
+  background:#ef4444;
+  border:1px solid rgba(239, 68, 68, 0.9);
 }}
 .tocCount--button:hover{{
   opacity:1;
