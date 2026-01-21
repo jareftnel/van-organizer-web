@@ -2790,10 +2790,10 @@ body{{
                   <div class="selectGroup">
                     <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
                     <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Choose Your Route</button>
+                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select Route</button>
                     </div>
                     <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                      <option value="">Choose Your Route</option>
+                      <option value="">Select Route</option>
                     </select>
                   </div>
                 </div>
@@ -3023,11 +3023,11 @@ body{{
   function syncRouteControl(){{
     if(!routeControl) return;
     var selected = routeSelect.options[routeSelect.selectedIndex];
-    var display = selected && selected.value ? selected.textContent : "Choose Your Route";
+    var display = selected && selected.value ? selected.textContent : "Select Route";
     var color = selected ? selected.style.color : "";
     var waveColor = getSelectedWaveColor();
     var accent = color || waveColor || "";
-    routeControl.textContent = display || "Choose Your Route";
+    routeControl.textContent = display || "Select Route";
     routeControl.style.color = accent || "";
     routeControl.style.setProperty("--wave-border", accent ? toRgba(accent, 0.65) : "");
     routeControl.style.setProperty("--wave-fill", accent ? toRgba(accent, 0.2) : "");
@@ -3143,14 +3143,14 @@ body{{
     routeSelect.innerHTML = "";
     openRoute.disabled = true;
     if(!label || !groupedRoutes[label]){{
-      var placeholder = new Option("Choose Your Route", "");
+      var placeholder = new Option("Select Route", "");
       placeholder.disabled = true;
       routeSelect.appendChild(placeholder);
       routeSelect.disabled = true;
       setRouteGroupVisibility(false);
       if(routeControl) {{
         routeControl.disabled = true;
-        routeControl.textContent = "Choose Your Route";
+        routeControl.textContent = "Select Route";
         routeControl.style.color = "";
       }}
       closePicker();
@@ -3160,7 +3160,7 @@ body{{
     routeSelect.disabled = false;
     if(routeControl) routeControl.disabled = false;
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
-    var placeholder = new Option("Choose Your Route", "");
+    var placeholder = new Option("Select Route", "");
     if(waveColor) placeholder.style.color = waveColor;
     placeholder.disabled = true;
     placeholder.selected = true;
