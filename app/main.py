@@ -2790,6 +2790,9 @@ body{{
                   </div>
                 </div>
               </div>
+              <div class="actionRow">
+                <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
+              </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
             <div class="summaryRow">
@@ -2798,11 +2801,6 @@ body{{
                 <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
               </button>
             </div>
-          </div>
-        </div>
-        <div class="tocBottom">
-          <div class="actionRow">
-            <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
           </div>
         </div>
       </div>
