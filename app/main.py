@@ -2065,6 +2065,10 @@ body{{
   letter-spacing:0.14em;
   text-align:center;
   transform-origin:center;
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.55),
+    0 0 18px rgba(120,200,255,0.5),
+    0 0 30px rgba(120,200,255,0.35);
 }}
 .tagGlass{{
   width:100%;
