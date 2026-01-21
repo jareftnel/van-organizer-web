@@ -2052,6 +2052,7 @@ body{{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
 }}
 .tocDateText{{
   position:relative;
