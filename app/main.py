@@ -2235,15 +2235,24 @@ body{{
   width:10px;
   height:10px;
   border-radius:999px;
-  box-shadow:0 6px 16px rgba(0,0,0,0.18);
+  background:var(--badge-color, #16b94e);
+  box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
+  animation:summaryPulse 1.6s ease-out infinite;
 }}
 .summaryBadge--ok{{
-  background:#16b94e;
-  border:1px solid rgba(22, 185, 78, 0.9);
+  --badge-color:#16b94e;
+  --badge-shadow:rgba(22,185,78,.6);
+  --badge-shadow-fade:rgba(22,185,78,0);
 }}
 .summaryBadge--warn{{
-  background:#f59e0b;
-  border:1px solid rgba(245, 158, 11, 0.9);
+  --badge-color:#f59e0b;
+  --badge-shadow:rgba(245,158,11,.6);
+  --badge-shadow-fade:rgba(245,158,11,0);
+}}
+@keyframes summaryPulse{{
+  0%{{ box-shadow:0 0 0 0 var(--badge-shadow); opacity:1; }}
+  70%{{ box-shadow:0 0 0 8px var(--badge-shadow-fade); opacity:.6; }}
+  100%{{ box-shadow:0 0 0 12px var(--badge-shadow-fade); opacity:.4; }}
 }}
 .tocCount--button:hover{{
   opacity:1;
