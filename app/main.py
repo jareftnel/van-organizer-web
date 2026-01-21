@@ -2025,23 +2025,20 @@ body{{
 .tocBanner .brandBanner{{
   border-radius:inherit;
 }}
-.tocDateOverlay{{
+.tocDateBanner{{
   position:absolute;
   inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:10px 20px;
+  display:grid;
+  place-items:center;
+  padding:10px 12px;
+  min-height:52px;
   font-family:'Segoe UI','Inter','Helvetica Neue',Arial,sans-serif;
-  font-size:clamp(16px, 2.6vw, 26px);
-  letter-spacing:3px;
-  font-weight:700;
   text-transform:uppercase;
   color:#fff;
   border-radius:inherit;
   z-index:2;
 }}
-.tocDateOverlay::before{{
+.tocDateBanner::before{{
   content:"";
   position:absolute;
   inset:0;
@@ -2049,16 +2046,15 @@ body{{
   backdrop-filter: blur(3px);
   border-radius:inherit;
 }}
-.tocDateOverlay > span{{
+.tocDateText{{
   position:relative;
   z-index:1;
-  max-width:95%;
-  text-align:center;
-  line-height:1.2;
-  text-wrap:nowrap;
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  display:inline-block;
+  font-size:19px;
+  font-weight:800;
+  letter-spacing:0.14em;
+  transform-origin:center;
 }}
 .tagGlass{{
   width:100%;
@@ -2697,7 +2693,7 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-            <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
+            <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
           </div>
           <div class="metaRow">
             <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
@@ -2767,7 +2763,8 @@ body{{
   var openRoute = document.getElementById("openRoute");
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
-  var tocDateText = tocDateBanner ? tocDateBanner.querySelector("span") : null;
+  var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
+  var tocDateObserver = null;
   var summaryPill = document.getElementById("summaryPill");
   var summaryBadge = document.getElementById("summaryBadge");
   var statusLine = document.getElementById("statusLine");
@@ -2795,6 +2792,36 @@ body{{
         event.preventDefault();
         window.location.href = summaryUrl;
       }}
+    }});
+  }}
+
+  function updateDateScale(){{
+    if(!tocDateBanner || !tocDateText) return;
+    var bannerStyle = window.getComputedStyle(tocDateBanner);
+    var paddingLeft = parseFloat(bannerStyle.paddingLeft) || 0;
+    var paddingRight = parseFloat(bannerStyle.paddingRight) || 0;
+    var availableWidth = tocDateBanner.clientWidth - paddingLeft - paddingRight;
+    var textWidth = tocDateText.scrollWidth;
+    if(!availableWidth || !textWidth) return;
+    var scale = Math.min(1, Math.max(0.72, availableWidth / textWidth));
+    tocDateText.style.transform = "scale(" + scale.toFixed(3) + ")";
+  }}
+
+  function setupDateObserver(){{
+    if(!tocDateBanner || !tocDateText || typeof ResizeObserver === "undefined") return;
+    if(tocDateObserver) tocDateObserver.disconnect();
+    tocDateObserver = new ResizeObserver(function(){{
+      updateDateScale();
+    }});
+    tocDateObserver.observe(tocDateBanner);
+    tocDateObserver.observe(tocDateText);
+  }}
+
+  setupDateObserver();
+  updateDateScale();
+  if(document.fonts && document.fonts.ready){{
+    document.fonts.ready.then(function(){{
+      updateDateScale();
     }});
   }}
 
@@ -3156,7 +3183,10 @@ body{{
         setStatus("Table of contents not ready yet.");
         return;
       }}
-      if(tocDateText) tocDateText.textContent = data.date_label || "Date";
+      if(tocDateText){{
+        tocDateText.textContent = data.date_label || "Date";
+        updateDateScale();
+      }}
       var n = data.route_count ?? 0;
       tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
       waveColors = data.wave_colors ?? {{}};
