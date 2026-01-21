@@ -2031,9 +2031,10 @@ body{{
 .tocDateBanner{{
   position:absolute;
   inset:0;
-  display:grid;
-  place-items:center;
-  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 12px;
   min-height:52px;
   font-family:inherit;
   text-transform:uppercase;
