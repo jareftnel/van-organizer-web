@@ -2121,8 +2121,8 @@ body{{
   border-radius:var(--r);
   overflow:hidden;
   display:grid;
-  grid-template-rows:auto minmax(0, 1fr) auto;
-  min-height:calc(100dvh - 96px);
+  grid-template-rows:auto auto auto;
+  min-height:0;
 }}
 .tocTop{{
   padding:0 22px 8px;
