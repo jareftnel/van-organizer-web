@@ -2703,7 +2703,7 @@ body{{
             <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
           </div>
           <div class="metaRow">
-            <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+            <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">Summary</button>
           </div>
         </div>
         <div class="tocMiddle">
@@ -3196,8 +3196,7 @@ body{{
         tocDateText.textContent = data.date_label || "Date";
         updateDateScale();
       }}
-      var n = data.route_count ?? 0;
-      tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
+      tocCount.textContent = "Summary";
       waveColors = data.wave_colors ?? {{}};
       setMismatchIndicator(data.mismatch_count);
 
