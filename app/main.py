@@ -2121,9 +2121,10 @@ body{{
   padding:0;
   border-radius:var(--r);
   overflow:hidden;
-  display:grid;
-  grid-template-rows:auto auto auto;
+  display:flex;
+  flex-direction:column;
   min-height:0;
+  height:auto;
 }}
 .tocTop{{
   padding:0 22px 8px;
@@ -2163,6 +2164,15 @@ body{{
   display:flex;
   flex-direction:column;
   gap:8px;
+}}
+.tocCluster{{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:12px;
+  padding:14px;
+  flex:0;
+  margin:0 auto;
 }}
 .tocBottom{{
   padding:0 22px 22px;
@@ -2632,6 +2642,7 @@ body{{
   .tocCard{{
     width:min(94vw, 380px);
     max-height:calc(100dvh - 24px);
+    height:auto;
     display:flex;
     flex-direction:column;
     box-sizing:border-box;
@@ -2688,6 +2699,10 @@ body{{
     box-sizing:border-box;
     display:flex;
     flex-direction:column;
+    gap:12px;
+  }}
+  .tocCluster{{
+    padding:14px;
     gap:12px;
   }}
   .tocSelectorsPanel{{
@@ -2769,38 +2784,40 @@ body{{
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
-            <div class="tocSelectorsPanel">
-              <div class="tocSelectorTitle">
-                <button class="tocCount tocCount--button tocCount--title glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-              </div>
-              <div class="selectionCard glassCard">
-                <div class="fieldRow">
-                  <div class="selectGroup">
-                    <label class="selectLabel selectLabel--hidden" for="waveSelect">Wave</label>
-                    <div class="customSelect" id="waveDropdown">
-                      <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+            <div class="tocCluster">
+              <div class="tocSelectorsPanel">
+                <div class="tocSelectorTitle">
+                  <button class="tocCount tocCount--button tocCount--title glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+                </div>
+                <div class="selectionCard glassCard">
+                  <div class="fieldRow">
+                    <div class="selectGroup">
+                      <label class="selectLabel selectLabel--hidden" for="waveSelect">Wave</label>
+                      <div class="customSelect" id="waveDropdown">
+                        <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                      </div>
+                      <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
+                        <option value="">Loading…</option>
+                      </select>
                     </div>
-                    <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
-                      <option value="">Loading…</option>
-                    </select>
+                  </div>
+                  <div class="fieldRow" id="routeRow" hidden>
+                    <div class="selectGroup">
+                      <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
+                      <div class="customSelect" id="routeDropdown">
+                        <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select Route</button>
+                      </div>
+                      <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
+                        <option value="">Select Route</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-                <div class="fieldRow" id="routeRow" hidden>
-                  <div class="selectGroup">
-                    <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
-                    <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select Route</button>
-                    </div>
-                    <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                      <option value="">Select Route</option>
-                    </select>
-                  </div>
+                <div class="actionRow">
+                  <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
                 </div>
+                <div class="statusLine" id="statusLine">Loading table of contents…</div>
               </div>
-              <div class="actionRow">
-                <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
-              </div>
-              <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
           </div>
         </div>
