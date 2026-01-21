@@ -2023,8 +2023,10 @@ body{{
   border-radius:var(--r);
   overflow:hidden;
 }}
-.tocBanner .brandBanner{{
-  border-radius:inherit;
+.tocBanner .bannerImg{{
+  border-radius:0;
+  box-shadow:none;
+  filter:none;
 }}
 .tocDateBanner{{
   position:absolute;
@@ -2037,16 +2039,19 @@ body{{
   font-family:inherit;
   text-transform:uppercase;
   color:#fff;
-  border-radius:inherit;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 18px 45px rgba(0,0,0,0.40);
   z-index:2;
+}}
+.tocDateBanner > *{{
+  border-radius:inherit;
 }}
 .tocDateBanner::before{{
   content:"";
   position:absolute;
   inset:0;
   background:rgba(0,0,0,0.6);
-  backdrop-filter: blur(3px);
-  border-radius:inherit;
 }}
 .tocDateText{{
   position:relative;
@@ -2600,7 +2605,6 @@ body{{
     width:100%;
     max-height:120px;
     object-fit:cover;
-    border-radius:12px;
   }}
   .tocTop .tocBanner{{
     border-radius:12px;
