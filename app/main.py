@@ -2032,11 +2032,12 @@ body{{
   align-items:center;
   justify-content:center;
   padding:10px 20px;
+  font-family:'Segoe UI','Inter','Helvetica Neue',Arial,sans-serif;
   font-size:clamp(16px, 2.6vw, 26px);
   letter-spacing:3px;
   font-weight:700;
   text-transform:uppercase;
-  color:#e8eef6;
+  color:#fff;
   border-radius:inherit;
   z-index:2;
 }}
