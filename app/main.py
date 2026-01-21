@@ -2168,8 +2168,8 @@ body{{
   opacity:0.9;
   padding:6px 18px;
   border-radius:999px;
-  background:#f39c12;
-  border:1px solid #f39c12;
+  background:#f4a62d;
+  border:1px solid #f4a62d;
   color:#111111;
   font:inherit;
   line-height:1.1;
@@ -2207,8 +2207,8 @@ body{{
 }}
 .tocCount--button:hover{{
   opacity:1;
-  background:#f4a62d;
-  border-color:#f4a62d;
+  background:#f39c12;
+  border-color:#f39c12;
 }}
 .tocCount--button:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
