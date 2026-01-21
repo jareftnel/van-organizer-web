@@ -2390,6 +2390,13 @@ body{{
   color:#ffffff;
   opacity:1;
 }}
+#routeControl[data-has-value="false"]{{
+  font-size:12px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#ffffff;
+  opacity:1;
+}}
 .fieldSurface{{
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.08);
@@ -2773,12 +2780,12 @@ body{{
                 <div class="fieldDivider" id="routeDivider" aria-hidden="true" hidden></div>
                 <div class="fieldRow" id="routeRow" hidden>
                   <div class="selectGroup">
-                    <label class="selectLabel" for="routeSelect">Route</label>
+                    <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
                     <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>ROUTE</button>
                     </div>
                     <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                      <option value="">Select a wave first</option>
+                      <option value="">ROUTE</option>
                     </select>
                   </div>
                 </div>
@@ -3011,11 +3018,11 @@ body{{
   function syncRouteControl(){{
     if(!routeControl) return;
     var selected = routeSelect.options[routeSelect.selectedIndex];
-    var display = selected ? selected.textContent : "Select route";
+    var display = selected && selected.value ? selected.textContent : "ROUTE";
     var color = selected ? selected.style.color : "";
     var waveColor = getSelectedWaveColor();
     var accent = color || waveColor || "";
-    routeControl.textContent = display || "Select route";
+    routeControl.textContent = display || "ROUTE";
     routeControl.style.color = accent || "";
     routeControl.style.setProperty("--wave-border", accent ? toRgba(accent, 0.65) : "");
     routeControl.style.setProperty("--wave-fill", accent ? toRgba(accent, 0.2) : "");
@@ -3131,14 +3138,14 @@ body{{
     routeSelect.innerHTML = "";
     openRoute.disabled = true;
     if(!label || !groupedRoutes[label]){{
-      var placeholder = new Option("Select a wave first", "");
+      var placeholder = new Option("ROUTE", "");
       placeholder.disabled = true;
       routeSelect.appendChild(placeholder);
       routeSelect.disabled = true;
       setRouteGroupVisibility(false);
       if(routeControl) {{
         routeControl.disabled = true;
-        routeControl.textContent = "Select a wave first";
+        routeControl.textContent = "ROUTE";
         routeControl.style.color = "";
       }}
       closePicker();
@@ -3148,7 +3155,7 @@ body{{
     routeSelect.disabled = false;
     if(routeControl) routeControl.disabled = false;
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
-    var placeholder = new Option("Select route", "");
+    var placeholder = new Option("ROUTE", "");
     if(waveColor) placeholder.style.color = waveColor;
     placeholder.disabled = true;
     placeholder.selected = true;
