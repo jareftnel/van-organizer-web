@@ -2152,18 +2152,20 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  font-size:13px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  opacity:0.9;
-  padding:4px 12px;
+  display:inline-flex;
+  align-items:center;
+  height:30px;
+  padding:0 12px;
   border-radius:999px;
   background:#f39c12;
   border:1px solid rgba(243, 156, 18, 0.85);
   color:#111111;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  font-weight:600;
-  line-height:1.1;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  font-family:inherit;
+  opacity:0.9;
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   box-shadow:0 12px 30px rgba(0,0,0,0.28);
