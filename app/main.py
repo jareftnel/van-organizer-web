@@ -1993,6 +1993,7 @@ body{{
 }}
 .tocPage{{
   align-items:stretch;
+  flex-direction:column;
 }}
 .heroWrap{{
   width:100%;
@@ -2213,8 +2214,9 @@ body{{
 }}
 .summaryRow{{
   display:flex;
-  justify-content:flex-end;
-  margin-top:8px;
+  justify-content:center;
+  margin-top:auto;
+  padding-top:16px;
 }}
 .summaryPill:active{{
   transform:translateY(1px) scale(0.98);
@@ -2801,15 +2803,15 @@ body{{
               </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
-            <div class="summaryRow">
-              <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-                <span class="summaryLabel">Summary</span>
-                <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
+    </div>
+    <div class="summaryRow">
+      <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+        <span class="summaryLabel">Summary</span>
+        <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
+      </button>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
