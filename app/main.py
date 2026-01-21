@@ -2242,8 +2242,8 @@ body{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:10px;
-  height:10px;
+  width:8px;
+  height:8px;
   border-radius:999px;
   background:var(--badge-color, #16b94e);
   box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
@@ -2255,9 +2255,9 @@ body{{
   --badge-shadow-fade:rgba(22,185,78,0);
 }}
 .summaryBadge--warn{{
-  --badge-color:#f59e0b;
-  --badge-shadow:rgba(245,158,11,.6);
-  --badge-shadow-fade:rgba(245,158,11,0);
+  --badge-color:#ef4444;
+  --badge-shadow:rgba(239,68,68,.6);
+  --badge-shadow-fade:rgba(239,68,68,0);
 }}
 @keyframes summaryPulse{{
   0%{{ box-shadow:0 0 0 0 var(--badge-shadow); opacity:1; }}
@@ -2680,8 +2680,8 @@ body{{
     font-size:11px;
   }}
   .summaryBadge{{
-    width:14px;
-    height:14px;
+    width:8px;
+    height:8px;
     font-size:9px;
   }}
   .tocCount{{
