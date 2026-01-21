@@ -2176,7 +2176,7 @@ body{{
   color:#111111;
   font-size:12px;
   font-weight:700;
-  letter-spacing:0.08em;
+  letter-spacing:0.04em;
   text-transform:uppercase;
   font-family:inherit;
   opacity:0.9;
