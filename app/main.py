@@ -2258,6 +2258,7 @@ body{{
   display:flex;
   justify-content:flex-start;
   align-items:center;
+  margin-bottom:-8px;
 }}
 .tocCount--title{{
   margin:0;
@@ -2272,7 +2273,7 @@ body{{
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:16px;
+  gap:8px;
   max-width:100%;
   box-sizing:border-box;
 }}
