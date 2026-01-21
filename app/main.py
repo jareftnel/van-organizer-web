@@ -2127,8 +2127,8 @@ body{{
 }}
 .tocBanner .mismatchIndicator{{
   position:absolute;
-  right:16px;
-  bottom:-10px;
+  right:-4px;
+  bottom:-4px;
   transform:translate(0, 0);
   z-index:3;
 }}
