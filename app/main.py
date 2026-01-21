@@ -2542,7 +2542,7 @@ body{{
     min-height:100dvh;
     display:flex;
     justify-content:center;
-    align-items:flex-start;
+    align-items:center;
     padding:12px;
     overflow-x:hidden;
   }}
@@ -2552,14 +2552,17 @@ body{{
   }}
   .tocCard{{
     width:min(94vw, 380px);
-    min-height:calc(100dvh - 24px);
-    display:grid;
-    grid-template-rows:auto 1fr auto;
+    max-height:calc(100dvh - 24px);
+    display:flex;
+    flex-direction:column;
     box-sizing:border-box;
+    max-width:100%;
   }}
   .tocTop{{
-    padding:16px 14px 10px;
+    padding:12px 14px 8px;
     gap:8px;
+    box-sizing:border-box;
+    max-width:100%;
   }}
   .tocTop .bannerImg{{
     width:100%;
@@ -2584,12 +2587,14 @@ body{{
     padding:6px 14px;
   }}
   .tocMiddle{{
+    flex:1;
     display:flex;
-    align-items:center;
+    flex-direction:column;
     justify-content:center;
-    padding:12px;
+    padding:10px 14px;
     min-height:0;
     box-sizing:border-box;
+    max-width:100%;
   }}
   .tocMiddleInner{{
     width:100%;
@@ -2652,10 +2657,12 @@ body{{
   .tocBottom{{
     padding:14px 14px calc(14px + env(safe-area-inset-bottom));
     border-top:1px solid rgba(255,255,255,0.06);
+    box-sizing:border-box;
+    max-width:100%;
   }}
   .tocBottom button{{
     width:100%;
-    height:44px;
+    height:48px;
   }}
   .statusLine{{
     margin-top:4px;
