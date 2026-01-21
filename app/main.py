@@ -2267,7 +2267,7 @@ body{{
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:12px;
+  gap:16px;
   max-width:100%;
   box-sizing:border-box;
 }}
@@ -2284,7 +2284,7 @@ body{{
   box-shadow:0 10px 30px rgba(0,0,0,0.35);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  transform:translateY(-12px);
+  transform:translateY(0);
 }}
 .fieldRow{{
   display:flex;
@@ -2693,7 +2693,7 @@ body{{
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
-    gap:12px;
+    gap:16px;
     max-width:100%;
     box-sizing:border-box;
   }}
