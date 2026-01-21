@@ -2240,6 +2240,15 @@ body{{
   outline:2px solid rgba(255,255,255,0.6);
   outline-offset:2px;
 }}
+.tocSelectorTitle{{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}}
+.tocCount--title{{
+  margin:0;
+}}
 .tocSelectorsPanel{{
   width:100%;
   border-radius:18px;
@@ -2620,6 +2629,9 @@ body{{
     letter-spacing:1.3px;
     padding:6px 14px;
   }}
+  .tocCount--title{{
+    font-size:14px;
+  }}
   .tocMiddle{{
     flex:0;
     display:flex;
@@ -2713,13 +2725,13 @@ body{{
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
           </div>
-          <div class="metaRow">
-            <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-          </div>
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
             <div class="tocSelectorsPanel">
+              <div class="tocSelectorTitle">
+                <button class="tocCount tocCount--button tocCount--title glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+              </div>
               <div class="selectionCard glassCard">
                 <div class="fieldRow">
                   <div class="selectGroup">
