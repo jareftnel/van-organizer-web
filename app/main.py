@@ -2803,8 +2803,8 @@ body{{
     var availableWidth = tocDateBanner.clientWidth - paddingLeft - paddingRight;
     var textWidth = tocDateText.scrollWidth;
     if(!availableWidth || !textWidth) return;
-    var scale = Math.min(1, Math.max(0.72, availableWidth / textWidth));
-    tocDateText.style.transform = "scale(" + scale.toFixed(3) + ")";
+    var scaleX = Math.min(1, Math.max(0.72, availableWidth / textWidth));
+    tocDateText.style.transform = scaleX === 1 ? "none" : "scaleX(" + scaleX.toFixed(3) + ")";
   }}
 
   function setupDateObserver(){{
