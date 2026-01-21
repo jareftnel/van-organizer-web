@@ -2787,10 +2787,10 @@ body{{
                   <div class="selectGroup">
                     <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
                     <div class="customSelect" id="routeDropdown">
-                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>ROUTE</button>
+                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Choose Your Route</button>
                     </div>
                     <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                      <option value="">ROUTE</option>
+                      <option value="">Choose Your Route</option>
                     </select>
                   </div>
                 </div>
@@ -3007,9 +3007,9 @@ body{{
     if(!waveControl) return;
     var selected = waveSelect.options[waveSelect.selectedIndex];
     var hasValue = selected && selected.value;
-    var display = hasValue ? selected.textContent : "WAVE";
+    var display = hasValue ? selected.textContent : "Select Wave";
     var color = selected && selected.dataset ? selected.dataset.color : "";
-    waveControl.textContent = display || "WAVE";
+    waveControl.textContent = display || "Select Wave";
     waveControl.style.color = color || "";
     waveControl.style.setProperty("--wave-accent", color || "transparent");
     waveControl.style.setProperty("--wave-border", color ? toRgba(color, 0.65) : "");
@@ -3020,11 +3020,11 @@ body{{
   function syncRouteControl(){{
     if(!routeControl) return;
     var selected = routeSelect.options[routeSelect.selectedIndex];
-    var display = selected && selected.value ? selected.textContent : "ROUTE";
+    var display = selected && selected.value ? selected.textContent : "Choose Your Route";
     var color = selected ? selected.style.color : "";
     var waveColor = getSelectedWaveColor();
     var accent = color || waveColor || "";
-    routeControl.textContent = display || "ROUTE";
+    routeControl.textContent = display || "Choose Your Route";
     routeControl.style.color = accent || "";
     routeControl.style.setProperty("--wave-border", accent ? toRgba(accent, 0.65) : "");
     routeControl.style.setProperty("--wave-fill", accent ? toRgba(accent, 0.2) : "");
@@ -3117,7 +3117,7 @@ body{{
       return;
     }}
     labels.sort();
-    var placeholder = new Option("WAVE", "");
+    var placeholder = new Option("Select Wave", "");
     placeholder.disabled = true;
     placeholder.selected = true;
     waveSelect.appendChild(placeholder);
@@ -3140,14 +3140,14 @@ body{{
     routeSelect.innerHTML = "";
     openRoute.disabled = true;
     if(!label || !groupedRoutes[label]){{
-      var placeholder = new Option("ROUTE", "");
+      var placeholder = new Option("Choose Your Route", "");
       placeholder.disabled = true;
       routeSelect.appendChild(placeholder);
       routeSelect.disabled = true;
       setRouteGroupVisibility(false);
       if(routeControl) {{
         routeControl.disabled = true;
-        routeControl.textContent = "ROUTE";
+        routeControl.textContent = "Choose Your Route";
         routeControl.style.color = "";
       }}
       closePicker();
@@ -3157,7 +3157,7 @@ body{{
     routeSelect.disabled = false;
     if(routeControl) routeControl.disabled = false;
     var waveColor = waveColors[label.replace("Wave: ", "")] || "";
-    var placeholder = new Option("ROUTE", "");
+    var placeholder = new Option("Choose Your Route", "");
     if(waveColor) placeholder.style.color = waveColor;
     placeholder.disabled = true;
     placeholder.selected = true;
