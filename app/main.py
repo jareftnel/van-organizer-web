@@ -2696,58 +2696,60 @@ body{{
 </style>
 </head>
 <body>
-  <div class="heroWrap">
-    <div class="uploadCard tocCard glassCard">
-      <div class="tocTop">
-        <div class="tocBanner">
-          <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-          <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
+  <div class="uploadPage tocPage">
+    <div class="heroWrap">
+      <div class="uploadCard tocCard glassCard">
+        <div class="tocTop">
+          <div class="tocBanner">
+            <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+            <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
+          </div>
+          <div class="metaRow">
+            <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+          </div>
         </div>
-        <div class="metaRow">
-          <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
-        </div>
-      </div>
-      <div class="tocMiddle">
-        <div class="tocMiddleInner">
-          <div class="tocSelectorsPanel">
-            <div class="selectionCard glassCard">
-              <div class="fieldRow">
-                <div class="selectGroup">
-                  <label class="selectLabel" for="waveSelect">Wave</label>
-                  <div class="customSelect" id="waveDropdown">
-                    <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+        <div class="tocMiddle">
+          <div class="tocMiddleInner">
+            <div class="tocSelectorsPanel">
+              <div class="selectionCard glassCard">
+                <div class="fieldRow">
+                  <div class="selectGroup">
+                    <label class="selectLabel" for="waveSelect">Wave</label>
+                    <div class="customSelect" id="waveDropdown">
+                      <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
+                    </div>
+                    <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
+                      <option value="">Loading…</option>
+                    </select>
                   </div>
-                  <select id="waveSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1">
-                    <option value="">Loading…</option>
-                  </select>
+                </div>
+                <div class="fieldDivider" id="routeDivider" aria-hidden="true" hidden></div>
+                <div class="fieldRow" id="routeRow" hidden>
+                  <div class="selectGroup">
+                    <label class="selectLabel" for="routeSelect">Route</label>
+                    <div class="customSelect" id="routeDropdown">
+                      <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
+                    </div>
+                    <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
+                      <option value="">Select a wave first</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-              <div class="fieldDivider" id="routeDivider" aria-hidden="true" hidden></div>
-              <div class="fieldRow" id="routeRow" hidden>
-                <div class="selectGroup">
-                  <label class="selectLabel" for="routeSelect">Route</label>
-                  <div class="customSelect" id="routeDropdown">
-                    <button class="selectInput customSelectControl fieldSurface" id="routeControl" type="button" aria-expanded="false" disabled>Select route</button>
-                  </div>
-                  <select id="routeSelect" class="selectInput selectInput--hidden" aria-hidden="true" tabindex="-1" disabled>
-                    <option value="">Select a wave first</option>
-                  </select>
-                </div>
-              </div>
+              <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
-            <div class="statusLine" id="statusLine">Loading table of contents…</div>
-          </div>
-          <div class="summaryRow">
-            <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-              <span class="summaryLabel">Summary</span>
-              <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
-            </button>
+            <div class="summaryRow">
+              <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+                <span class="summaryLabel">Summary</span>
+                <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="tocBottom">
-        <div class="actionRow">
-          <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
+        <div class="tocBottom">
+          <div class="actionRow">
+            <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
+          </div>
         </div>
       </div>
     </div>
