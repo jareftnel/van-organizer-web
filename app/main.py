@@ -2701,7 +2701,7 @@ body{{
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
-    gap:16px;
+    gap:0;
     max-width:100%;
     box-sizing:border-box;
   }}
