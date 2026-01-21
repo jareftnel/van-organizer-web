@@ -2216,6 +2216,8 @@ body{{
 .summaryRow{{
   display:flex;
   justify-content:center;
+  align-items:center;
+  gap:8px;
   margin-top:auto;
   padding-top:16px;
 }}
@@ -2230,22 +2232,18 @@ body{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:16px;
-  height:16px;
+  width:10px;
+  height:10px;
   border-radius:999px;
-  font-size:10px;
-  font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
 }}
 .summaryBadge--ok{{
-  background:rgba(0, 0, 0, 0.12);
-  border:1px solid #000000;
-  color:#16b94e;
+  background:#16b94e;
+  border:1px solid rgba(22, 185, 78, 0.9);
 }}
-.summaryBadge--error{{
-  background:rgba(248, 113, 113, 0.16);
-  border:1px solid rgba(248, 113, 113, 0.7);
-  color:#f87171;
+.summaryBadge--warn{{
+  background:#f59e0b;
+  border:1px solid rgba(245, 158, 11, 0.9);
 }}
 .tocCount--button:hover{{
   opacity:1;
@@ -2808,11 +2806,11 @@ body{{
         </div>
       </div>
     </div>
-    <div class="summaryRow">
+  <div class="summaryRow">
       <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
         <span class="summaryLabel">Summary</span>
-        <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
       </button>
+      <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
@@ -2945,25 +2943,22 @@ body{{
     if(!summaryPill || !summaryBadge) return;
     if(typeof count !== "number"){{
       summaryPill.hidden = false;
-      summaryPill.title = "View verification summary";
-      summaryBadge.textContent = "✓";
+      summaryPill.title = "Summary not ready";
       summaryBadge.hidden = false;
-      summaryBadge.classList.remove("summaryBadge--error");
-      summaryBadge.classList.add("summaryBadge--ok");
+      summaryBadge.classList.remove("summaryBadge--ok");
+      summaryBadge.classList.add("summaryBadge--warn");
       return;
     }}
     if(count === 0){{
       summaryPill.title = "No mismatches reported";
-      summaryBadge.textContent = "✓";
       summaryBadge.hidden = false;
-      summaryBadge.classList.remove("summaryBadge--error");
+      summaryBadge.classList.remove("summaryBadge--warn");
       summaryBadge.classList.add("summaryBadge--ok");
     }} else {{
       summaryPill.title = "Mismatches reported";
-      summaryBadge.textContent = "!";
       summaryBadge.hidden = false;
       summaryBadge.classList.remove("summaryBadge--ok");
-      summaryBadge.classList.add("summaryBadge--error");
+      summaryBadge.classList.add("summaryBadge--warn");
     }}
   }}
 
