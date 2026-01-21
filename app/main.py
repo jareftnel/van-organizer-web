@@ -2032,7 +2032,7 @@ body{{
   place-items:center;
   padding:10px 12px;
   min-height:52px;
-  font-family:'Segoe UI','Inter','Helvetica Neue',Arial,sans-serif;
+  font-family:inherit;
   text-transform:uppercase;
   color:#fff;
   border-radius:inherit;
