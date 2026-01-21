@@ -2168,10 +2168,11 @@ body{{
   display:inline-flex;
   align-items:center;
   height:30px;
-  padding:0 12px;
+  padding:0 8px;
   border-radius:16px 16px 0 0;
   width:100%;
-  justify-content:center;
+  justify-content:flex-start;
+  text-align:left;
   background:#f39c12;
   border:1px solid rgba(243, 156, 18, 0.85);
   color:#111111;
