@@ -2553,16 +2553,14 @@ body{{
   .tocCard{{
     width:min(94vw, 380px);
     max-height:calc(100dvh - 24px);
-    display:grid;
-    grid-template-rows:auto auto auto;
-    row-gap:12px;
-    padding:14px;
+    display:flex;
+    flex-direction:column;
     box-sizing:border-box;
     max-width:100%;
   }}
   .tocTop{{
-    padding:0;
-    gap:10px;
+    padding:12px 14px 8px;
+    gap:8px;
     box-sizing:border-box;
     max-width:100%;
   }}
@@ -2575,23 +2573,8 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .tocDateOverlay{{
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.12);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
-  }}
-  .tocDateOverlay::before{{
-    background:transparent;
-    backdrop-filter:none;
-  }}
   .metaRow .mismatchIndicator{{
     left:0;
-  }}
-  .metaRow{{
-    margin-top:0;
-    margin-bottom:10px;
   }}
   .mismatchIndicator{{
     width:18px;
@@ -2604,10 +2587,11 @@ body{{
     padding:6px 14px;
   }}
   .tocMiddle{{
+    flex:1;
     display:flex;
     flex-direction:column;
-    justify-content:flex-start;
-    padding:0;
+    justify-content:center;
+    padding:10px 14px;
     min-height:0;
     box-sizing:border-box;
     max-width:100%;
@@ -2623,24 +2607,16 @@ body{{
   .tocSelectorsPanel{{
     width:100%;
     border-radius:18px;
-    padding:12px;
-    min-height:0;
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.12);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    padding:0;
+    min-height:200px;
+    background:transparent;
+    border:0;
     display:flex;
     flex-direction:column;
-    justify-content:flex-start;
+    justify-content:center;
     gap:12px;
     max-width:100%;
     box-sizing:border-box;
-  }}
-  .tocSelectorsPanel .fieldSurface,
-  .tocSelectorsPanel .selectInput:not(.selectInput--hidden){{
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.14);
   }}
   .selectionCard{{
     width:100%;
@@ -2679,7 +2655,7 @@ body{{
     letter-spacing:0.6px;
   }}
   .tocBottom{{
-    padding:0 0 calc(14px + env(safe-area-inset-bottom));
+    padding:14px 14px calc(14px + env(safe-area-inset-bottom));
     border-top:1px solid rgba(255,255,255,0.06);
     box-sizing:border-box;
     max-width:100%;
