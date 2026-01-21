@@ -2378,7 +2378,7 @@ body{{
 .customSelectControl{{
   width:100%;
   cursor:pointer;
-  padding:0 44px 0 16px;
+  padding:0 44px;
   position:relative;
   display:flex;
   align-items:center;
