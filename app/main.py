@@ -2398,15 +2398,15 @@ body{{
   opacity:1;
 }}
 .fieldSurface{{
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(10,16,26,0.55);
+  border:1px solid var(--glassBorder);
   border-radius:14px;
   display:flex;
   align-items:center;
 }}
 .fieldSurface[data-has-value="true"]{{
   border-color:var(--wave-border, rgba(255,255,255,0.12));
-  background:linear-gradient(180deg, var(--wave-fill, rgba(255,255,255,0.16)) 0%, rgba(255,255,255,0.04) 100%);
+  background:rgba(10,16,26,0.55);
   box-shadow:0 10px 24px rgba(0,0,0,0.28);
   transform:translateY(-1px);
 }}
