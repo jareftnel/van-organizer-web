@@ -2330,6 +2330,18 @@ body{{
   text-align:left;
   margin-left:4px;
 }}
+.selectLabel--hidden{{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0, 0, 0, 0);
+  border:0;
+  opacity:0;
+  pointer-events:none;
+}}
 .selectInput{{
   height:46px;
   width:100%;
@@ -2369,6 +2381,13 @@ body{{
   display:flex;
   align-items:center;
   justify-content:center;
+}}
+#waveControl[data-has-value="false"]{{
+  font-size:12px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#ffffff;
+  opacity:1;
 }}
 .fieldSurface{{
   background:rgba(255,255,255,0.06);
@@ -2740,7 +2759,7 @@ body{{
               <div class="selectionCard glassCard">
                 <div class="fieldRow">
                   <div class="selectGroup">
-                    <label class="selectLabel" for="waveSelect">Wave</label>
+                    <label class="selectLabel selectLabel--hidden" for="waveSelect">Wave</label>
                     <div class="customSelect" id="waveDropdown">
                       <button class="selectInput customSelectControl fieldSurface" id="waveControl" type="button" aria-expanded="false">Loading…</button>
                     </div>
@@ -2976,14 +2995,15 @@ body{{
   function syncWaveControl(){{
     if(!waveControl) return;
     var selected = waveSelect.options[waveSelect.selectedIndex];
-    var display = selected ? selected.textContent : "Select Wave";
+    var hasValue = selected && selected.value;
+    var display = hasValue ? selected.textContent : "WAVE";
     var color = selected && selected.dataset ? selected.dataset.color : "";
-    waveControl.textContent = display || "Select Wave";
+    waveControl.textContent = display || "WAVE";
     waveControl.style.color = color || "";
     waveControl.style.setProperty("--wave-accent", color || "transparent");
     waveControl.style.setProperty("--wave-border", color ? toRgba(color, 0.65) : "");
     waveControl.style.setProperty("--wave-fill", color ? toRgba(color, 0.2) : "");
-    waveControl.dataset.hasValue = selected && selected.value ? "true" : "false";
+    waveControl.dataset.hasValue = hasValue ? "true" : "false";
   }}
 
   function syncRouteControl(){{
@@ -3086,7 +3106,7 @@ body{{
       return;
     }}
     labels.sort();
-    var placeholder = new Option("Select Wave", "");
+    var placeholder = new Option("WAVE", "");
     placeholder.disabled = true;
     placeholder.selected = true;
     waveSelect.appendChild(placeholder);
