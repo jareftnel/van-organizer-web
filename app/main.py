@@ -2385,14 +2385,14 @@ body{{
   justify-content:center;
 }}
 #waveControl[data-has-value="false"]{{
-  font-size:12px;
+  font-size:clamp(10px, 1.6vh, 12px);
   letter-spacing:0.12em;
   text-transform:uppercase;
   color:#ffffff;
   opacity:1;
 }}
 #routeControl[data-has-value="false"]{{
-  font-size:12px;
+  font-size:clamp(10px, 1.6vh, 12px);
   letter-spacing:0.12em;
   text-transform:uppercase;
   color:#ffffff;
@@ -2778,7 +2778,6 @@ body{{
                     </select>
                   </div>
                 </div>
-                <div class="fieldDivider" id="routeDivider" aria-hidden="true" hidden></div>
                 <div class="fieldRow" id="routeRow" hidden>
                   <div class="selectGroup">
                     <label class="selectLabel selectLabel--hidden" for="routeSelect">Route</label>
@@ -2931,9 +2930,8 @@ body{{
       if(routeDivider) routeDivider.hidden = false;
       return;
     }}
-    var hideRow = !isVerticalMobile();
-    routeRow.hidden = hideRow;
-    if(routeDivider) routeDivider.hidden = hideRow;
+    routeRow.hidden = true;
+    if(routeDivider) routeDivider.hidden = true;
   }}
 
   function setMismatchIndicator(count){{
