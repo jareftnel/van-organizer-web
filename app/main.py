@@ -2398,15 +2398,15 @@ body{{
   opacity:1;
 }}
 .fieldSurface{{
-  background:#3fa7ff;
-  border:1px solid #3fa7ff;
+  background:rgba(10,16,26,0.55);
+  border:1px solid var(--glassBorder);
   border-radius:14px;
   display:flex;
   align-items:center;
 }}
 .fieldSurface[data-has-value="true"]{{
   border-color:var(--wave-border, rgba(255,255,255,0.12));
-  background:#3fa7ff;
+  background:rgba(10,16,26,0.55);
   box-shadow:0 10px 24px rgba(0,0,0,0.28);
   transform:translateY(-1px);
 }}
