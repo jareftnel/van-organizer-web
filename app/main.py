@@ -2169,12 +2169,15 @@ body{{
   opacity:0.9;
   padding:6px 18px;
   border-radius:999px;
-  background:#f39c12;
-  border:1px solid #f39c12;
-  color:#111111;
+  background:rgba(243, 156, 18, 0.22);
+  border:1px solid rgba(243, 156, 18, 0.55);
+  color:#fff7e6;
   font:inherit;
   line-height:1.1;
   font-weight:700;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.28);
 }}
 .tocCount--button{{
   cursor:pointer;
@@ -2208,8 +2211,8 @@ body{{
 }}
 .tocCount--button:hover{{
   opacity:1;
-  background:#f4a62d;
-  border-color:#f4a62d;
+  background:rgba(243, 156, 18, 0.32);
+  border-color:rgba(243, 156, 18, 0.7);
 }}
 .tocCount--button:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
