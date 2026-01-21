@@ -2031,8 +2031,9 @@ body{{
 .tocDateBanner{{
   position:absolute;
   inset:0;
-  display:grid;
-  place-items:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   padding:10px 12px;
   min-height:52px;
   font-family:inherit;
@@ -2061,6 +2062,7 @@ body{{
   width:100%;
   font-size:19px;
   font-weight:800;
+  line-height:1;
   letter-spacing:0.14em;
   text-align:center;
   transform-origin:center;
