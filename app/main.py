@@ -2172,9 +2172,9 @@ body{{
   background:#f39c12;
   border:1px solid #f39c12;
   color:#111111;
-  font:inherit;
   line-height:1.1;
-  font-weight:700;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-weight:400;
 }}
 .tocCount--button{{
   cursor:pointer;
