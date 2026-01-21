@@ -2128,8 +2128,8 @@ body{{
 }}
 .tocBanner .mismatchIndicator{{
   position:absolute;
-  right:-4px;
-  bottom:-4px;
+  right:6px;
+  bottom:6px;
   transform:translate(0, 0);
   z-index:3;
 }}
@@ -2200,8 +2200,8 @@ body{{
   outline-offset:2px;
 }}
 .mismatchIndicator--ok{{
-  background:rgba(22, 185, 78, 0.16);
-  border:1px solid rgba(22, 185, 78, 0.7);
+  background:rgba(0, 0, 0, 0.12);
+  border:1px solid #000000;
   color:#16b94e;
 }}
 .mismatchIndicator--error{{
