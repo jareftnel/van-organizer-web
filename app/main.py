@@ -689,6 +689,7 @@ body{
   background:#101826;
   border:1px solid #1c2a3a;
   padding:26px 24px;
+  margin-top:-20px;
   box-shadow:0 18px 40px rgba(5,9,14,.45);
 }
 .title{font-size:24px;font-weight:800;letter-spacing:.2px}
