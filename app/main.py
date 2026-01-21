@@ -2587,10 +2587,10 @@ body{{
     padding:6px 14px;
   }}
   .tocMiddle{{
-    flex:1;
+    flex:0;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
     padding:10px 14px;
     min-height:0;
     box-sizing:border-box;
