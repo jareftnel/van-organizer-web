@@ -2587,10 +2587,10 @@ body{{
     padding:6px 14px;
   }}
   .tocMiddle{{
-    flex:1;
+    flex:0;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
     padding:10px 14px;
     min-height:0;
     box-sizing:border-box;
@@ -2608,12 +2608,12 @@ body{{
     width:100%;
     border-radius:18px;
     padding:0;
-    min-height:200px;
+    min-height:auto;
     background:transparent;
     border:0;
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:flex-start;
     gap:12px;
     max-width:100%;
     box-sizing:border-box;
