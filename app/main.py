@@ -2111,10 +2111,13 @@ body{{
   min-height:calc(100dvh - 96px);
 }}
 .tocTop{{
-  padding:20px 22px 8px;
+  padding:0 22px 8px;
   display:flex;
   flex-direction:column;
   gap:6px;
+}}
+.tocTop .tocBanner{{
+  margin:0 -22px;
 }}
 .metaRow{{
   display:flex;
@@ -2582,10 +2585,13 @@ body{{
     max-width:100%;
   }}
   .tocTop{{
-    padding:12px 14px 8px;
+    padding:0 14px 8px;
     gap:8px;
     box-sizing:border-box;
     max-width:100%;
+  }}
+  .tocTop .tocBanner{{
+    margin:0 -14px;
   }}
   .tocTop .bannerImg{{
     width:100%;
