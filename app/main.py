@@ -1992,7 +1992,8 @@ body{{
   box-sizing:border-box;
 }}
 .tocPage{{
-  align-items:stretch;
+  align-items:center;
+  justify-content:center;
   flex-direction:column;
 }}
 .heroWrap{{
@@ -2003,7 +2004,7 @@ body{{
   flex-direction:column;
   align-items:stretch;
   gap:0;
-  flex:1;
+  flex:0;
 }}
 .heroWrap > *{{width:100%;}}
 .brandBanner{{
