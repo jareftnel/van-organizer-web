@@ -2120,18 +2120,11 @@ body{{
 }}
 .metaRow{{
   display:flex;
-  align-items:baseline;
+  align-items:center;
   justify-content:flex-start;
   position:relative;
   min-height:28px;
   margin-top:10px;
-}}
-.tocBanner .mismatchIndicator{{
-  position:absolute;
-  right:6px;
-  bottom:6px;
-  transform:translate(0, 0);
-  z-index:3;
 }}
 .tocStatusRow{{
   display:flex;
@@ -2183,28 +2176,46 @@ body{{
   cursor:pointer;
   transition:opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }}
-.mismatchIndicator{{
+.summaryPill{{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  height:30px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#e8eef6;
+  cursor:pointer;
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  margin-left:auto;
+}}
+.summaryPill:active{{
+  transform:translateY(1px) scale(0.98);
+}}
+.summaryPill:focus-visible{{
+  outline:2px solid rgba(255,255,255,0.6);
+  outline-offset:2px;
+}}
+.summaryBadge{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:18px;
-  height:18px;
+  width:16px;
+  height:16px;
   border-radius:999px;
   font-size:10px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
-  cursor:pointer;
 }}
-.mismatchIndicator:focus-visible{{
-  outline:2px solid rgba(255,255,255,0.7);
-  outline-offset:2px;
-}}
-.mismatchIndicator--ok{{
+.summaryBadge--ok{{
   background:rgba(0, 0, 0, 0.12);
   border:1px solid #000000;
   color:#16b94e;
 }}
-.mismatchIndicator--error{{
+.summaryBadge--error{{
   background:rgba(248, 113, 113, 0.16);
   border:1px solid rgba(248, 113, 113, 0.7);
   color:#f87171;
@@ -2580,9 +2591,14 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .mismatchIndicator{{
-    width:16px;
-    height:16px;
+  .summaryPill{{
+    height:28px;
+    padding:0 10px;
+    font-size:11px;
+  }}
+  .summaryBadge{{
+    width:14px;
+    height:14px;
     font-size:9px;
   }}
   .tocCount{{
@@ -2682,10 +2698,13 @@ body{{
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
-            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
           </div>
           <div class="metaRow">
             <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+            <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+              <span class="summaryLabel">Summary</span>
+              <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true">✓</span>
+            </button>
           </div>
         </div>
         <div class="tocMiddle">
@@ -2749,7 +2768,8 @@ body{{
   var tocCount = document.getElementById("tocCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector("span") : null;
-  var mismatchIndicator = document.getElementById("mismatchIndicator");
+  var summaryPill = document.getElementById("summaryPill");
+  var summaryBadge = document.getElementById("summaryBadge");
   var statusLine = document.getElementById("statusLine");
   var pickerBackdrop = document.getElementById("pickerBackdrop");
   var pickerModal = document.getElementById("pickerModal");
@@ -2766,11 +2786,11 @@ body{{
   tocCount.addEventListener("click", function(){{
     window.open(stackedUrl, "_blank", "noopener");
   }});
-  if(mismatchIndicator){{
-    mismatchIndicator.addEventListener("click", function(){{
+  if(summaryPill){{
+    summaryPill.addEventListener("click", function(){{
       window.location.href = summaryUrl;
     }});
-    mismatchIndicator.addEventListener("keydown", function(event){{
+    summaryPill.addEventListener("keydown", function(event){{
       if(event.key === "Enter" || event.key === " "){{
         event.preventDefault();
         window.location.href = summaryUrl;
@@ -2824,25 +2844,28 @@ body{{
   }}
 
   function setMismatchIndicator(count){{
-    if(!mismatchIndicator) return;
+    if(!summaryPill || !summaryBadge) return;
     if(typeof count !== "number"){{
-      mismatchIndicator.hidden = false;
-      mismatchIndicator.textContent = "✓";
-      mismatchIndicator.title = "View verification summary";
-      mismatchIndicator.classList.remove("mismatchIndicator--error");
-      mismatchIndicator.classList.add("mismatchIndicator--ok");
+      summaryPill.hidden = false;
+      summaryPill.title = "View verification summary";
+      summaryBadge.textContent = "✓";
+      summaryBadge.hidden = false;
+      summaryBadge.classList.remove("summaryBadge--error");
+      summaryBadge.classList.add("summaryBadge--ok");
       return;
     }}
     if(count === 0){{
-      mismatchIndicator.textContent = "✓";
-      mismatchIndicator.title = "No mismatches reported";
-      mismatchIndicator.classList.remove("mismatchIndicator--error");
-      mismatchIndicator.classList.add("mismatchIndicator--ok");
+      summaryPill.title = "No mismatches reported";
+      summaryBadge.textContent = "✓";
+      summaryBadge.hidden = false;
+      summaryBadge.classList.remove("summaryBadge--error");
+      summaryBadge.classList.add("summaryBadge--ok");
     }} else {{
-      mismatchIndicator.textContent = "✕";
-      mismatchIndicator.title = "Mismatches reported";
-      mismatchIndicator.classList.remove("mismatchIndicator--ok");
-      mismatchIndicator.classList.add("mismatchIndicator--error");
+      summaryPill.title = "Mismatches reported";
+      summaryBadge.textContent = "!";
+      summaryBadge.hidden = false;
+      summaryBadge.classList.remove("summaryBadge--ok");
+      summaryBadge.classList.add("summaryBadge--error");
     }}
   }}
 
