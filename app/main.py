@@ -3248,6 +3248,7 @@ body{{
     .then(function(data){{
       if(!data || data.status !== "ok"){{
         setStatus("Table of contents not ready yet.");
+        setMismatchIndicator(undefined);
         return;
       }}
       if(tocDateText){{
@@ -3298,6 +3299,7 @@ body{{
     }})
     .catch(function(){{
       setStatus("Unable to load table of contents.");
+      setMismatchIndicator(undefined);
     }});
 }})();
 </script>
