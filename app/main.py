@@ -2168,7 +2168,9 @@ body{{
   align-items:center;
   height:30px;
   padding:0 12px;
-  border-radius:999px;
+  border-radius:16px 16px 0 0;
+  width:100%;
+  justify-content:center;
   background:#f39c12;
   border:1px solid rgba(243, 156, 18, 0.85);
   color:#111111;
@@ -2274,7 +2276,7 @@ body{{
   flex-direction:column;
   gap:12px;
   box-sizing:border-box;
-  border-radius:18px;
+  border-radius:0 0 18px 18px;
   background:rgba(255,255,255,0.047);
   border:1px solid rgba(255,255,255,0.07);
   box-shadow:0 10px 30px rgba(0,0,0,0.35);
@@ -2692,6 +2694,7 @@ body{{
     display:flex;
     flex-direction:column;
     box-sizing:border-box;
+    border-radius:0 0 18px 18px;
   }}
   .fieldRow{{
     gap:6px;
