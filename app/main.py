@@ -2020,11 +2020,11 @@ body{{
 }}
 .tocBanner{{
   position:relative;
-  border-radius:var(--r);
+  border-radius:18px;
   overflow:hidden;
 }}
 .tocBanner .bannerImg{{
-  border-radius:0;
+  border-radius:inherit;
   box-shadow:none;
   filter:none;
 }}
@@ -2039,7 +2039,7 @@ body{{
   font-family:inherit;
   text-transform:uppercase;
   color:#fff;
-  border-radius:18px;
+  border-radius:inherit;
   overflow:hidden;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
   z-index:2;
