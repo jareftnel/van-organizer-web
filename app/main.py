@@ -2125,11 +2125,12 @@ body{{
   min-height:28px;
   margin-top:-2px;
 }}
-.metaRow .mismatchIndicator{{
+.tocBanner .mismatchIndicator{{
   position:absolute;
-  left:0;
-  top:50%;
-  transform:translateY(-50%);
+  right:-4px;
+  bottom:-4px;
+  transform:translate(0, 0);
+  z-index:3;
 }}
 .tocStatusRow{{
   display:flex;
@@ -2182,10 +2183,10 @@ body{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:20px;
-  height:20px;
+  width:18px;
+  height:18px;
   border-radius:999px;
-  font-size:11px;
+  font-size:10px;
   font-weight:800;
   box-shadow:0 6px 16px rgba(0,0,0,0.18);
   cursor:pointer;
@@ -2575,13 +2576,10 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .metaRow .mismatchIndicator{{
-    left:0;
-  }}
   .mismatchIndicator{{
-    width:18px;
-    height:18px;
-    font-size:10px;
+    width:16px;
+    height:16px;
+    font-size:9px;
   }}
   .tocCount{{
     font-size:15px;
@@ -2680,9 +2678,9 @@ body{{
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
             <div class="tocDateOverlay" id="tocDateBanner"><span>Date</span></div>
+            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
           </div>
           <div class="metaRow">
-            <span class="mismatchIndicator mismatchIndicator--ok" id="mismatchIndicator" role="button" tabindex="0" title="No mismatches reported">✓</span>
             <button class="tocCount tocCount--button glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
           </div>
         </div>
