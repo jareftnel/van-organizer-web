@@ -2121,10 +2121,10 @@ body{{
 .metaRow{{
   display:flex;
   align-items:baseline;
-  justify-content:center;
+  justify-content:flex-start;
   position:relative;
   min-height:28px;
-  margin-top:-2px;
+  margin-top:10px;
 }}
 .tocBanner .mismatchIndicator{{
   position:absolute;
@@ -2163,18 +2163,18 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  font-size:clamp(16px, 2.2vw, 22px);
+  font-size:13px;
   letter-spacing:2px;
   text-transform:uppercase;
   opacity:0.9;
-  padding:6px 18px;
+  padding:4px 12px;
   border-radius:999px;
-  background:rgba(243, 156, 18, 0.22);
-  border:1px solid rgba(243, 156, 18, 0.55);
-  color:#fff7e6;
-  font:inherit;
+  background:#f39c12;
+  border:1px solid rgba(243, 156, 18, 0.85);
+  color:#111111;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-weight:600;
   line-height:1.1;
-  font-weight:700;
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   box-shadow:0 12px 30px rgba(0,0,0,0.28);
