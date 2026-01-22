@@ -2805,6 +2805,22 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
+  .tocBanner .bannerGlass{{
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    background:rgba(12,16,22,0.55);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 10px 24px rgba(0,0,0,0.35);
+  }}
+  .tocBanner .bannerGlass::before{{
+    background:linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.12),
+      rgba(255,255,255,0) 60%
+    );
+  }}
   .statusDot{{
     width:8px;
     height:8px;
