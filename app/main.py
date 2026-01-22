@@ -2653,15 +2653,20 @@ body{{
     min-height:100vh;
     display:flex;
     justify-content:center;
-    align-items:flex-start;
+    align-items:stretch;
     padding:48px 24px;
+    height:100vh;
   }}
   .tocShell{{
     width:100%;
     max-width:100%;
+    display:flex;
+    flex:1;
   }}
   .tocCard{{
     width:100%;
+    min-height:calc(100vh - 96px);
+    grid-template-rows:auto 1fr auto;
   }}
   .tocTop{{
     padding:0 18px 12px;
@@ -2689,9 +2694,13 @@ body{{
   }}
   .tocMiddle{{
     padding:0 18px 22px;
+    flex:1;
+    align-items:stretch;
   }}
   .tocMiddleInner{{
     width:100%;
+    flex:1;
+    justify-content:stretch;
   }}
   .tocPanel{{
     margin-top:-24px;
@@ -2702,6 +2711,10 @@ body{{
     backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
     box-shadow:0 14px 40px rgba(0,0,0,0.45);
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
   }}
   .routesDownloadBtn{{
     height:44px;
