@@ -2688,9 +2688,17 @@ body{{
     height:100%;
     border-radius:24px;
     overflow:hidden;
+    grid-template-columns:minmax(40px, 60px) 1fr minmax(40px, 60px);
+    padding:0 12px;
+    min-height:64px;
   }}
   .tocDateText{{
-    font-size:clamp(18px, 1.8vw, 24px);
+    font-size:clamp(20px, 2.2vw, 30px);
+  }}
+  .tocDateIcon{{
+    min-width:40px;
+    width:clamp(44px, 4.5vw, 60px);
+    font-size:clamp(24px, 2.6vw, 34px);
   }}
   .tocMiddle{{
     padding:0 18px 22px;
