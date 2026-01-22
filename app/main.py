@@ -2809,6 +2809,11 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
+  .tocDateBanner{{
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+  }}
   .tocBanner{{
     height:auto;
     aspect-ratio:auto;
