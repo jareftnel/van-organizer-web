@@ -2217,9 +2217,13 @@ body{{
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:8px;
   margin-top:auto;
   padding-top:16px;
+}}
+.summaryPillWrap{{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
 }}
 .summaryPill:active{{
   transform:translateY(1px) scale(0.98);
@@ -2238,6 +2242,9 @@ body{{
   background:var(--badge-color, #16b94e);
   box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
   animation:summaryPulse 1.6s ease-out infinite;
+  position:absolute;
+  left:100%;
+  margin-left:8px;
 }}
 .summaryBadge--ok{{
   --badge-color:#16b94e;
@@ -2818,10 +2825,12 @@ body{{
       </div>
     </div>
   <div class="summaryRow">
-      <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-        <span class="summaryLabel">Summary</span>
-      </button>
-      <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
+      <div class="summaryPillWrap">
+        <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+          <span class="summaryLabel">Summary</span>
+        </button>
+        <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
+      </div>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
