@@ -2805,6 +2805,13 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
+  .tocBanner{{
+    height:auto;
+    aspect-ratio:4 / 1;
+  }}
+  .tocTop .bannerImg{{
+    transform:none;
+  }}
   .tocBanner .bannerGlass{{
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
