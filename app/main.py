@@ -2219,7 +2219,8 @@ body{{
   align-items:center;
   gap:8px;
   margin-top:auto;
-  padding-top:16px;
+  padding:16px 0;
+  width:100%;
 }}
 .summaryPill:active{{
   transform:translateY(1px) scale(0.98);
