@@ -2176,11 +2176,11 @@ body{{
 .tocCount{{
   margin-top:0;
   display:grid;
-  grid-template-columns:85% 15%;
+  grid-template-columns:1fr auto;
   gap:6px;
-  height:32px;
+  height:36px;
   width:100%;
-  border-radius:16px 16px 0 0;
+  border-radius:18px 18px 0 0;
   background:transparent;
   border:0;
   color:#111111;
@@ -2214,11 +2214,30 @@ body{{
   text-align:left;
 }}
 .tocCountHalf--right{{
-  justify-content:flex-start;
-  gap:8px;
+  justify-content:center;
+}}
+.summaryBtn{{
+  width:36px;
+  height:36px;
+  padding:0;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(0,0,0,0.28);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.18);
+  transition:transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}}
+.summaryBtn:hover{{
+  background:rgba(0,0,0,0.35);
 }}
 .tocCountHalf:active{{
   transform:translateY(1px);
+}}
+.summaryBtn:active{{
+  transform:scale(0.96);
 }}
 .tocCountHalf:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
@@ -2231,13 +2250,12 @@ body{{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:8px;
-  height:8px;
+  width:10px;
+  height:10px;
   border-radius:999px;
   background:var(--badge-color, #16b94e);
   box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
   animation:summaryPulse 1.6s ease-out infinite;
-  margin-left:auto;
 }}
 .summaryBadge--ok{{
   --badge-color:#16b94e;
@@ -2657,12 +2675,12 @@ body{{
     border-radius:12px;
   }}
   .summaryBadge{{
-    width:8px;
-    height:8px;
+    width:10px;
+    height:10px;
     font-size:9px;
   }}
   .tocCount{{
-    height:34px;
+    height:36px;
     font-size:15px;
     letter-spacing:1.3px;
   }}
@@ -2671,6 +2689,10 @@ body{{
   }}
   .tocCountHalf{{
     padding:0 10px;
+  }}
+  .summaryBtn{{
+    width:36px;
+    height:36px;
   }}
   .tocMiddle{{
     flex:0;
@@ -2773,7 +2795,7 @@ body{{
               <div class="tocSelectorTitle">
                 <div class="tocCount tocCount--title glassField" aria-label="Stacked PDF and summary actions">
                   <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">0 Routes</button>
-                  <button class="tocCountHalf tocCountHalf--right" id="tocCountSummary" type="button" title="View verification summary">
+                  <button class="tocCountHalf tocCountHalf--right summaryBtn" id="tocCountSummary" type="button" title="View verification summary">
                     <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
                   </button>
                 </div>
