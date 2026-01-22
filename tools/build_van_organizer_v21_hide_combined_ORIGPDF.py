@@ -1069,32 +1069,31 @@ td:last-child,th:last-child{text-align:right}
   .downloadLabelShort{display:inline;}
   .downloadBtn{padding:6px 10px;font-size:12px;}
   .sectionHeaderRow{
-    grid-template-columns:1fr;
-    grid-template-rows:auto auto auto;
-    gap:10px;
-    justify-items:center;
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:8px;
   }
   .routeTitle{
-    grid-column:1;
-    grid-row:1;
-    justify-self:center;
-    text-align:center;
-    font-size:clamp(18px, 5vw, 22px);
+    flex:1 1 auto;
+    min-width:0;
+    justify-content:flex-start;
+    text-align:left;
+    font-size:clamp(14px, 4vw, 18px);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   .topCounts{
-    grid-column:1;
-    grid-row:2;
-    justify-self:center;
-    flex-wrap:wrap;
-    justify-content:center;
+    flex:0 0 auto;
+    gap:6px;
   }
   .tabsRow{
-    grid-column:1;
-    grid-row:3;
-    flex-wrap:wrap;
-    justify-content:center;
+    flex:0 0 auto;
+    gap:6px;
   }
-  .tab{padding:6px 10px;font-size:12px;}
+  .countPill{padding:6px 8px;min-height:32px;font-size:12px;}
+  .tab{padding:4px 8px;font-size:11px;white-space:nowrap;}
 }
 
 @media (max-width: 720px) and (orientation: portrait){
