@@ -490,7 +490,7 @@ button{
 </head>
 <body>
   <div class="uploadPage">
-    <div class="heroWrap">
+    <div class="heroWrap tocShell">
       <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
       <div class="tagGlass">
         <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
@@ -2633,6 +2633,72 @@ body{{
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:20px;}}
   .tocPage{{align-items:center; height:100svh; min-height:100svh;}}
 }}
+@media (min-width: 768px){{
+  .tocPage{{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:48px 24px;
+  }}
+  .tocShell{{
+    width:min(640px, 92vw);
+  }}
+  .tocTop{{
+    padding:0 18px 12px;
+  }}
+  .tocTop .tocBanner{{
+    margin:0;
+  }}
+  .tocBanner{{
+    height:150px;
+    border-radius:24px;
+    overflow:hidden;
+  }}
+  .tocBanner .bannerImg{{
+    height:100%;
+    max-height:none;
+    object-fit:cover;
+  }}
+  .tocDateBanner{{
+    height:150px;
+    border-radius:24px;
+    overflow:hidden;
+  }}
+  .tocDateText{{
+    font-size:clamp(18px, 1.8vw, 24px);
+  }}
+  .tocMiddle{{
+    padding:0 18px 22px;
+  }}
+  .tocMiddleInner{{
+    width:100%;
+  }}
+  .tocPanel{{
+    margin-top:-24px;
+    border-radius:22px;
+    padding:18px 18px 20px;
+    background:rgba(10,14,18,0.78);
+    border:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 14px 40px rgba(0,0,0,0.45);
+  }}
+  .routesDownloadBtn{{
+    height:44px;
+    border-radius:14px;
+  }}
+  .tocSelectors{{
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }}
+  .openRouteBtn{{
+    margin-top:16px;
+    width:100%;
+  }}
+}}
 @media (max-width: 480px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .tocPage{{
@@ -2771,7 +2837,7 @@ body{{
 </head>
 <body>
   <div class="uploadPage tocPage">
-    <div class="heroWrap">
+    <div class="heroWrap tocShell">
       <div class="uploadCard tocCard glassCard">
         <div class="tocTop">
           <div class="tocBanner">
@@ -2784,14 +2850,14 @@ body{{
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
-            <div class="tocSelectorsPanel">
+            <div class="tocSelectorsPanel tocPanel">
               <div class="tocSelectorTitle">
                 <button class="tocCount tocCount--title glassField routesDownloadBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
                   <span class="routesDownloadText">0 Routes</span>
                   <span class="statusDot statusDot--ok" id="summaryBadge" aria-hidden="true"></span>
                 </button>
               </div>
-              <div class="selectionCard glassCard">
+              <div class="selectionCard glassCard tocSelectors">
                 <div class="fieldRow">
                   <div class="selectGroup">
                     <label class="selectLabel selectLabel--hidden" for="waveSelect">Wave</label>
@@ -2816,7 +2882,7 @@ body{{
                 </div>
               </div>
               <div class="actionRow">
-                <button class="buildBtn" id="openRoute" type="button" disabled>Open Route</button>
+                <button class="buildBtn openRouteBtn" id="openRoute" type="button" disabled>Open Route</button>
               </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
