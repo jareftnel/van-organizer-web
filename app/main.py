@@ -2176,7 +2176,7 @@ body{{
 .tocCount{{
   margin-top:0;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:85% 15%;
   gap:6px;
   height:32px;
   width:100%;
