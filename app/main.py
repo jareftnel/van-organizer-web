@@ -2248,7 +2248,7 @@ body{{
   -webkit-tap-highlight-color:transparent;
 }}
 .tapBtn:active{{
-  transform:translateY(1px);
+  transform:translateY(5px);
   filter:brightness(0.96);
 }}
 .routesDownloadBtn:focus-visible{{
