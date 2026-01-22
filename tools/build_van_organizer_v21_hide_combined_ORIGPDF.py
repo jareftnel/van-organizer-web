@@ -1068,6 +1068,33 @@ td:last-child,th:last-child{text-align:right}
   .downloadLabelFull{display:none;}
   .downloadLabelShort{display:inline;}
   .downloadBtn{padding:6px 10px;font-size:12px;}
+  .sectionHeaderRow{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto;
+    gap:10px;
+    justify-items:center;
+  }
+  .routeTitle{
+    grid-column:1;
+    grid-row:1;
+    justify-self:center;
+    text-align:center;
+    font-size:clamp(18px, 5vw, 22px);
+  }
+  .topCounts{
+    grid-column:1;
+    grid-row:2;
+    justify-self:center;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .tabsRow{
+    grid-column:1;
+    grid-row:3;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .tab{padding:6px 10px;font-size:12px;}
 }
 
 @media (max-width: 720px) and (orientation: portrait){
