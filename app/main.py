@@ -2027,15 +2027,11 @@ body{{
   position:relative;
   border-radius:18px;
   overflow:hidden;
-  height:auto;
 }}
 .tocBanner .bannerImg{{
   border-radius:inherit;
   box-shadow:none;
   filter:none;
-  width:100%;
-  height:auto;
-  object-fit:contain;
 }}
 .tocDateBanner{{
   position:absolute;
@@ -2679,16 +2675,17 @@ body{{
     margin:0;
   }}
   .tocBanner{{
-    height:auto;
+    height:150px;
     border-radius:24px;
     overflow:hidden;
   }}
   .tocBanner .bannerImg{{
+    height:100%;
     max-height:none;
-    object-fit:contain;
+    object-fit:cover;
   }}
   .tocDateBanner{{
-    height:100%;
+    height:150px;
     border-radius:24px;
     overflow:hidden;
   }}
@@ -2767,8 +2764,8 @@ body{{
   }}
   .tocTop .bannerImg{{
     width:100%;
-    max-height:none;
-    object-fit:contain;
+    max-height:120px;
+    object-fit:cover;
   }}
   .tocTop .tocBanner{{
     border-radius:12px;
