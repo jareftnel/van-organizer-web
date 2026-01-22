@@ -1992,8 +1992,10 @@ body{{
   box-sizing:border-box;
 }}
 .tocPage{{
+  display:grid;
+  grid-template-rows:1fr auto;
   align-items:center;
-  justify-content:center;
+  justify-items:center;
   flex-direction:column;
 }}
 .heroWrap{{
@@ -2217,7 +2219,7 @@ body{{
   display:flex;
   justify-content:center;
   align-items:center;
-  margin-top:auto;
+  margin-top:0;
   padding-top:16px;
 }}
 .summaryPillWrap{{
