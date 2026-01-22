@@ -2096,6 +2096,8 @@ body{{
   justify-content:center;
   font-size:24px;
   font-weight:800;
+  line-height:1;
+  height:1em;
   color:#ffffff;
   opacity:0.98;
   text-shadow:
