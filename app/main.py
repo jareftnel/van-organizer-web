@@ -2657,7 +2657,11 @@ body{{
     padding:48px 24px;
   }}
   .tocShell{{
-    width:min(640px, 92vw);
+    width:100%;
+    max-width:100%;
+  }}
+  .tocCard{{
+    width:100%;
   }}
   .tocTop{{
     padding:0 18px 12px;
