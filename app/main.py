@@ -2175,14 +2175,11 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  display:inline-flex;
-  align-items:center;
+  display:grid;
+  grid-template-columns:1fr 1fr;
   height:30px;
-  padding:0 8px;
-  border-radius:16px 16px 0 0;
   width:100%;
-  justify-content:flex-start;
-  text-align:left;
+  border-radius:16px 16px 0 0;
   background:#f39c12;
   border:1px solid rgba(243, 156, 18, 0.85);
   color:#111111;
@@ -2195,56 +2192,49 @@ body{{
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   box-shadow:0 12px 30px rgba(0,0,0,0.28);
-}}
-.tocCount--button{{
-  cursor:pointer;
-  transition:opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}}
-.summaryPill{{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  height:30px;
-  padding:0 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  color:#e8eef6;
-  cursor:pointer;
-  transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
-  margin-left:0;
-}}
-.tocFooterSummary{{
-  position:sticky;
-  bottom:0;
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-  background:rgba(255,255,255,0.06);
-  border-top:1px solid rgba(255,255,255,0.10);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  cursor:pointer;
-}}
-.tocFooterSummary .summaryPill{{
-  flex:1;
-  justify-content:center;
-}}
-.summaryPillWrap{{
+  overflow:hidden;
   position:relative;
-  display:inline-flex;
+}}
+.tocCount::after{{
+  content:"";
+  position:absolute;
+  top:4px;
+  bottom:4px;
+  left:50%;
+  width:1px;
+  background:transparent;
+}}
+.tocCountHalf{{
+  display:flex;
   align-items:center;
+  height:100%;
+  padding:0 8px;
+  background:transparent;
+  border:0;
+  color:inherit;
+  font:inherit;
+  text-transform:inherit;
+  letter-spacing:inherit;
+  cursor:pointer;
+  transition:opacity 0.2s ease, background 0.2s ease;
 }}
-.summaryPill:active{{
-  transform:translateY(1px) scale(0.98);
+.tocCountHalf--left{{
+  justify-content:flex-start;
+  text-align:left;
 }}
-.summaryPill:focus-visible{{
+.tocCountHalf--right{{
+  justify-content:flex-start;
+  gap:8px;
+}}
+.tocCountHalf:active{{
+  transform:translateY(1px);
+}}
+.tocCountHalf:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
-  outline-offset:2px;
+  outline-offset:-2px;
+}}
+.tocCountHalf:hover{{
+  background:rgba(255, 255, 255, 0.12);
 }}
 .summaryBadge{{
   display:inline-flex;
@@ -2256,9 +2246,7 @@ body{{
   background:var(--badge-color, #16b94e);
   box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
   animation:summaryPulse 1.6s ease-out infinite;
-  position:absolute;
-  left:100%;
-  margin-left:8px;
+  margin-left:auto;
 }}
 .summaryBadge--ok{{
   --badge-color:#16b94e;
@@ -2274,15 +2262,6 @@ body{{
   0%{{ box-shadow:0 0 0 0 var(--badge-shadow); opacity:1; }}
   70%{{ box-shadow:0 0 0 8px var(--badge-shadow-fade); opacity:.6; }}
   100%{{ box-shadow:0 0 0 12px var(--badge-shadow-fade); opacity:.4; }}
-}}
-.tocCount--button:hover{{
-  opacity:1;
-  background:rgba(243, 156, 18, 0.32);
-  border-color:rgba(243, 156, 18, 0.7);
-}}
-.tocCount--button:focus-visible{{
-  outline:2px solid rgba(255,255,255,0.6);
-  outline-offset:2px;
 }}
 .tocSelectorTitle{{
   width:100%;
@@ -2686,23 +2665,21 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .summaryPill{{
-    height:28px;
-    padding:0 10px;
-    font-size:11px;
-  }}
   .summaryBadge{{
     width:8px;
     height:8px;
     font-size:9px;
   }}
   .tocCount{{
+    height:34px;
     font-size:15px;
     letter-spacing:1.3px;
-    padding:6px 14px;
   }}
   .tocCount--title{{
     font-size:14px;
+  }}
+  .tocCountHalf{{
+    padding:0 10px;
   }}
   .tocMiddle{{
     flex:0;
@@ -2803,7 +2780,13 @@ body{{
           <div class="tocMiddleInner">
             <div class="tocSelectorsPanel">
               <div class="tocSelectorTitle">
-                <button class="tocCount tocCount--button tocCount--title glassField" id="tocCount" type="button" title="Open stacked PDF">0 Routes</button>
+                <div class="tocCount tocCount--title glassField" aria-label="Stacked PDF and summary actions">
+                  <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">0 Routes</button>
+                  <button class="tocCountHalf tocCountHalf--right" id="tocCountSummary" type="button" title="View verification summary">
+                    <span class="tocCountLabel">Summary</span>
+                    <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
               <div class="selectionCard glassCard">
                 <div class="fieldRow">
@@ -2836,14 +2819,6 @@ body{{
             </div>
           </div>
         </div>
-        <div class="tocFooterSummary">
-          <div class="summaryPillWrap">
-            <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-              <span class="summaryLabel">Summary</span>
-            </button>
-            <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -2865,11 +2840,11 @@ body{{
   var routeRow = document.getElementById("routeRow");
   var routeDivider = document.getElementById("routeDivider");
   var openRoute = document.getElementById("openRoute");
-  var tocCount = document.getElementById("tocCount");
+  var tocCountDownload = document.getElementById("tocCountDownload");
+  var tocCountSummary = document.getElementById("tocCountSummary");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
   var tocDateObserver = null;
-  var summaryPill = document.getElementById("summaryPill");
   var summaryBadge = document.getElementById("summaryBadge");
   var statusLine = document.getElementById("statusLine");
   var pickerBackdrop = document.getElementById("pickerBackdrop");
@@ -2884,14 +2859,16 @@ body{{
   var stackedUrl = "/job/" + jid + "/download/STACKED.pdf";
   var summaryUrl = "/job/" + jid + "/verification";
 
-  tocCount.addEventListener("click", function(){{
-    window.open(stackedUrl, "_blank", "noopener");
-  }});
-  if(summaryPill){{
-    summaryPill.addEventListener("click", function(){{
+  if(tocCountDownload){{
+    tocCountDownload.addEventListener("click", function(){{
+      window.open(stackedUrl, "_blank", "noopener");
+    }});
+  }}
+  if(tocCountSummary){{
+    tocCountSummary.addEventListener("click", function(){{
       window.location.href = summaryUrl;
     }});
-    summaryPill.addEventListener("keydown", function(event){{
+    tocCountSummary.addEventListener("keydown", function(event){{
       if(event.key === "Enter" || event.key === " "){{
         event.preventDefault();
         window.location.href = summaryUrl;
@@ -2974,22 +2951,22 @@ body{{
   }}
 
   function setMismatchIndicator(count){{
-    if(!summaryPill || !summaryBadge) return;
+    if(!tocCountSummary || !summaryBadge) return;
     if(typeof count !== "number"){{
-      summaryPill.hidden = false;
-      summaryPill.title = "Summary not ready";
+      tocCountSummary.hidden = false;
+      tocCountSummary.title = "Summary not ready";
       summaryBadge.hidden = false;
       summaryBadge.classList.remove("summaryBadge--ok");
       summaryBadge.classList.add("summaryBadge--warn");
       return;
     }}
     if(count === 0){{
-      summaryPill.title = "No mismatches reported";
+      tocCountSummary.title = "No mismatches reported";
       summaryBadge.hidden = false;
       summaryBadge.classList.remove("summaryBadge--warn");
       summaryBadge.classList.add("summaryBadge--ok");
     }} else {{
-      summaryPill.title = "Mismatches reported";
+      tocCountSummary.title = "Mismatches reported";
       summaryBadge.hidden = false;
       summaryBadge.classList.remove("summaryBadge--ok");
       summaryBadge.classList.add("summaryBadge--warn");
@@ -3290,7 +3267,9 @@ body{{
         updateDateScale();
       }}
       var n = data.route_count ?? 0;
-      tocCount.textContent = n + " Route" + (n === 1 ? "" : "s");
+      if(tocCountDownload){{
+        tocCountDownload.textContent = n + " Route" + (n === 1 ? "" : "s");
+      }}
       waveColors = data.wave_colors ?? {{}};
       setMismatchIndicator(data.mismatch_count);
 
