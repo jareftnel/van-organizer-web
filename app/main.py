@@ -2177,46 +2177,37 @@ body{{
   margin-top:0;
   display:grid;
   grid-template-columns:1fr 1fr;
-  height:30px;
+  gap:6px;
+  height:32px;
   width:100%;
   border-radius:16px 16px 0 0;
-  background:#f39c12;
-  border:1px solid rgba(243, 156, 18, 0.85);
+  background:transparent;
+  border:0;
   color:#111111;
   font-size:12px;
   font-weight:700;
   letter-spacing:0.04em;
   text-transform:uppercase;
   font-family:inherit;
-  opacity:0.9;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  box-shadow:0 12px 30px rgba(0,0,0,0.28);
-  overflow:hidden;
+  opacity:0.95;
   position:relative;
-}}
-.tocCount::after{{
-  content:"";
-  position:absolute;
-  top:4px;
-  bottom:4px;
-  left:50%;
-  width:1px;
-  background:transparent;
 }}
 .tocCountHalf{{
   display:flex;
   align-items:center;
   height:100%;
   padding:0 8px;
-  background:transparent;
-  border:0;
+  width:100%;
+  background:#f39c12;
+  border:1px solid rgba(243, 156, 18, 0.85);
+  border-radius:14px;
   color:inherit;
   font:inherit;
   text-transform:inherit;
   letter-spacing:inherit;
   cursor:pointer;
-  transition:opacity 0.2s ease, background 0.2s ease;
+  transition:opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow:0 10px 24px rgba(0,0,0,0.22);
 }}
 .tocCountHalf--left{{
   justify-content:flex-start;
@@ -2234,7 +2225,7 @@ body{{
   outline-offset:-2px;
 }}
 .tocCountHalf:hover{{
-  background:rgba(255, 255, 255, 0.12);
+  background:#f6b047;
 }}
 .summaryBadge{{
   display:inline-flex;
@@ -2783,7 +2774,6 @@ body{{
                 <div class="tocCount tocCount--title glassField" aria-label="Stacked PDF and summary actions">
                   <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">0 Routes</button>
                   <button class="tocCountHalf tocCountHalf--right" id="tocCountSummary" type="button" title="View verification summary">
-                    <span class="tocCountLabel">Summary</span>
                     <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
                   </button>
                 </div>
