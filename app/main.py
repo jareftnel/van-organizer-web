@@ -1444,7 +1444,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   .banner img{{max-height:110px}}
 }}
 @media (max-width: 600px) and (orientation: portrait){{
-  .banner img{{max-height:130px}}
+  .banner img{{max-height:110px}}
 }}
 @media (prefers-reduced-motion: reduce){{
   .banner img{{ transition:none; }}
