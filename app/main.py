@@ -2044,10 +2044,21 @@ body{{
   font-family:inherit;
   text-transform:uppercase;
   color:#fff;
+  background:none;
+  border:0;
   border-radius:inherit;
   overflow:hidden;
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
   z-index:2;
+  cursor:pointer;
+  transition:transform 0.15s ease;
+}}
+.tocDateBanner:active{{
+  transform:translateY(1px);
+}}
+.tocDateBanner:focus-visible{{
+  outline:2px solid rgba(255,255,255,0.35);
+  outline-offset:2px;
 }}
 .tocDateBanner > *{{
   border-radius:inherit;
@@ -2175,14 +2186,14 @@ body{{
 }}
 .tocCount{{
   margin-top:0;
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:6px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   height:36px;
   width:100%;
   border-radius:18px 18px 0 0;
-  background:transparent;
-  border:0;
+  background:#f39c12;
+  border:1px solid rgba(243, 156, 18, 0.85);
   color:#111111;
   font-size:12px;
   font-weight:700;
@@ -2191,86 +2202,40 @@ body{{
   font-family:inherit;
   opacity:0.95;
   position:relative;
+  padding:0 12px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.22);
+  transition:opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }}
-.tocCountHalf{{
+.routesDownloadBtn{{
+  width:100%;
   display:flex;
   align-items:center;
-  height:100%;
-  padding:0 8px;
-  width:100%;
-  background:#f39c12;
-  border:1px solid rgba(243, 156, 18, 0.85);
-  border-radius:14px;
-  color:inherit;
-  font:inherit;
-  text-transform:inherit;
-  letter-spacing:inherit;
+  justify-content:space-between;
   cursor:pointer;
-  transition:opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow:0 10px 24px rgba(0,0,0,0.22);
 }}
-.tocCountHalf--left{{
-  justify-content:flex-start;
-  text-align:left;
-}}
-.tocCountHalf--right{{
-  justify-content:center;
-}}
-.summaryBtn{{
-  width:36px;
-  height:36px;
-  padding:0;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:rgba(0,0,0,0.28);
-  border:1px solid rgba(255,255,255,0.18);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  box-shadow:0 10px 20px rgba(0,0,0,0.18);
-  transition:transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
-}}
-.summaryBtn:hover{{
-  background:rgba(0,0,0,0.35);
-}}
-.tocCountHalf:active{{
+.routesDownloadBtn:active{{
   transform:translateY(1px);
 }}
-.summaryBtn:active{{
-  transform:scale(0.96);
-}}
-.tocCountHalf:focus-visible{{
+.routesDownloadBtn:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
   outline-offset:-2px;
 }}
-.tocCountHalf:hover{{
+.routesDownloadBtn:hover{{
   background:#f6b047;
 }}
-.summaryBadge{{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:10px;
-  height:10px;
+.statusDot{{
+  width:8px;
+  height:8px;
   border-radius:999px;
-  background:var(--badge-color, #16b94e);
-  box-shadow:0 0 0 0 var(--badge-shadow, rgba(22,185,78,.6));
-  animation:summaryPulse 1.6s ease-out infinite;
+  background:var(--badge-color, rgba(120,235,170,0.95));
+  pointer-events:none;
+  flex:0 0 auto;
 }}
-.summaryBadge--ok{{
-  --badge-color:#16b94e;
-  --badge-shadow:rgba(22,185,78,.6);
-  --badge-shadow-fade:rgba(22,185,78,0);
+.statusDot--ok{{
+  --badge-color:rgba(120,235,170,0.95);
 }}
-.summaryBadge--warn{{
-  --badge-color:#ef4444;
-  --badge-shadow:rgba(239,68,68,.6);
-  --badge-shadow-fade:rgba(239,68,68,0);
-}}
-@keyframes summaryPulse{{
-  0%{{ box-shadow:0 0 0 0 var(--badge-shadow); opacity:1; }}
-  70%{{ box-shadow:0 0 0 8px var(--badge-shadow-fade); opacity:.6; }}
-  100%{{ box-shadow:0 0 0 12px var(--badge-shadow-fade); opacity:.4; }}
+.statusDot--warn{{
+  --badge-color:rgba(239,68,68,0.95);
 }}
 .tocSelectorTitle{{
   width:100%;
@@ -2674,10 +2639,9 @@ body{{
   .tocTop .tocBanner{{
     border-radius:12px;
   }}
-  .summaryBadge{{
-    width:10px;
-    height:10px;
-    font-size:9px;
+  .statusDot{{
+    width:8px;
+    height:8px;
   }}
   .tocCount{{
     height:36px;
@@ -2686,13 +2650,6 @@ body{{
   }}
   .tocCount--title{{
     font-size:14px;
-  }}
-  .tocCountHalf{{
-    padding:0 10px;
-  }}
-  .summaryBtn{{
-    width:36px;
-    height:36px;
   }}
   .tocMiddle{{
     flex:0;
@@ -2786,19 +2743,17 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-            <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
+            <button class="tocDateBanner" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary"><span class="tocDateText">Date</span></button>
           </div>
         </div>
         <div class="tocMiddle">
           <div class="tocMiddleInner">
             <div class="tocSelectorsPanel">
               <div class="tocSelectorTitle">
-                <div class="tocCount tocCount--title glassField" aria-label="Stacked PDF and summary actions">
-                  <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">0 Routes</button>
-                  <button class="tocCountHalf tocCountHalf--right summaryBtn" id="tocCountSummary" type="button" title="View verification summary">
-                    <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
-                  </button>
-                </div>
+                <button class="tocCount tocCount--title glassField routesDownloadBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
+                  <span class="routesDownloadText">0 Routes</span>
+                  <span class="statusDot statusDot--ok" id="summaryBadge" aria-hidden="true"></span>
+                </button>
               </div>
               <div class="selectionCard glassCard">
                 <div class="fieldRow">
@@ -2853,7 +2808,6 @@ body{{
   var routeDivider = document.getElementById("routeDivider");
   var openRoute = document.getElementById("openRoute");
   var tocCountDownload = document.getElementById("tocCountDownload");
-  var tocCountSummary = document.getElementById("tocCountSummary");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
   var tocDateObserver = null;
@@ -2876,15 +2830,9 @@ body{{
       window.open(stackedUrl, "_blank", "noopener");
     }});
   }}
-  if(tocCountSummary){{
-    tocCountSummary.addEventListener("click", function(){{
+  if(tocDateBanner){{
+    tocDateBanner.addEventListener("click", function(){{
       window.location.href = summaryUrl;
-    }});
-    tocCountSummary.addEventListener("keydown", function(event){{
-      if(event.key === "Enter" || event.key === " "){{
-        event.preventDefault();
-        window.location.href = summaryUrl;
-      }}
     }});
   }}
 
@@ -2963,25 +2911,21 @@ body{{
   }}
 
   function setMismatchIndicator(count){{
-    if(!tocCountSummary || !summaryBadge) return;
+    if(!summaryBadge) return;
     if(typeof count !== "number"){{
-      tocCountSummary.hidden = false;
-      tocCountSummary.title = "Summary not ready";
       summaryBadge.hidden = false;
-      summaryBadge.classList.remove("summaryBadge--ok");
-      summaryBadge.classList.add("summaryBadge--warn");
+      summaryBadge.classList.remove("statusDot--ok");
+      summaryBadge.classList.add("statusDot--warn");
       return;
     }}
     if(count === 0){{
-      tocCountSummary.title = "No mismatches reported";
       summaryBadge.hidden = false;
-      summaryBadge.classList.remove("summaryBadge--warn");
-      summaryBadge.classList.add("summaryBadge--ok");
+      summaryBadge.classList.remove("statusDot--warn");
+      summaryBadge.classList.add("statusDot--ok");
     }} else {{
-      tocCountSummary.title = "Mismatches reported";
       summaryBadge.hidden = false;
-      summaryBadge.classList.remove("summaryBadge--ok");
-      summaryBadge.classList.add("summaryBadge--warn");
+      summaryBadge.classList.remove("statusDot--ok");
+      summaryBadge.classList.add("statusDot--warn");
     }}
   }}
 
