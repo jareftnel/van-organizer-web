@@ -2036,10 +2036,11 @@ body{{
 .tocDateBanner{{
   position:absolute;
   inset:0;
-  display:flex;
+  display:grid;
+  grid-template-columns:minmax(32px, 40px) 1fr minmax(32px, 40px);
   align-items:center;
   justify-content:center;
-  padding:0 12px;
+  padding:0 8px;
   min-height:52px;
   font-family:inherit;
   text-transform:uppercase;
@@ -2051,10 +2052,12 @@ body{{
   box-shadow:0 18px 45px rgba(0,0,0,0.40);
   z-index:2;
   cursor:pointer;
-  transition:transform 0.15s ease;
+  transition:transform 0.15s ease, filter 0.15s ease;
 }}
-.tocDateBanner:active{{
-  transform:translateY(1px);
+.tocDateSpacer{{
+  width:100%;
+  height:100%;
+  grid-column:1;
 }}
 .tocDateBanner:focus-visible{{
   outline:2px solid rgba(255,255,255,0.35);
@@ -2081,23 +2084,27 @@ body{{
   letter-spacing:0.14em;
   text-align:center;
   transform-origin:center;
+  grid-column:2;
   text-shadow:
     0 0 6px rgba(255,255,255,0.55),
     0 0 18px rgba(120,200,255,0.5),
     0 0 30px rgba(120,200,255,0.35);
 }}
 .tocDateIcon{{
-  position:absolute;
-  right:16px;
-  top:50%;
-  transform:translateY(-62.5%);
+  position:relative;
+  grid-column:3;
+  justify-self:end;
+  align-self:center;
+  transform:translateY(1px);
   display:flex;
   align-items:center;
   justify-content:center;
+  min-width:32px;
+  width:40px;
+  height:100%;
   font-size:24px;
   font-weight:800;
   line-height:1;
-  height:1em;
   color:#ffffff;
   opacity:0.98;
   text-shadow:
@@ -2160,10 +2167,10 @@ body{{
   min-height:0;
 }}
 .tocTop{{
-  padding:0 22px 8px;
+  padding:0 22px 4px;
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:4px;
 }}
 .tocTop .tocBanner{{
   margin:0 -22px;
@@ -2222,7 +2229,7 @@ body{{
   font-family:inherit;
   opacity:0.95;
   position:relative;
-  padding:0 12px;
+  padding:0 40px 0 16px;
   box-shadow:0 10px 24px rgba(0,0,0,0.22);
   transition:opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }}
@@ -2237,8 +2244,12 @@ body{{
 .routesDownloadText{{
   margin-right:auto;
 }}
-.routesDownloadBtn:active{{
-  transform:translateY(1px);
+.tapBtn{{
+  -webkit-tap-highlight-color:transparent;
+}}
+.tapBtn:active{{
+  transform:translateY(5px);
+  filter:brightness(0.96);
 }}
 .routesDownloadBtn:focus-visible{{
   outline:2px solid rgba(255,255,255,0.6);
@@ -2256,6 +2267,10 @@ body{{
   flex:0 0 auto;
   box-shadow:0 0 0 0 var(--badge-glow, rgba(120,235,170,0.65));
   animation:statusPulse 1.6s ease-out infinite;
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
 }}
 .statusDot--ok{{
   --badge-color:rgba(120,235,170,0.95);
@@ -2375,7 +2390,7 @@ body{{
   border:0;
   background:transparent;
   color:#e8eef6;
-  padding:0 12px;
+  padding:0 14px;
   font-size:clamp(14px, 2.1vw, 16px);
   font-weight:600;
   text-align:center;
@@ -2401,7 +2416,7 @@ body{{
 .customSelectControl{{
   width:100%;
   cursor:pointer;
-  padding:0 44px;
+  padding:0 48px;
   position:relative;
   display:flex;
   align-items:center;
@@ -2442,7 +2457,7 @@ body{{
   transform:translateY(-50%);
   border-left:6px solid transparent;
   border-right:6px solid transparent;
-  border-top:7px solid rgba(232,238,246,0.9);
+  border-top:7px solid rgba(232,238,246,0.82);
 }}
 .customSelectControl:disabled{{
   opacity:0.5;
@@ -2722,8 +2737,8 @@ body{{
     max-width:100%;
   }}
   .tocTop{{
-    padding:0 14px 8px;
-    gap:8px;
+    padding:0 14px 4px;
+    gap:6px;
     box-sizing:border-box;
     max-width:100%;
   }}
@@ -2755,7 +2770,7 @@ body{{
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
-    padding:10px 14px;
+    padding:6px 14px;
     min-height:0;
     box-sizing:border-box;
     max-width:100%;
@@ -2842,7 +2857,8 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-            <button class="tocDateBanner" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary">
+            <button class="tocDateBanner tapBtn" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary">
+              <span class="tocDateSpacer" aria-hidden="true"></span>
               <span class="tocDateText">Date</span>
               <span class="tocDateIcon" aria-hidden="true">›</span>
             </button>
@@ -2852,7 +2868,7 @@ body{{
           <div class="tocMiddleInner">
             <div class="tocSelectorsPanel tocPanel">
               <div class="tocSelectorTitle">
-                <button class="tocCount tocCount--title glassField routesDownloadBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
+                <button class="tocCount tocCount--title glassField routesDownloadBtn tapBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
                   <span class="routesDownloadText">0 Routes</span>
                   <span class="statusDot statusDot--ok" id="summaryBadge" aria-hidden="true"></span>
                 </button>
@@ -2882,7 +2898,7 @@ body{{
                 </div>
               </div>
               <div class="actionRow">
-                <button class="buildBtn openRouteBtn" id="openRoute" type="button" disabled>Open Route</button>
+                <button class="buildBtn openRouteBtn tapBtn" id="openRoute" type="button" disabled>Open Route</button>
               </div>
               <div class="statusLine" id="statusLine">Loading table of contents…</div>
             </div>
