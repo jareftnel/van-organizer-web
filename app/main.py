@@ -2091,19 +2091,17 @@ body{{
   right:16px;
   top:50%;
   transform:translateY(-50%);
-  width:28px;
-  height:28px;
-  border-radius:999px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px;
-  font-weight:700;
+  font-size:24px;
+  font-weight:800;
   color:#ffffff;
-  opacity:0.95;
-  background:rgba(0,0,0,0.35);
-  border:1px solid rgba(255,255,255,0.4);
-  text-shadow:0 0 8px rgba(0,0,0,0.45);
+  opacity:0.98;
+  text-shadow:
+    0 0 10px rgba(0,0,0,0.6),
+    0 0 16px rgba(120,200,255,0.65);
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45));
   z-index:1;
 }}
 .tagGlass{{
