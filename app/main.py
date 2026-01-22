@@ -2675,17 +2675,17 @@ body{{
     margin:0;
   }}
   .tocBanner{{
-    height:150px;
+    height:auto;
     border-radius:24px;
     overflow:hidden;
   }}
   .tocBanner .bannerImg{{
-    height:100%;
+    height:auto;
     max-height:none;
-    object-fit:cover;
+    object-fit:contain;
   }}
   .tocDateBanner{{
-    height:150px;
+    height:100%;
     border-radius:24px;
     overflow:hidden;
   }}
