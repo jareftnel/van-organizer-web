@@ -2798,8 +2798,11 @@ body{{
     margin:0 -14px;
   }}
   .tocTop .bannerImg{{
+    position:relative;
+    inset:auto;
     width:100%;
-    max-height:120px;
+    height:auto;
+    max-height:none;
     object-fit:contain;
     background:#0b0f14;
   }}
@@ -2808,7 +2811,7 @@ body{{
   }}
   .tocBanner{{
     height:auto;
-    aspect-ratio:4 / 1;
+    aspect-ratio:auto;
   }}
   .tocTop .bannerImg{{
     transform:none;
