@@ -2039,6 +2039,7 @@ body{{
   display:flex;
   align-items:center;
   justify-content:center;
+  gap:8px;
   padding:0 12px;
   min-height:52px;
   font-family:inherit;
@@ -2074,6 +2075,15 @@ body{{
     0 0 6px rgba(255,255,255,0.55),
     0 0 18px rgba(120,200,255,0.5),
     0 0 30px rgba(120,200,255,0.35);
+}}
+.tocDateChevron{{
+  position:relative;
+  z-index:1;
+  font-size:20px;
+  opacity:0.85;
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.35),
+    0 0 18px rgba(120,200,255,0.4);
 }}
 .tagGlass{{
   width:100%;
@@ -2210,11 +2220,27 @@ body{{
   box-shadow:0 10px 24px rgba(0,0,0,0.22);
 }}
 .tocCountHalf--left{{
-  justify-content:flex-start;
+  justify-content:space-between;
   text-align:left;
 }}
 .tocCountHalf--right{{
   justify-content:center;
+}}
+.tocCountIcon{{
+  font-size:14px;
+  opacity:0.85;
+  margin-left:10px;
+}}
+.tocHint{{
+  margin-top:10px;
+  font-size:12px;
+  line-height:1.2;
+  text-align:center;
+  color:rgba(255,255,255,0.65);
+}}
+.tocHint strong{{
+  color:rgba(255,255,255,0.85);
+  font-weight:700;
 }}
 .summaryBtn{{
   width:36px;
@@ -2786,7 +2812,10 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-            <div class="tocDateBanner" id="tocDateBanner"><span class="tocDateText">Date</span></div>
+            <div class="tocDateBanner" id="tocDateBanner">
+              <span class="tocDateText">Date</span>
+              <span class="tocDateChevron" aria-hidden="true">›</span>
+            </div>
           </div>
         </div>
         <div class="tocMiddle">
@@ -2794,7 +2823,10 @@ body{{
             <div class="tocSelectorsPanel">
               <div class="tocSelectorTitle">
                 <div class="tocCount tocCount--title glassField" aria-label="Stacked PDF and summary actions">
-                  <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">0 Routes</button>
+                  <button class="tocCountHalf tocCountHalf--left" id="tocCountDownload" type="button" title="Download stacked PDF">
+                    <span id="tocCountLabel">0 Routes</span>
+                    <span class="tocCountIcon" aria-hidden="true">↓</span>
+                  </button>
                   <button class="tocCountHalf tocCountHalf--right summaryBtn" id="tocCountSummary" type="button" title="View verification summary">
                     <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
                   </button>
@@ -2832,6 +2864,9 @@ body{{
           </div>
         </div>
       </div>
+      <div class="tocHint">
+        <strong>Date</strong> opens Summary · <strong>47 ROUTES</strong> downloads PDF
+      </div>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
@@ -2853,6 +2888,7 @@ body{{
   var routeDivider = document.getElementById("routeDivider");
   var openRoute = document.getElementById("openRoute");
   var tocCountDownload = document.getElementById("tocCountDownload");
+  var tocCountLabel = document.getElementById("tocCountLabel");
   var tocCountSummary = document.getElementById("tocCountSummary");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
@@ -3279,8 +3315,8 @@ body{{
         updateDateScale();
       }}
       var n = data.route_count ?? 0;
-      if(tocCountDownload){{
-        tocCountDownload.textContent = n + " Route" + (n === 1 ? "" : "s");
+      if(tocCountLabel){{
+        tocCountLabel.textContent = n + " Route" + (n === 1 ? "" : "s");
       }}
       waveColors = data.wave_colors ?? {{}};
       setMismatchIndicator(data.mismatch_count);
