@@ -2800,7 +2800,8 @@ body{{
   .tocTop .bannerImg{{
     width:100%;
     max-height:120px;
-    object-fit:cover;
+    object-fit:contain;
+    background:#0b0f14;
   }}
   .tocTop .tocBanner{{
     border-radius:12px;
