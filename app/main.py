@@ -2715,9 +2715,17 @@ body{{
   .tocDateBanner{{
     height:100%;
     border-radius:24px;
+    grid-template-columns:minmax(24px, 32px) 1fr minmax(24px, 32px);
+    padding:0 6px;
   }}
   .tocDateText{{
-    font-size:clamp(18px, 1.8vw, 24px);
+    font-size:clamp(17px, 1.6vw, 22px);
+    letter-spacing:0.12em;
+  }}
+  .tocDateIcon{{
+    min-width:24px;
+    width:32px;
+    font-size:20px;
   }}
   .tocMiddle{{
     padding:0 18px 22px;
@@ -2974,6 +2982,8 @@ body{{
   var routesDownloadText = document.querySelector(".routesDownloadText");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
+  var tocDateIcon = tocDateBanner ? tocDateBanner.querySelector(".tocDateIcon") : null;
+  var tocDateSpacer = tocDateBanner ? tocDateBanner.querySelector(".tocDateSpacer") : null;
   var tocDateObserver = null;
   var summaryBadge = document.getElementById("summaryBadge");
   var statusLine = document.getElementById("statusLine");
@@ -3005,7 +3015,9 @@ body{{
     var bannerStyle = window.getComputedStyle(tocDateBanner);
     var paddingLeft = parseFloat(bannerStyle.paddingLeft) || 0;
     var paddingRight = parseFloat(bannerStyle.paddingRight) || 0;
-    var availableWidth = tocDateBanner.clientWidth - paddingLeft - paddingRight;
+    var iconWidth = tocDateIcon ? tocDateIcon.getBoundingClientRect().width : 0;
+    var spacerWidth = tocDateSpacer ? tocDateSpacer.getBoundingClientRect().width : 0;
+    var availableWidth = tocDateBanner.clientWidth - paddingLeft - paddingRight - iconWidth - spacerWidth;
     var textWidth = tocDateText.scrollWidth;
     if(!availableWidth || !textWidth) return;
     var scaleX = Math.min(1, Math.max(0.72, availableWidth / textWidth));
