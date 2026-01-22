@@ -2620,7 +2620,7 @@ body{{
   background:#0b0f14;
   color:#e8eef6;
 }}
-.selectInput option:disabled{{
+  .selectInput option:disabled{{
   color:rgba(232,238,246,0.6);
 }}
 .selectInput:disabled{{
@@ -2880,6 +2880,9 @@ body{{
     gap:0;
     max-width:100%;
     box-sizing:border-box;
+  }}
+  .actionRow{{
+    margin-top:10px;
   }}
   .selectionCard{{
     width:100%;
