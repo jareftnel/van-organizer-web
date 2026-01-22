@@ -2767,7 +2767,7 @@ body{{
     justify-content:stretch;
   }}
   .tocPanel{{
-    margin-top:-24px;
+    margin-top:12px;
     border-radius:22px;
     padding:18px 18px 20px;
     background:rgba(10,14,18,0.78);
