@@ -2712,7 +2712,36 @@ body{{
     overflow:hidden;
     height:clamp(160px, 16vw, 220px);
   }}
+  .tocBanner .bannerImg{{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:auto;
+    max-height:none;
+    object-fit:contain;
+    background:#0b0f14;
+    transform:none;
+    filter:none;
+  }}
+  .tocBanner .bannerGlass{{
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    background:rgba(12,16,22,0.55);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 10px 24px rgba(0,0,0,0.35);
+  }}
+  .tocBanner .bannerGlass::before{{
+    background:linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.12),
+      rgba(255,255,255,0) 60%
+    );
+  }}
   .tocDateBanner{{
+    position:absolute;
+    inset:0;
     height:100%;
     border-radius:24px;
     grid-template-columns:minmax(24px, 32px) 1fr minmax(24px, 32px);
