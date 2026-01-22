@@ -2091,8 +2091,19 @@ body{{
   right:16px;
   top:50%;
   transform:translateY(-50%);
-  font-size:18px;
-  opacity:0.7;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:700;
+  color:#ffffff;
+  opacity:0.95;
+  background:rgba(0,0,0,0.35);
+  border:1px solid rgba(255,255,255,0.4);
+  text-shadow:0 0 8px rgba(0,0,0,0.45);
   z-index:1;
 }}
 .tagGlass{{
@@ -2226,10 +2237,6 @@ body{{
 .routesDownloadText{{
   margin-right:auto;
 }}
-.routesDownloadIcon{{
-  font-size:14px;
-  opacity:0.75;
-}}
 .routesDownloadBtn:active{{
   transform:translateY(1px);
 }}
@@ -2247,12 +2254,21 @@ body{{
   background:var(--badge-color, rgba(120,235,170,0.95));
   pointer-events:none;
   flex:0 0 auto;
+  box-shadow:0 0 0 0 var(--badge-glow, rgba(120,235,170,0.65));
+  animation:statusPulse 1.6s ease-out infinite;
 }}
 .statusDot--ok{{
   --badge-color:rgba(120,235,170,0.95);
+  --badge-glow:rgba(120,235,170,0.65);
 }}
 .statusDot--warn{{
   --badge-color:rgba(239,68,68,0.95);
+  --badge-glow:rgba(239,68,68,0.65);
+}}
+@keyframes statusPulse{{
+  0%{{ box-shadow:0 0 0 0 var(--badge-glow, rgba(120,235,170,0.65)); opacity:1; }}
+  70%{{ box-shadow:0 0 0 8px transparent; opacity:0.6; }}
+  100%{{ box-shadow:0 0 0 12px transparent; opacity:0.4; }}
 }}
 .tocSelectorTitle{{
   width:100%;
@@ -2605,17 +2621,6 @@ body{{
   opacity:0.7;
   text-align:center;
 }}
-.tocHint{{
-  margin-top:10px;
-  font-size:12px;
-  line-height:1.2;
-  text-align:center;
-  color:rgba(255,255,255,0.65);
-}}
-.tocHint strong{{
-  color:rgba(255,255,255,0.85);
-  font-weight:700;
-}}
 @media (orientation: landscape) and (max-height: 560px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));}}
@@ -2783,7 +2788,6 @@ body{{
               <div class="tocSelectorTitle">
                 <button class="tocCount tocCount--title glassField routesDownloadBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
                   <span class="routesDownloadText">0 Routes</span>
-                  <span class="routesDownloadIcon" aria-hidden="true">↓</span>
                   <span class="statusDot statusDot--ok" id="summaryBadge" aria-hidden="true"></span>
                 </button>
               </div>
@@ -2819,7 +2823,6 @@ body{{
           </div>
         </div>
       </div>
-      <div class="tocHint"><strong>Date</strong> opens Summary · <strong id="tocHintCount">0 ROUTES</strong> downloads PDF</div>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
@@ -2842,7 +2845,6 @@ body{{
   var openRoute = document.getElementById("openRoute");
   var tocCountDownload = document.getElementById("tocCountDownload");
   var routesDownloadText = document.querySelector(".routesDownloadText");
-  var tocHintCount = document.getElementById("tocHintCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
   var tocDateObserver = null;
@@ -3260,9 +3262,6 @@ body{{
       var n = data.route_count ?? 0;
       if(routesDownloadText){{
         routesDownloadText.textContent = n + " Route" + (n === 1 ? "" : "s");
-      }}
-      if(tocHintCount){{
-        tocHintCount.textContent = n + " ROUTE" + (n === 1 ? "" : "S");
       }}
       waveColors = data.wave_colors ?? {{}};
       setMismatchIndicator(data.mismatch_count);
