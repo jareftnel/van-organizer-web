@@ -2090,12 +2090,14 @@ body{{
   position:absolute;
   right:16px;
   top:50%;
-  transform:translateY(-50%);
+  transform:translateY(-55%);
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:24px;
   font-weight:800;
+  line-height:1;
+  height:1em;
   color:#ffffff;
   opacity:0.98;
   text-shadow:
