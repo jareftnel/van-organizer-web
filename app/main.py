@@ -241,6 +241,14 @@ form{display:flex;flex-direction:column;gap:16px}
   overflow:hidden;
   text-overflow:ellipsis;
 }
+.uploadHint{
+  margin-top:8px;
+  text-align:center;
+  color:rgba(255,255,255,0.55);
+  font-size:clamp(11px, 1.5vh, 13px);
+  font-weight:500;
+  white-space:nowrap;
+}
 .waveBadge{
   position:absolute;
   right:10px;
@@ -513,6 +521,9 @@ button{
             </button>
             <input id="fileInput" class="fileInput" type="file" name="file" accept="application/pdf" hidden required />
             <input id="waveInput" class="fileInput" type="file" name="wave_images" accept="image/*" multiple hidden />
+          </div>
+          <div class="uploadHint">
+            Upload route sheets to begin · <strong>Orange button</strong> adds wave colors
           </div>
           <button class="buildBtn" type="submit">Build</button>
         </form>
