@@ -1981,6 +1981,11 @@ body{{
   --r:22px;
   --glass:rgba(255,255,255,0.06);
   --glassBorder:rgba(255,255,255,0.10);
+  --glass-blur:18px;
+  --glass-tint:0.22;
+  --glass-border:0.12;
+  --glass-inset:0.12;
+  --glare-top:0.18;
 }}
 .uploadPage{{
   min-height:100dvh;
@@ -2027,15 +2032,50 @@ body{{
   position:relative;
   border-radius:18px;
   overflow:hidden;
+  isolation:isolate;
+  height:clamp(120px, 18vw, 180px);
 }}
 .tocBanner .bannerImg{{
-  border-radius:inherit;
-  box-shadow:none;
-  filter:none;
-}}
-.tocDateBanner{{
   position:absolute;
   inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:inherit;
+  box-shadow:none;
+  max-height:none;
+  transform:scale(1.04);
+  filter:blur(2px) contrast(1.05) saturate(1.05);
+  z-index:0;
+}}
+.tocBanner .bannerGlass{{
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  backdrop-filter:blur(var(--glass-blur));
+  -webkit-backdrop-filter:blur(var(--glass-blur));
+  background:rgba(15,18,22,var(--glass-tint));
+  border:1px solid rgba(255,255,255,var(--glass-border));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,var(--glass-inset)),
+    0 12px 30px rgba(0,0,0,0.35);
+  z-index:1;
+}}
+.tocBanner .bannerGlass::before{{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(
+    to bottom,
+    rgba(255,255,255,var(--glare-top)),
+    rgba(255,255,255,0) 60%
+  );
+}}
+.tocDateBanner{{
+  position:relative;
+  width:100%;
+  height:100%;
   display:grid;
   grid-template-columns:minmax(32px, 40px) 1fr minmax(32px, 40px);
   align-items:center;
@@ -2065,13 +2105,6 @@ body{{
 }}
 .tocDateBanner > *{{
   border-radius:inherit;
-}}
-.tocDateBanner::before{{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter: blur(3px);
 }}
 .tocDateText{{
   position:relative;
@@ -2675,19 +2708,13 @@ body{{
     margin:0;
   }}
   .tocBanner{{
-    height:auto;
     border-radius:24px;
     overflow:hidden;
-  }}
-  .tocBanner .bannerImg{{
-    height:auto;
-    max-height:none;
-    object-fit:contain;
+    height:clamp(160px, 16vw, 220px);
   }}
   .tocDateBanner{{
     height:100%;
     border-radius:24px;
-    overflow:hidden;
   }}
   .tocDateText{{
     font-size:clamp(18px, 1.8vw, 24px);
@@ -2874,6 +2901,7 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+            <div class="bannerGlass" aria-hidden="true"></div>
             <button class="tocDateBanner tapBtn" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary">
               <span class="tocDateSpacer" aria-hidden="true"></span>
               <span class="tocDateText">Date</span>
