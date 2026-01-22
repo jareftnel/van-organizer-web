@@ -2123,6 +2123,7 @@ body{{
   padding:0;
   border-radius:var(--r);
   overflow:hidden;
+  position:relative;
   display:grid;
   grid-template-rows:auto auto auto;
   min-height:0;
@@ -2215,12 +2216,23 @@ body{{
   transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
   margin-left:0;
 }}
-.summaryRow{{
+.tocFooterSummary{{
+  position:sticky;
+  bottom:0;
+  width:100%;
   display:flex;
-  justify-content:center;
+  justify-content:space-between;
   align-items:center;
-  margin-top:0;
-  padding-top:16px;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,0.06);
+  border-top:1px solid rgba(255,255,255,0.10);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  cursor:pointer;
+}}
+.tocFooterSummary .summaryPill{{
+  flex:1;
+  justify-content:center;
 }}
 .summaryPillWrap{{
   position:relative;
@@ -2824,14 +2836,14 @@ body{{
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  <div class="summaryRow">
-      <div class="summaryPillWrap">
-        <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
-          <span class="summaryLabel">Summary</span>
-        </button>
-        <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
+        <div class="tocFooterSummary">
+          <div class="summaryPillWrap">
+            <button class="summaryPill glassField" id="summaryPill" type="button" title="View verification summary">
+              <span class="summaryLabel">Summary</span>
+            </button>
+            <span class="summaryBadge summaryBadge--ok" id="summaryBadge" aria-hidden="true"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
