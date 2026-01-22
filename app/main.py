@@ -2086,6 +2086,15 @@ body{{
     0 0 18px rgba(120,200,255,0.5),
     0 0 30px rgba(120,200,255,0.35);
 }}
+.tocDateIcon{{
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:18px;
+  opacity:0.7;
+  z-index:1;
+}}
 .tagGlass{{
   width:100%;
   margin-top:-12px;
@@ -2210,8 +2219,16 @@ body{{
   width:100%;
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-start;
+  gap:10px;
   cursor:pointer;
+}}
+.routesDownloadText{{
+  margin-right:auto;
+}}
+.routesDownloadIcon{{
+  font-size:14px;
+  opacity:0.75;
 }}
 .routesDownloadBtn:active{{
   transform:translateY(1px);
@@ -2588,6 +2605,17 @@ body{{
   opacity:0.7;
   text-align:center;
 }}
+.tocHint{{
+  margin-top:10px;
+  font-size:12px;
+  line-height:1.2;
+  text-align:center;
+  color:rgba(255,255,255,0.65);
+}}
+.tocHint strong{{
+  color:rgba(255,255,255,0.85);
+  font-weight:700;
+}}
 @media (orientation: landscape) and (max-height: 560px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));}}
@@ -2743,7 +2771,10 @@ body{{
         <div class="tocTop">
           <div class="tocBanner">
             <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
-            <button class="tocDateBanner" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary"><span class="tocDateText">Date</span></button>
+            <button class="tocDateBanner" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary">
+              <span class="tocDateText">Date</span>
+              <span class="tocDateIcon" aria-hidden="true">›</span>
+            </button>
           </div>
         </div>
         <div class="tocMiddle">
@@ -2752,6 +2783,7 @@ body{{
               <div class="tocSelectorTitle">
                 <button class="tocCount tocCount--title glassField routesDownloadBtn" id="tocCountDownload" type="button" title="Download stacked PDF" aria-label="Download stacked PDF">
                   <span class="routesDownloadText">0 Routes</span>
+                  <span class="routesDownloadIcon" aria-hidden="true">↓</span>
                   <span class="statusDot statusDot--ok" id="summaryBadge" aria-hidden="true"></span>
                 </button>
               </div>
@@ -2787,6 +2819,7 @@ body{{
           </div>
         </div>
       </div>
+      <div class="tocHint"><strong>Date</strong> opens Summary · <strong id="tocHintCount">0 ROUTES</strong> downloads PDF</div>
     </div>
   </div>
   <div id="pickerBackdrop" class="pickerBackdrop" hidden></div>
@@ -2808,6 +2841,8 @@ body{{
   var routeDivider = document.getElementById("routeDivider");
   var openRoute = document.getElementById("openRoute");
   var tocCountDownload = document.getElementById("tocCountDownload");
+  var routesDownloadText = document.querySelector(".routesDownloadText");
+  var tocHintCount = document.getElementById("tocHintCount");
   var tocDateBanner = document.getElementById("tocDateBanner");
   var tocDateText = tocDateBanner ? tocDateBanner.querySelector(".tocDateText") : null;
   var tocDateObserver = null;
@@ -3223,8 +3258,11 @@ body{{
         updateDateScale();
       }}
       var n = data.route_count ?? 0;
-      if(tocCountDownload){{
-        tocCountDownload.textContent = n + " Route" + (n === 1 ? "" : "s");
+      if(routesDownloadText){{
+        routesDownloadText.textContent = n + " Route" + (n === 1 ? "" : "s");
+      }}
+      if(tocHintCount){{
+        tocHintCount.textContent = n + " ROUTE" + (n === 1 ? "" : "S");
       }}
       waveColors = data.wave_colors ?? {{}};
       setMismatchIndicator(data.mismatch_count);
