@@ -2617,12 +2617,14 @@ body{{
 @media (orientation: landscape) and (max-height: 560px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));}}
+  .tocPage{{align-items:center; height:100svh; min-height:100svh;}}
   .uploadCard{{padding:12px;}}
   .tocCard{{min-height:0; height:auto;}}
 }}
 @media (orientation: portrait) and (max-height: 560px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:20px;}}
+  .tocPage{{align-items:center; height:100svh; min-height:100svh;}}
 }}
 @media (max-width: 480px){{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
