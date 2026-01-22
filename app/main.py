@@ -1969,7 +1969,8 @@ def toc_page(jid: str):
 <style>
 html, body{{
   height:100%;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
 }}
 body{{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -1995,6 +1996,7 @@ body{{
   justify-content:center;
   padding:calc(24px + env(safe-area-inset-top, 0px)) 18px calc(24px + env(safe-area-inset-bottom, 0px));
   box-sizing:border-box;
+  overflow-x:hidden;
 }}
 .tocPage{{
   display:grid;
@@ -2014,6 +2016,10 @@ body{{
   flex:0;
 }}
 .heroWrap > *{{width:100%;}}
+img, svg, iframe{{
+  max-width:100%;
+  height:auto;
+}}
 .brandBanner{{
   display:block;
   width:100%;
@@ -2796,26 +2802,31 @@ body{{
   }}
 }}
 @media (max-width: 480px){{
-  html, body{{height:auto; min-height:100%; overflow:auto;}}
+  html, body{{height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto;}}
   .tocPage{{
     min-height:100dvh;
     display:flex;
     justify-content:center;
-    align-items:center;
-    padding:12px;
+    align-items:flex-start;
+    padding:16px 14px 24px;
     overflow-x:hidden;
+    box-sizing:border-box;
   }}
   .heroWrap{{
-    max-width:100%;
-    margin:0;
+    max-width:420px;
+    margin:0 auto;
+    width:100%;
+    flex:0 0 auto;
   }}
   .tocCard{{
-    width:min(94vw, 380px);
-    max-height:calc(100dvh - 24px);
+    width:100%;
+    max-width:420px;
+    height:auto;
+    min-height:0;
+    flex:0 0 auto;
     display:flex;
     flex-direction:column;
     box-sizing:border-box;
-    max-width:100%;
   }}
   .tocTop{{
     padding:0 14px 4px;
@@ -2879,12 +2890,13 @@ body{{
     font-size:14px;
   }}
   .tocMiddle{{
-    flex:0;
+    flex:0 0 auto;
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
     padding:6px 14px;
     min-height:0;
+    height:auto;
     box-sizing:border-box;
     max-width:100%;
   }}
