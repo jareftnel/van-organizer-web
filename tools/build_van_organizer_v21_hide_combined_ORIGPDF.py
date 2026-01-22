@@ -1068,6 +1068,32 @@ td:last-child,th:last-child{text-align:right}
   .downloadLabelFull{display:none;}
   .downloadLabelShort{display:inline;}
   .downloadBtn{padding:6px 10px;font-size:12px;}
+  .sectionHeaderRow{
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:8px;
+  }
+  .routeTitle{
+    flex:1 1 auto;
+    min-width:0;
+    justify-content:flex-start;
+    text-align:left;
+    font-size:clamp(14px, 4vw, 18px);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .topCounts{
+    flex:0 0 auto;
+    gap:6px;
+  }
+  .tabsRow{
+    flex:0 0 auto;
+    gap:6px;
+  }
+  .countPill{padding:6px 8px;min-height:32px;font-size:12px;}
+  .tab{padding:4px 8px;font-size:11px;white-space:nowrap;}
 }
 
 @media (max-width: 720px) and (orientation: portrait){
