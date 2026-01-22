@@ -2090,7 +2090,7 @@ body{{
   position:absolute;
   right:16px;
   top:50%;
-  transform:translateY(-55%);
+  transform:translateY(-62.5%);
   display:flex;
   align-items:center;
   justify-content:center;
