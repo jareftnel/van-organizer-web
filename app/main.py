@@ -2720,8 +2720,8 @@ body{{
     max-height:none;
     object-fit:contain;
     background:#0b0f14;
-    transform:none;
-    filter:none;
+    transform:scale(1.02);
+    filter:blur(2px) contrast(1.05) saturate(1.05);
   }}
   .tocBanner .bannerGlass{{
     backdrop-filter:none;
