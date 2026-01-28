@@ -1656,7 +1656,7 @@ def verification_page(jid: str):
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Verification Summary</title>
+<title>Summary</title>
 <style>
 html, body{{
   height:100%;
@@ -1708,10 +1708,6 @@ body{{
   font-weight:800;
   letter-spacing:0.6px;
 }}
-.subtitle{{
-  font-size:14px;
-  opacity:0.75;
-}}
 .backBtn{{
   display:inline-flex;
   align-items:center;
@@ -1724,6 +1720,14 @@ body{{
   background:rgba(255,255,255,0.04);
   text-decoration:none;
   font-weight:700;
+}}
+.backBtnIcon{{
+  display:none;
+  font-size:20px;
+  line-height:1;
+}}
+.backBtnText{{
+  display:inline;
 }}
 .section{{
   margin-top:18px;
@@ -1788,6 +1792,24 @@ body{{
   border-color:rgba(248,113,113,0.4);
   background:rgba(248,113,113,0.08);
 }}
+@media (max-width: 720px){{
+  .headerRow{{
+    justify-content:flex-start;
+    flex-wrap:nowrap;
+  }}
+  .backBtn{{
+    order:-1;
+    width:40px;
+    padding:0;
+    border-radius:50%;
+  }}
+  .backBtnIcon{{
+    display:inline;
+  }}
+  .backBtnText{{
+    display:none;
+  }}
+}}
 </style>
 </head>
 <body>
@@ -1795,10 +1817,12 @@ body{{
     <div class="card">
       <div class="headerRow">
         <div class="titleBlock">
-          <div class="title">Verification Summary</div>
-          <div class="subtitle">Review routes with the heaviest counts and overflow.</div>
+          <div class="title">Summary</div>
         </div>
-        <a class="backBtn" href="/job/{jid}/toc">Back to routes</a>
+        <a class="backBtn" href="/job/{jid}/toc" aria-label="Back to routes">
+          <span class="backBtnIcon" aria-hidden="true">←</span>
+          <span class="backBtnText">Back to routes</span>
+        </a>
       </div>
 
       <section class="section" id="verificationSection">
@@ -1836,6 +1860,7 @@ body{{
 (function(){{
   var jid = "{jid}";
   var verificationList = document.getElementById("verificationList");
+  var verificationSection = document.getElementById("verificationSection");
   var bagsSection = document.getElementById("bagsSection");
   var bagsList = document.getElementById("bagsList");
   var bagsEmpty = document.getElementById("bagsEmpty");
@@ -1872,9 +1897,10 @@ body{{
   function renderVerification(mismatches){{
     verificationList.innerHTML = "";
     if(!mismatches || !mismatches.length){{
-      verificationList.appendChild(makeRow("All routes verified", "No mismatches", false));
+      if(verificationSection) verificationSection.hidden = true;
       return;
     }}
+    if(verificationSection) verificationSection.hidden = false;
     mismatches.forEach(function(item){{
       var parts = [];
       if(item.overflow_mismatch){{
