@@ -1074,10 +1074,12 @@ def organizer_raw(jid: str):
             ".toteGridFrame .toteWrap{"
             "overflow-x:auto !important;"
             "overflow-y:hidden !important;"
+            "direction:rtl;"
             "-webkit-overflow-scrolling:touch;"
             "}"
             ".toteGridFrame .tote-grid{"
             "width:max-content !important;"
+            "direction:ltr;"
             "}"
             "}"
             "</style>",
