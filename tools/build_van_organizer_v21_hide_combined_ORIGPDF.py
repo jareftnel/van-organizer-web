@@ -628,6 +628,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   --tote-rows:3;
   --tote-cols:1;
   --tote-scale:1;
+  --tote-min-cell-w: 0px;
   --tote-gap: clamp(8px, 1.4vw, 16px);
   --tote-base-w: 210px;
   --tote-base-h: 190px;
@@ -635,7 +636,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   --tote-max-scale: 1.15;
   display:grid;
   grid-template-rows:repeat(var(--tote-rows), minmax(0, 1fr));
-  grid-template-columns:repeat(var(--tote-cols), minmax(0, 1fr));
+  grid-template-columns:repeat(var(--tote-cols), minmax(var(--tote-min-cell-w, 0px), 1fr));
   grid-auto-flow:column;
   gap:var(--tote-gap);
   justify-content:stretch;
@@ -2743,6 +2744,10 @@ window.addEventListener("message", (ev)=>{
     var isNarrow = window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
     var rawScale = isNarrow ? (contentH / baseH) : Math.min(contentW / baseW, contentH / baseH);
     var scale = Math.min(maxScale, Math.max(minScale, rawScale));
+    if(isNarrow){
+      var minCellW = (baseW * scale) + cardPadW;
+      grid.style.setProperty('--tote-min-cell-w', Math.ceil(minCellW) + 'px');
+    }
 
     grid.style.setProperty('--tote-rows', rows);
     grid.style.setProperty('--tote-cols', cols);
