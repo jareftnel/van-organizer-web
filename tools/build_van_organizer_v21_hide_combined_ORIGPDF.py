@@ -2740,7 +2740,8 @@ window.addEventListener("message", (ev)=>{
     var contentW = cellW - cardPadW;
     var contentH = cellH - cardPadH;
     if(contentW <= 0 || contentH <= 0) return;
-    var rawScale = Math.min(contentW / baseW, contentH / baseH);
+    var isNarrow = window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
+    var rawScale = isNarrow ? (contentH / baseH) : Math.min(contentW / baseW, contentH / baseH);
     var scale = Math.min(maxScale, Math.max(minScale, rawScale));
 
     grid.style.setProperty('--tote-rows', rows);
