@@ -3132,6 +3132,49 @@ img, svg, iframe{{
   .statusLine{{
     margin-top:4px;
   }}
+  .pickerModal{{
+    background:rgba(255,255,255,0.78);
+    border:1px solid rgba(255,255,255,0.65);
+    box-shadow:
+      0 26px 60px rgba(10,12,16,0.35),
+      0 0 22px rgba(255,255,255,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }}
+  .pickerHeader{{
+    background:
+      linear-gradient(135deg, rgba(255,210,120,0.9), rgba(243,156,18,0.75));
+    border-bottom:1px solid rgba(255,255,255,0.45);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }}
+  .pickerTitle{{
+    padding-left:6px;
+  }}
+  .pickerClose{{
+    color:#1b1b1b;
+  }}
+  .pickerRow{{
+    color:#1b1b1b;
+  }}
+  .pickerRow:hover{{
+    background:rgba(0,0,0,0.05);
+  }}
+  .pickerRow:active{{
+    background:rgba(0,0,0,0.08);
+  }}
+  .pickerRow--active{{
+    background:rgba(0,0,0,0.06);
+  }}
+  .pickerList::-webkit-scrollbar-track{{
+    background:rgba(0,0,0,0.06);
+  }}
+  .pickerList::-webkit-scrollbar-thumb{{
+    background:rgba(46,66,92,0.5);
+    border:2px solid rgba(255,255,255,0.7);
+  }}
 }}
 </style>
 </head>
