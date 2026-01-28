@@ -1755,8 +1755,8 @@ body{{
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
+  background:var(--wave-fill, rgba(255,255,255,0.04));
+  border:1px solid var(--wave-border, rgba(255,255,255,0.08));
   border-radius:12px;
   padding:14px 12px;
   text-align:left;
@@ -1765,11 +1765,11 @@ body{{
   transition:background 0.2s ease, border-color 0.2s ease;
 }}
 .routeRow:hover{{
-  background:rgba(255,255,255,0.08);
-  border-color:rgba(255,255,255,0.16);
+  background:var(--wave-hover, rgba(255,255,255,0.08));
+  border-color:var(--wave-border-hover, rgba(255,255,255,0.16));
 }}
 .routeRow:active{{
-  background:rgba(255,255,255,0.12);
+  background:var(--wave-active, rgba(255,255,255,0.12));
 }}
 .routeRow:focus-visible{{
   outline:2px solid rgba(63,167,255,0.6);
@@ -1794,20 +1794,42 @@ body{{
 }}
 @media (max-width: 720px){{
   .headerRow{{
-    justify-content:flex-start;
+    justify-content:center;
     flex-wrap:nowrap;
+    position:relative;
+  }}
+  .titleBlock{{
+    width:100%;
+    align-items:center;
+    text-align:center;
   }}
   .backBtn{{
     order:-1;
     width:40px;
     padding:0;
     border-radius:50%;
+    position:absolute;
+    right:0;
   }}
   .backBtnIcon{{
     display:inline;
   }}
   .backBtnText{{
     display:none;
+  }}
+  .page{{
+    padding-top:18px;
+  }}
+  .section{{
+    padding:12px 12px;
+  }}
+  .sectionTitle{{
+    font-size:clamp(12px, 3.4vw, 14px);
+    margin-bottom:8px;
+    white-space:nowrap;
+  }}
+  .routeRow{{
+    padding:10px 12px;
   }}
 }}
 </style>
@@ -1831,25 +1853,25 @@ body{{
       </section>
 
       <section class="section" id="bagsSection">
-        <div class="sectionTitle">Routes with 30+ Bags</div>
+        <div class="sectionTitle">30+ Bags</div>
         <div class="routeList" id="bagsList"></div>
         <div class="emptyState" id="bagsEmpty" hidden>No routes with 30+ bags.</div>
       </section>
 
       <section class="section" id="overflowSection">
-        <div class="sectionTitle">Routes with 50+ Overflow</div>
+        <div class="sectionTitle">50+ Overflow</div>
         <div class="routeList" id="overflowList"></div>
         <div class="emptyState" id="overflowEmpty" hidden>No routes with 50+ overflow.</div>
       </section>
 
       <section class="section" id="totalSection">
-        <div class="sectionTitle">Routes with Heaviest Package Counts</div>
+        <div class="sectionTitle">Heaviest Package Counts</div>
         <div class="routeList" id="totalList"></div>
         <div class="emptyState" id="totalEmpty" hidden>No route totals available.</div>
       </section>
 
       <section class="section" id="commercialSection">
-        <div class="sectionTitle">Routes with Heaviest Commercial</div>
+        <div class="sectionTitle">Heaviest Commercial</div>
         <div class="routeList" id="commercialList"></div>
         <div class="emptyState" id="commercialEmpty" hidden>No commercial counts available.</div>
       </section>
@@ -1871,6 +1893,7 @@ body{{
   var totalEmpty = document.getElementById("totalEmpty");
   var commercialList = document.getElementById("commercialList");
   var commercialEmpty = document.getElementById("commercialEmpty");
+  var routeColors = {{}};
 
   function openRoute(routeName){{
     if(!routeName) return;
@@ -1878,7 +1901,74 @@ body{{
     window.location.href = url;
   }}
 
-  function makeRow(routeName, metric, isAlert){{
+  function timeKey(timeLabel){{
+    if(!timeLabel) return "";
+    var match = String(timeLabel).match(/(\\d{{1,2}})\\s*[:.]\\s*(\\d{{2}})\\s*([AaPp])?\\s*([Mm])?/);
+    if(!match) return "";
+    var hh = parseInt(match[1], 10);
+    var mm = match[2];
+    var ampm = "";
+    if(match[3] && match[4]){{
+      ampm = (match[3] + match[4]).toUpperCase();
+    }}
+    if(ampm === "PM" && hh !== 12){{
+      hh += 12;
+    }}
+    if(ampm === "AM" && hh === 12){{
+      hh = 0;
+    }}
+    return String(hh).padStart(2, "0") + ":" + mm;
+  }}
+
+  function toRgba(color, alpha){{
+    if(!color) return "";
+    var trimmed = String(color).trim();
+    var hex = trimmed.match(/^#([0-9a-f]{{3}}|[0-9a-f]{{6}})$/i);
+    if(hex){{
+      var value = hex[1];
+      if(value.length === 3){{
+        value = value.split("").map(function(ch){{ return ch + ch; }}).join("");
+      }}
+      var r = parseInt(value.slice(0, 2), 16);
+      var g = parseInt(value.slice(2, 4), 16);
+      var b = parseInt(value.slice(4, 6), 16);
+      return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+    }}
+    var rgb = trimmed.match(/^rgba?\\(([^)]+)\\)$/i);
+    if(rgb){{
+      var parts = rgb[1].split(",").map(function(part){{ return parseFloat(part); }});
+      if(parts.length >= 3){{
+        return "rgba(" + parts[0] + ", " + parts[1] + ", " + parts[2] + ", " + alpha + ")";
+      }}
+    }}
+    return trimmed;
+  }}
+
+  function applyWaveColor(row, color){{
+    if(!row) return;
+    if(!color){{
+      row.style.removeProperty("--wave-accent");
+      row.style.removeProperty("--wave-border");
+      row.style.removeProperty("--wave-border-hover");
+      row.style.removeProperty("--wave-fill");
+      row.style.removeProperty("--wave-hover");
+      row.style.removeProperty("--wave-active");
+      return;
+    }}
+    row.style.setProperty("--wave-accent", color);
+    row.style.setProperty("--wave-border", toRgba(color, 0.45));
+    row.style.setProperty("--wave-border-hover", toRgba(color, 0.65));
+    row.style.setProperty("--wave-fill", toRgba(color, 0.14));
+    row.style.setProperty("--wave-hover", toRgba(color, 0.22));
+    row.style.setProperty("--wave-active", toRgba(color, 0.28));
+  }}
+
+  function getRouteColor(routeName){{
+    if(!routeName) return "";
+    return routeColors[routeName] || "";
+  }}
+
+  function makeRow(routeName, metric, isAlert, waveColor){{
     var row = document.createElement("button");
     row.type = "button";
     row.className = "routeRow" + (isAlert ? " alertRow" : "");
@@ -1891,7 +1981,22 @@ body{{
     metricSpan.textContent = metric || "";
     row.appendChild(nameSpan);
     row.appendChild(metricSpan);
+    applyWaveColor(row, waveColor);
     return row;
+  }}
+
+  function buildRouteColorMap(tocData){{
+    if(!tocData || tocData.status !== "ok") return;
+    var waveColors = tocData.wave_colors || {{}};
+    var routes = tocData.routes || [];
+    routes.forEach(function(route){{
+      var routeName = route.title || "Route";
+      var key = timeKey(route.time_label || "");
+      var color = key ? waveColors[key] : "";
+      if(routeName && color){{
+        routeColors[routeName] = color;
+      }}
+    }});
   }}
 
   function renderVerification(mismatches){{
@@ -1910,7 +2015,8 @@ body{{
         parts.push("Total " + item.declared_total + "→" + item.computed_total);
       }}
       var metric = parts.length ? parts.join(" | ") : "Mismatch";
-      verificationList.appendChild(makeRow(item.title || "Route", metric, true));
+      var routeName = item.title || "Route";
+      verificationList.appendChild(makeRow(routeName, metric, true, getRouteColor(routeName)));
     }});
   }}
 
@@ -1927,7 +2033,8 @@ body{{
     if(emptyEl) emptyEl.hidden = true;
     if(sectionEl) sectionEl.hidden = false;
     items.forEach(function(item){{
-      listEl.appendChild(makeRow(item.route || item.title || "Route", item.metric || metricLabel(item), false));
+      var routeName = item.route || item.title || "Route";
+      listEl.appendChild(makeRow(routeName, item.metric || metricLabel(item), false, getRouteColor(routeName)));
     }});
   }}
 
@@ -1937,9 +2044,18 @@ body{{
     }});
   }}
 
-  fetch("/job/" + jid + "/summary-data", {{ cache: "no-store" }})
+  var summaryRequest = fetch("/job/" + jid + "/summary-data", {{ cache: "no-store" }})
     .then(function(r){{ return r.json(); }})
-    .then(function(data){{
+    .catch(function(){{ return null; }});
+  var tocRequest = fetch("/job/" + jid + "/toc-data", {{ cache: "no-store" }})
+    .then(function(r){{ return r.json(); }})
+    .catch(function(){{ return null; }});
+
+  Promise.all([summaryRequest, tocRequest])
+    .then(function(results){{
+      var data = results[0];
+      var tocData = results[1];
+      buildRouteColorMap(tocData);
       if(!data || data.status !== "ok") return;
 
       renderVerification(data.mismatches || []);
