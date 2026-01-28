@@ -2715,7 +2715,9 @@ img, svg, iframe{{
 }}
 .pickerList{{
   max-height:none;
-  overflow:hidden;
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   padding:clamp(4px, 1.2vh, 10px) clamp(6px, 2vw, 12px) clamp(6px, 1.6vh, 12px);
   scrollbar-color:rgba(116,136,168,0.6) rgba(255,255,255,0.06);
@@ -2843,6 +2845,16 @@ img, svg, iframe{{
   html, body{{height:auto; min-height:100%; overflow:auto;}}
   .uploadPage{{height:auto; min-height:100svh; align-items:flex-start; padding-top:20px;}}
   .tocPage{{align-items:center; height:100svh; min-height:100svh;}}
+}}
+@media (max-width: 600px) and (orientation: portrait) and (max-height: 640px){{
+  .pickerModal{{
+    max-height:min(88svh, 560px);
+  }}
+  .pickerRow{{
+    height:clamp(36px, 5.2vh, 46px);
+    font-size:clamp(12px, 1.9vh, 15px);
+    margin:clamp(2px, 0.4vh, 4px) clamp(4px, 1vw, 6px);
+  }}
 }}
 @media (min-width: 768px){{
   .tocPage{{
@@ -3140,7 +3152,10 @@ img, svg, iframe{{
       0 14px 30px rgba(0,0,0,0.35);
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
-    position:relative;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
     overflow:hidden;
   }}
   .pickerModal::before{{
