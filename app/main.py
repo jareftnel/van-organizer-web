@@ -1135,8 +1135,36 @@ def organizer_raw(jid: str):
             "  text-align:center !important;"
             "  width:100%;"
             "}"
+            ".tote-grid .toteBigNumberStack{"
+            "  flex-direction:column !important;"
+            "  justify-content:flex-start !important;"
+            "  height:100%;"
+            "}"
+            ".tote-grid .toteBigNumber{"
+            "  flex:1 1 auto !important;"
+            "}"
             ".tote-grid .toteBigNumberLine{"
             "  text-align:center !important;"
+            "}"
+            "</style>",
+        )
+    if "</style>" in html and "tote-grid-row-height-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-grid-row-height-patch */"
+            ".tote-grid > *{"
+            "  height:auto !important;"
+            "  min-height:160px;"
+            "}"
+            ".tote-grid :where(.toteCard,.card,.cell){"
+            "  height:auto !important;"
+            "  display:flex;"
+            "  flex-direction:column;"
+            "}"
+            ".tote-grid .toteBigNumber{"
+            "  display:flex !important;"
+            "  align-items:center !important;"
+            "  justify-content:center !important;"
             "}"
             "</style>",
         )
