@@ -2671,10 +2671,12 @@ img, svg, iframe{{
   left:50%;
   transform:translate(-50%, -50%);
   width:min(92vw, 460px);
-  background:rgba(12,16,24,0.95);
+  background:rgba(12,16,24,0.6);
   border-radius:20px;
-  border:1px solid rgba(255,255,255,0.16);
-  box-shadow:0 24px 50px rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.22);
+  box-shadow:0 28px 60px rgba(0,0,0,0.45), 0 0 36px rgba(243,156,18,0.25);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
   z-index:9001;
   display:flex;
   flex-direction:column;
@@ -2685,14 +2687,18 @@ img, svg, iframe{{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  height:clamp(40px, 7vh, 52px);
-  padding:clamp(6px, 1.6vh, 12px) clamp(10px, 2.6vw, 16px);
-  border-bottom:1px solid rgba(255,255,255,0.06);
+  height:clamp(32px, 5.4vh, 44px);
+  padding:clamp(3px, 0.8vh, 6px) clamp(10px, 2.6vw, 16px);
+  background:rgba(243,156,18,0.9);
+  border-bottom:1px solid rgba(243,156,18,0.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }}
 .pickerTitle{{
   font-weight:750;
   font-size:clamp(13px, 2.2vh, 17px);
   text-align:left;
+  color:#111111;
 }}
 .pickerClose{{
   background:transparent;
