@@ -3132,6 +3132,73 @@ img, svg, iframe{{
   .statusLine{{
     margin-top:4px;
   }}
+  .pickerModal{{
+    background:rgba(12,16,22,0.55);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 14px 30px rgba(0,0,0,0.35);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    position:relative;
+    overflow:hidden;
+  }}
+  .pickerModal::before{{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.12),
+      rgba(255,255,255,0) 60%
+    );
+  }}
+  .pickerHeader{{
+    position:relative;
+    background:rgba(243,156,18,0.78);
+    border-bottom:1px solid rgba(255,255,255,0.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.35);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    overflow:hidden;
+  }}
+  .pickerHeader::before{{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.25),
+      rgba(255,255,255,0) 70%
+    );
+  }}
+  .pickerTitle{{
+    padding-left:6px;
+  }}
+  .pickerClose{{
+    color:#e8eef6;
+  }}
+  .pickerRow{{
+    color:#e8eef6;
+  }}
+  .pickerRow:hover{{
+    background:rgba(255,255,255,0.08);
+  }}
+  .pickerRow:active{{
+    background:rgba(255,255,255,0.14);
+  }}
+  .pickerRow--active{{
+    background:rgba(255,255,255,0.12);
+  }}
+  .pickerList::-webkit-scrollbar-track{{
+    background:rgba(255,255,255,0.06);
+  }}
+  .pickerList::-webkit-scrollbar-thumb{{
+    background:rgba(116,136,168,0.65);
+    border:2px solid rgba(12,16,24,0.95);
+  }}
 }}
 </style>
 </head>
