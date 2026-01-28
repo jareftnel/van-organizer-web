@@ -1805,17 +1805,26 @@ body{{
   }}
   .backBtn{{
     order:-1;
-    width:40px;
+    width:32px;
+    height:32px;
     padding:0;
-    border-radius:50%;
+    border-radius:0;
+    border:none;
+    background:transparent;
     position:absolute;
-    right:0;
+    left:0;
+    top:0;
   }}
   .backBtnIcon{{
     display:inline;
+    font-size:16px;
+    line-height:1;
   }}
   .backBtnText{{
     display:none;
+  }}
+  .backBtn:hover .backBtnIcon{{
+    text-shadow:0 0 6px rgba(130,200,255,0.9), 0 0 14px rgba(130,200,255,0.7);
   }}
   .page{{
     padding-top:18px;
