@@ -1179,6 +1179,26 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-grid-row-height-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-grid-row-height-patch */"
+            ".tote-grid > *{"
+            "  height:auto !important;"
+            "  min-height:160px;"
+            "}"
+            ".tote-grid :where(.toteCard,.card,.cell){"
+            "  height:auto !important;"
+            "  display:flex;"
+            "  flex-direction:column;"
+            "}"
+            ".tote-grid .toteBigNumber{"
+            "  display:flex !important;"
+            "  align-items:center !important;"
+            "  justify-content:center !important;"
+            "}"
+            "</style>",
+        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
