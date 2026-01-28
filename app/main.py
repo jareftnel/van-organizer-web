@@ -1123,6 +1123,23 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-bignumber-center-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-bignumber-center-patch */"
+            ".tote-grid .toteBigNumber,"
+            ".tote-grid .toteBigNumberStack{"
+            "  display:flex !important;"
+            "  align-items:center !important;"
+            "  justify-content:center !important;"
+            "  text-align:center !important;"
+            "  width:100%;"
+            "}"
+            ".tote-grid .toteBigNumberLine{"
+            "  text-align:center !important;"
+            "}"
+            "</style>",
+        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
