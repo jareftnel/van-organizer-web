@@ -1199,30 +1199,6 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
-    if "</style>" in html and "tote-card-rows-patch" not in html:
-        html = html.replace(
-            "</style>",
-            "/* tote-card-rows-patch */"
-            ".tote-grid :where(.toteCard){"
-            "  display:grid !important;"
-            "  grid-template-rows:repeat(3, minmax(var(--tote-row-height, 0px), auto));"
-            "  align-items:stretch;"
-            "  row-gap:10px;"
-            "}"
-            ".tote-grid :where(.toteTopRow){"
-            "  align-self:start;"
-            "}"
-            ".tote-grid :where(.toteBigNumber,.toteBigNumberStack){"
-            "  align-self:center;"
-            "}"
-            ".tote-grid :where(.toteBottomRow){"
-            "  align-self:end;"
-            "}"
-            ".tote-grid :where(.toteBottomRow,.toteFooter){"
-            "  white-space:normal !important;"
-            "}"
-            "</style>",
-        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
@@ -1344,43 +1320,6 @@ def organizer_raw(jid: str):
             "  }"
             ""
             "  window.addEventListener('load', init);"
-            "})();"
-            "</script>"
-            "</body>",
-        )
-    if "</body>" in html and "tote-card-rows-script" not in html:
-        html = html.replace(
-            "</body>",
-            "<script>"
-            "/* tote-card-rows-script */"
-            "(function(){"
-            "  function measure(el){"
-            "    if(!el){return 0;}"
-            "    return Math.max(el.scrollHeight || 0, Math.ceil(el.getBoundingClientRect().height || 0));"
-            "  }"
-            "  function updateCard(card){"
-            "    if(!card){return;}"
-            "    var top = card.querySelector('.toteTopRow');"
-            "    var mid = card.querySelector('.toteBigNumberStack') || card.querySelector('.toteBigNumber');"
-            "    var bot = card.querySelector('.toteBottomRow');"
-            "    var heights = [measure(top), measure(mid), measure(bot)].filter(function(h){return h > 0;});"
-            "    if(!heights.length){return;}"
-            "    var maxH = Math.max.apply(null, heights);"
-            "    if(maxH > 0){"
-            "      card.style.setProperty('--tote-row-height', String(Math.ceil(maxH)) + 'px');"
-            "    }"
-            "  }"
-            "  function updateAll(){"
-            "    document.querySelectorAll('.tote-grid .toteCard').forEach(updateCard);"
-            "  }"
-            "  if(document.readyState === 'loading'){"
-            "    document.addEventListener('DOMContentLoaded', updateAll);"
-            "  }else{"
-            "    updateAll();"
-            "  }"
-            "  window.addEventListener('resize', function(){"
-            "    window.requestAnimationFrame(updateAll);"
-            "  });"
             "})();"
             "</script>"
             "</body>",
