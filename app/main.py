@@ -2760,12 +2760,6 @@ img, svg, iframe{{
   overflow:hidden;
   text-overflow:ellipsis;
 }}
-.pickerRow:hover{{
-  background:rgba(255,255,255,0.08);
-}}
-.pickerRow:active{{
-  background:rgba(255,255,255,0.14);
-}}
 .pickerRow--active{{
   background:rgba(255,255,255,0.12);
   font-weight:700;
@@ -2774,11 +2768,12 @@ img, svg, iframe{{
   opacity:0.5;
   cursor:default;
 }}
-@media (hover:none){{
-  .pickerRow:hover,
-  .pickerRow:active,
-  .pickerRow--active{{
-    background:transparent;
+@media (hover:hover){{
+  .pickerRow:hover{{
+    background:rgba(255,255,255,0.08);
+  }}
+  .pickerRow:active{{
+    background:rgba(255,255,255,0.14);
   }}
 }}
 .selectInput option{{
@@ -3197,12 +3192,6 @@ img, svg, iframe{{
   }}
   .pickerRow{{
     color:#e8eef6;
-  }}
-  .pickerRow:hover{{
-    background:rgba(255,255,255,0.08);
-  }}
-  .pickerRow:active{{
-    background:rgba(255,255,255,0.14);
   }}
   .pickerRow--active{{
     background:rgba(255,255,255,0.12);
