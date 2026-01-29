@@ -1183,6 +1183,11 @@ def organizer_raw(jid: str):
             "}"
             ".toteTopRow > :last-child{"
             "  background:green !important;"
+            "  display:inline-flex !important;"
+            "  align-items:center !important;"
+            "  justify-content:center !important;"
+            "  padding:0 !important;"
+            "  margin:0 !important;"
             "}"
             "</style>",
         )
