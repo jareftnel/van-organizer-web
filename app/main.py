@@ -1175,6 +1175,15 @@ def organizer_raw(jid: str):
             ".toteTopRow > *{"
             "  align-self:center !important;"
             "}"
+            ".toteTopRow > :first-child{"
+            "  background:purple !important;"
+            "}"
+            ".toteTopRow > :nth-child(2){"
+            "  background:black !important;"
+            "}"
+            ".toteTopRow > :last-child{"
+            "  background:green !important;"
+            "}"
             "</style>",
         )
     if "</body>" in html and "combined-search-patch" not in html:
