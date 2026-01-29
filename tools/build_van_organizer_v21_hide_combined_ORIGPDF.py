@@ -858,18 +858,13 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   color:#e3c056;
   border-color: rgba(227,192,86,.35);
   background: rgba(227,192,86,.16);
-  width:auto;
-  min-width:calc(22px * var(--card-scale));
+  width:var(--tote-badge-width);
+  min-width:var(--tote-badge-width);
   height:calc(22px * var(--card-scale));
   border-radius:999px;
   font-size:calc(12px * var(--card-scale));
-  padding:0 6px;
+  padding:0;
   position:static;
-}
-.bags-tab .toteStar.combine{
-  position:absolute;
-  bottom:10px;
-  left:10px;
 }
 .bags-tab .toteStar.on{
   bottom:10px;
@@ -1871,9 +1866,8 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
   const pkgClass = pkgText ? "hasPkg" : "";
   const sortZoneClass = cur.sort_zone ? "" : "noSortZone";
   const starHtml = it.eligibleCombine ? `<div class="toteStar combine toteBubble" data-action="combine" data-second="${it.idx}" title="Combine with previous">+</div>` : ``;
-  const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}</div>`;
+  const badgeGroupHtml = `<div class="toteBadgeGroup">${badgeHtml}${starHtml}</div>`;
   const barHtml = `<div class="card-bar">
-    <span class="bar-left-icon">${starHtml}</span>
     <div class="bar-track"><div class="bar-fill"></div></div>
   </div>`;
   const rightBadgeHtml = `<div class="toteRightBadge">${pkgHtml}</div>`;
