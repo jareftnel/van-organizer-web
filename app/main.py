@@ -1163,7 +1163,7 @@ def organizer_raw(jid: str):
             "  padding-top:0 !important;"
             "}"
             ".toteTopRow{"
-            "  margin-top:0 !important;"
+            "  margin-top:-6px !important;"
             "}"
             "</style>",
         )
