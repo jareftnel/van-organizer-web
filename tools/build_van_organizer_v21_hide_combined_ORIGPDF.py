@@ -795,7 +795,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   background:rgba(255,255,255,0.22);
   border-radius:999px;
   overflow:hidden;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
+  box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.18);
   align-self:center;
 }
 .bar-fill{
@@ -803,7 +803,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   border-radius:999px;
   width:100%;
   background: linear-gradient(90deg, var(--chipL, #2a74ff) 0 50%, var(--chipR, var(--chipL, #2a74ff)) 50% 100%);
-  border:1px solid var(--chipBorder, #000);
+  border:0.5px solid color-mix(in srgb, var(--chipBorder, #000) 40%, transparent);
   box-sizing:border-box;
 }
 .bar-fill.yellow{
