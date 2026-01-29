@@ -1188,6 +1188,15 @@ def organizer_raw(jid: str):
             "  justify-content:center !important;"
             "  padding:0 !important;"
             "  margin:0 !important;"
+            "  min-width:0 !important;"
+            "  min-height:0 !important;"
+            "  line-height:0 !important;"
+            "  gap:0 !important;"
+            "}"
+            ".toteTopRow > :last-child > *{"
+            "  margin:0 !important;"
+            "  padding:0 !important;"
+            "  line-height:0 !important;"
             "}"
             "</style>",
         )
