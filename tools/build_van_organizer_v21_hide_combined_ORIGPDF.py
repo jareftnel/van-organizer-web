@@ -756,8 +756,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 }
 .card-bar{
   grid-column:2;
-  display:grid;
-  grid-template-columns:auto 1fr auto;
+  display:flex;
   align-items:center;
   gap:8px;
   width:calc(100% - (var(--top-gap, 0px) * 2));
@@ -773,7 +772,11 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   justify-content:center;
   min-height:1px;
 }
+.bar-left-icon:empty{
+  display:none;
+}
 .bar-track{
+  flex:1 1 auto;
   position:relative;
   height:6px;
   background:rgba(255,255,255,0.22);
