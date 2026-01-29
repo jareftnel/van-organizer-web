@@ -1136,6 +1136,7 @@ def organizer_raw(jid: str):
             ":where(.tote-grid) :where(.card,.cell,.toteCard) > :first-child{"
             "  align-self:start !important;"
             "  justify-self:start !important;"
+            "  padding-top:2px !important;"
             "}"
             ":where(.tote-grid) :where(.card,.cell,.toteCard) > :nth-child(2){"
             "  align-self:center !important;"
