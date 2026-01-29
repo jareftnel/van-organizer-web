@@ -1172,6 +1172,15 @@ def organizer_raw(jid: str):
             "  align-items:center !important;"
             "  justify-content:space-between !important;"
             "}"
+            ".toteTopRow > :first-child{"
+            "  background:purple !important;"
+            "}"
+            ".toteTopRow > :nth-child(2){"
+            "  background:#000 !important;"
+            "}"
+            ".toteTopRow > :nth-child(3){"
+            "  background:green !important;"
+            "}"
             ".toteTopRow > *{"
             "  align-self:center !important;"
             "}"
@@ -1471,7 +1480,13 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   backdrop-filter: blur(2px);
 }}
 #bannerHUD > *{{ position:relative; z-index:1; pointer-events:auto; }}
-.hudLeft{{ display:flex; gap:8px; z-index:1; justify-self:stretch; justify-content:flex-start; }}
+.hudLeft{{
+  display:flex;
+  gap:8px;
+  z-index:1;
+  justify-self:stretch;
+  justify-content:flex-start;
+}}
 .hudTab{{
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);
@@ -1497,7 +1512,13 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   z-index:1;
   pointer-events:none;
 }}
-.hudRight{{ display:flex; gap:10px; z-index:1; justify-self:stretch; justify-content:flex-end; }}
+.hudRight{{
+  display:flex;
+  gap:10px;
+  z-index:1;
+  justify-self:stretch;
+  justify-content:flex-end;
+}}
 .hudRight.stacked{{
   flex-direction:column;
   align-items:flex-end;
