@@ -905,11 +905,10 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   font-size:calc(48px * var(--card-scale));
 }
 .toteBottomRow{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:4px;
-  align-items:center;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items:flex-start;
+  justify-items:center;
   line-height:1.2;
   margin-top:auto;
   min-height:calc(28px * var(--card-scale));
@@ -921,6 +920,29 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   font-size:calc(13px * var(--card-scale));
   position:static !important;
   overflow:visible;
+  column-gap:0;
+  background:linear-gradient(90deg, rgba(127,255,127,.45) 0 29.4%, rgba(255,255,255,.6) 29.4% 70.6%, rgba(255,127,255,.45) 70.6% 100%);
+  outline:2px solid rgba(255, 255, 0, 0.8);
+  outline-offset:-2px;
+}
+.toteBottomRow > *{
+  align-self:flex-start;
+  min-width:0;
+}
+.toteBottomRow > :first-child{
+  background:rgba(128, 0, 128, 0.35);
+  justify-self:start;
+  width:100%;
+}
+.toteBottomRow > :nth-child(2){
+  background:rgba(0, 0, 0, 0.25);
+  justify-self:center;
+  width:100%;
+}
+.toteBottomRow > :last-child{
+  background:rgba(0, 128, 0, 0.35);
+  justify-self:end;
+  width:100%;
 }
 .toteFooter{
   white-space:nowrap;
@@ -1891,7 +1913,7 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
         <div class="toteBigNumberLine">${topNum}</div>
         <div class="toteBigNumberLine">${botNum}</div>
       </div>
-      ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
+      ${sub ? `<div class="toteBottomRow toteFooter"><div class="toteBottomCol toteBottomLeft"></div><div class="toteBottomCol toteBottomCenter">${sub}</div><div class="toteBottomCol toteBottomRight"></div></div>` : ``}
     </div>`;
   }
 
@@ -1904,7 +1926,7 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
       ${rightBadgeHtml}
     </div>
     <div class="toteBigNumber">${main1}</div>
-    ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
+    ${sub ? `<div class="toteBottomRow toteFooter"><div class="toteBottomCol toteBottomLeft"></div><div class="toteBottomCol toteBottomCenter">${sub}</div><div class="toteBottomCol toteBottomRight"></div></div>` : ``}
   </div>`;
 }
 

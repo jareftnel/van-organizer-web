@@ -1209,6 +1209,74 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-bottom-row-columns-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-bottom-row-columns-patch */"
+            ".toteBottomRow{"
+            "  display:grid !important;"
+            "  grid-template-columns:minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr) !important;"
+            "  align-items:flex-start !important;"
+            "  justify-items:center !important;"
+            "  column-gap:0 !important;"
+            "  background:linear-gradient(90deg, rgba(127,255,127,.45) 0 29.4%, rgba(255,255,255,.6) 29.4% 70.6%, rgba(255,127,255,.45) 70.6% 100%) !important;"
+            "  outline:2px solid rgba(255, 255, 0, 0.8) !important;"
+            "  outline-offset:-2px !important;"
+            "}"
+            ".toteBottomRow > *{"
+            "  align-self:flex-start !important;"
+            "  min-width:0 !important;"
+            "}"
+            ".toteBottomRow > :first-child{"
+            "  background:rgba(128, 0, 128, 0.35) !important;"
+            "  justify-self:start !important;"
+            "  width:100% !important;"
+            "}"
+            ".toteBottomRow > :nth-child(2){"
+            "  background:rgba(0, 0, 0, 0.25) !important;"
+            "  justify-self:center !important;"
+            "  width:100% !important;"
+            "}"
+            ".toteBottomRow > :last-child{"
+            "  background:rgba(0, 128, 0, 0.35) !important;"
+            "  justify-self:end !important;"
+            "  width:100% !important;"
+            "}"
+            "</style>",
+        )
+    if "</body>" in html and "tote-bottom-row-columns-script" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "/* tote-bottom-row-columns-script */"
+            "(function(){"
+            "  function ensureColumns(row){"
+            "    if(row.querySelector('.toteBottomCol')) return;"
+            "    var existing = row.innerHTML;"
+            "    row.innerHTML = '';"
+            "    var left = document.createElement('div');"
+            "    left.className = 'toteBottomCol toteBottomLeft';"
+            "    var center = document.createElement('div');"
+            "    center.className = 'toteBottomCol toteBottomCenter';"
+            "    center.innerHTML = existing;"
+            "    var right = document.createElement('div');"
+            "    right.className = 'toteBottomCol toteBottomRight';"
+            "    row.appendChild(left);"
+            "    row.appendChild(center);"
+            "    row.appendChild(right);"
+            "  }"
+            "  function run(){"
+            "    Array.prototype.forEach.call(document.querySelectorAll('.toteBottomRow'), ensureColumns);"
+            "  }"
+            "  if(document.readyState === 'loading'){"
+            "    document.addEventListener('DOMContentLoaded', run, {once:true});"
+            "  }else{"
+            "    run();"
+            "  }"
+            "})();"
+            "</script>"
+            "</body>",
+        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
