@@ -769,12 +769,14 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   grid-column:2;
   display:flex;
   align-items:center;
+  align-self:center;
   gap:8px;
   width:calc(100% - (var(--top-gap, 0px) * 2));
   max-width:100%;
   margin:0 auto;
   justify-self:center;
   min-width:40px;
+  min-height:calc(22px * var(--card-scale));
 }
 .bar-left-icon,
 .bar-count{
@@ -794,6 +796,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   border-radius:999px;
   overflow:hidden;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
+  align-self:center;
 }
 .bar-fill{
   height:100%;
