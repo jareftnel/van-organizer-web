@@ -1123,6 +1123,31 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-card-rows-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-card-rows-patch */"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard){"
+            "  display:grid !important;"
+            "  grid-template-rows:repeat(3, minmax(0, 1fr)) !important;"
+            "  align-items:stretch !important;"
+            "  overflow:visible !important;"
+            "}"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :first-child{"
+            "  align-self:start !important;"
+            "  justify-self:start !important;"
+            "}"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :nth-child(2){"
+            "  align-self:center !important;"
+            "  justify-self:center !important;"
+            "  text-align:center !important;"
+            "}"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :last-child{"
+            "  align-self:end !important;"
+            "  justify-self:start !important;"
+            "}"
+            "</style>",
+        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
