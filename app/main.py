@@ -1221,8 +1221,6 @@ def organizer_raw(jid: str):
             "  justify-items:center !important;"
             "  column-gap:0 !important;"
             "  background:linear-gradient(90deg, rgba(127,255,127,.45) 0 29.4%, rgba(255,255,255,.6) 29.4% 70.6%, rgba(255,127,255,.45) 70.6% 100%) !important;"
-            "  outline:2px solid rgba(255, 255, 0, 0.8) !important;"
-            "  outline-offset:-2px !important;"
             "}"
             ".toteBottomRow > *{"
             "  align-self:flex-start !important;"
