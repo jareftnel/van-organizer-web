@@ -635,14 +635,15 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   --tote-min-scale: 0.55;
   --tote-max-scale: 1.15;
   display:grid;
-  grid-template-rows:repeat(var(--tote-rows), minmax(0, 1fr));
+  grid-template-rows:repeat(var(--tote-rows), minmax(var(--tote-base-h), 1fr));
   grid-template-columns:repeat(var(--tote-cols), minmax(var(--tote-min-cell-w, 0px), 1fr));
   grid-auto-flow:column;
   gap:var(--tote-gap);
   justify-content:stretch;
   align-items:stretch;
+  align-content:stretch;
   width:100%;
-  height:100%;
+  height:auto;
   min-width:0;
   max-width:none;
   box-sizing:border-box;
