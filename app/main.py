@@ -1209,23 +1209,6 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
-    if "</style>" in html and "tote-bottom-row-highlight-patch" not in html:
-        html = html.replace(
-            "</style>",
-            "/* tote-bottom-row-highlight-patch */"
-            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :nth-child(3){"
-            "  background:#ffeb3b !important;"
-            "  color:#0000ff !important;"
-            "  align-self:stretch !important;"
-            "  justify-self:stretch !important;"
-            "  width:100% !important;"
-            "  min-width:0 !important;"
-            "  min-height:0 !important;"
-            "  display:flex !important;"
-            "  align-items:flex-end !important;"
-            "}"
-            "</style>",
-        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
