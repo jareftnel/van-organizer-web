@@ -1471,7 +1471,15 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   backdrop-filter: blur(2px);
 }}
 #bannerHUD > *{{ position:relative; z-index:1; pointer-events:auto; }}
-.hudLeft{{ display:flex; gap:8px; z-index:1; justify-self:stretch; justify-content:flex-start; }}
+.hudLeft{{
+  display:flex;
+  gap:8px;
+  z-index:1;
+  justify-self:stretch;
+  justify-content:flex-start;
+  background:purple;
+  height:100%;
+}}
 .hudTab{{
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);
@@ -1496,8 +1504,18 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   white-space:nowrap;
   z-index:1;
   pointer-events:none;
+  background:#000;
+  height:100%;
 }}
-.hudRight{{ display:flex; gap:10px; z-index:1; justify-self:stretch; justify-content:flex-end; }}
+.hudRight{{
+  display:flex;
+  gap:10px;
+  z-index:1;
+  justify-self:stretch;
+  justify-content:flex-end;
+  background:green;
+  height:100%;
+}}
 .hudRight.stacked{{
   flex-direction:column;
   align-items:flex-end;
