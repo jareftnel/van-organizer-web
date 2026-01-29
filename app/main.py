@@ -1128,8 +1128,8 @@ def organizer_raw(jid: str):
             "</style>",
             "/* tote-card-rows-patch */"
             ":where(.tote-grid) :where(.card,.cell,.toteCard){"
-            "  display:grid !important;"
-            "  grid-template-rows:repeat(3, minmax(0, 1fr)) !important;"
+            "  display:flex !important;"
+            "  flex-direction:column !important;"
             "  align-items:stretch !important;"
             "  overflow:visible !important;"
             "}"
@@ -1150,6 +1150,7 @@ def organizer_raw(jid: str):
             ":where(.tote-grid) :where(.card,.cell,.toteCard) > :nth-child(3){"
             "  align-self:end !important;"
             "  justify-self:start !important;"
+            "  margin-top:auto !important;"
             "}"
             ":where(.tote-grid) :where(.card,.cell,.toteCard):not(:has(> :nth-child(3)))::after{"
             "  content:\"\";"

@@ -946,6 +946,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   width:100%;
 }
 .toteFooter{
+  margin-top:auto;
   white-space:nowrap;
   overflow:visible;
 }
