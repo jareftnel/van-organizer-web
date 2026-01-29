@@ -718,7 +718,7 @@ input{min-width:140px;flex:1 1 auto;width:auto}
 
 .toteTopRow{
   display:grid;
-  grid-template-columns:auto minmax(0, 1fr);
+  grid-template-columns:minmax(var(--tote-badge-width), 1fr) minmax(0, 1.35fr) minmax(var(--tote-badge-width), 1fr);
   align-items:center;
   column-gap:6px;
   min-height:26px;
@@ -730,6 +730,17 @@ input{min-width:140px;flex:1 1 auto;width:auto}
   gap:6px;
   justify-self:start;
   grid-column:1;
+}
+.toteRightBadge{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  justify-self:end;
+  grid-column:3;
+  min-height:22px;
+}
+.toteRightBadge:empty{
+  display:none;
 }
 .toteBubble{
   min-width:calc(22px * var(--card-scale));
@@ -1861,8 +1872,8 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
   const barHtml = `<div class="card-bar">
     <span class="bar-left-icon">${starHtml}</span>
     <div class="bar-track"><div class="bar-fill"></div></div>
-    <span class="bar-count">${pkgHtml}</span>
   </div>`;
+  const rightBadgeHtml = `<div class="toteRightBadge">${pkgHtml}</div>`;
   const slotAttr = (slotIndex === 0 || slotIndex) ? ` data-slot="${slotIndex}"` : "";
   if(second){
     const main2 = (second.bag_id || second.bag || "").toString();
@@ -1877,6 +1888,7 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
       <div class="toteTopRow">
         ${badgeGroupHtml}
         ${barHtml}
+        ${rightBadgeHtml}
       </div>
       <div class="toteBigNumber toteBigNumberStack">
         <div class="toteBigNumberLine">${topNum}</div>
@@ -1892,6 +1904,7 @@ function buildToteCardHtml(it, routeShort, getSubLine, getBadgeText, getPkgCount
     <div class="toteTopRow">
       ${badgeGroupHtml}
       ${barHtml}
+      ${rightBadgeHtml}
     </div>
     <div class="toteBigNumber">${main1}</div>
     ${sub ? `<div class="toteBottomRow toteFooter">${sub}</div>` : ``}
