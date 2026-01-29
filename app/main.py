@@ -1165,6 +1165,7 @@ def organizer_raw(jid: str):
             "/* tote-top-gap-patch */"
             ".toteCard{"
             "  padding-top:6px !important;"
+            "  padding-bottom:6px !important;"
             "}"
             ".toteTopRow{"
             "  margin-top:0 !important;"
