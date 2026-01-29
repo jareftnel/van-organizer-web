@@ -1142,9 +1142,15 @@ def organizer_raw(jid: str):
             "  justify-self:center !important;"
             "  text-align:center !important;"
             "}"
-            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :last-child{"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard) > :nth-child(3){"
             "  align-self:end !important;"
             "  justify-self:start !important;"
+            "}"
+            ":where(.tote-grid) :where(.card,.cell,.toteCard):not(:has(> :nth-child(3)))::after{"
+            "  content:\"\";"
+            "  display:block;"
+            "  align-self:stretch;"
+            "  justify-self:stretch;"
             "}"
             "</style>",
         )
