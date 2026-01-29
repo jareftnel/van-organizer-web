@@ -1155,6 +1155,18 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-top-gap-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-top-gap-patch */"
+            ".toteCard{"
+            "  padding-top:0 !important;"
+            "}"
+            ".toteTopRow{"
+            "  margin-top:0 !important;"
+            "}"
+            "</style>",
+        )
     if "</body>" in html and "combined-search-patch" not in html:
         html = html.replace(
             "</body>",
