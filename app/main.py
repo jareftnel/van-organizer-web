@@ -1171,6 +1171,7 @@ def organizer_raw(jid: str):
             "  display:flex !important;"
             "  align-items:center !important;"
             "  justify-content:space-between !important;"
+            "  background:linear-gradient(90deg, #7fff7f 0 33.333%, #ffffff 33.333% 66.666%, #ff7fff 66.666% 100%) !important;"
             "}"
             ".toteTopRow > *{"
             "  align-self:center !important;"
