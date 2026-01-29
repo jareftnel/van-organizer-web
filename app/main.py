@@ -1169,8 +1169,11 @@ def organizer_raw(jid: str):
             ".toteTopRow{"
             "  margin-top:0 !important;"
             "  display:flex !important;"
-            "  align-items:flex-start !important;"
+            "  align-items:center !important;"
             "  justify-content:space-between !important;"
+            "}"
+            ".toteTopRow > *{"
+            "  align-self:center !important;"
             "}"
             "</style>",
         )
