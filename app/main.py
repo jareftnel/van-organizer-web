@@ -1172,6 +1172,15 @@ def organizer_raw(jid: str):
             "  align-items:center !important;"
             "  justify-content:space-between !important;"
             "}"
+            ".toteTopRow > :first-child{"
+            "  background:purple !important;"
+            "}"
+            ".toteTopRow > :nth-child(2){"
+            "  background:#000 !important;"
+            "}"
+            ".toteTopRow > :nth-child(3){"
+            "  background:green !important;"
+            "}"
             ".toteTopRow > *{"
             "  align-self:center !important;"
             "}"
@@ -1477,8 +1486,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   z-index:1;
   justify-self:stretch;
   justify-content:flex-start;
-  background:purple;
-  height:100%;
 }}
 .hudTab{{
   background:rgba(255,255,255,.08);
@@ -1504,8 +1511,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   white-space:nowrap;
   z-index:1;
   pointer-events:none;
-  background:#000;
-  height:100%;
 }}
 .hudRight{{
   display:flex;
@@ -1513,8 +1518,6 @@ iframe{{border:0; display:block; width:100%; height:100%}}
   z-index:1;
   justify-self:stretch;
   justify-content:flex-end;
-  background:green;
-  height:100%;
 }}
 .hudRight.stacked{{
   flex-direction:column;
