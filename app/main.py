@@ -3052,20 +3052,23 @@ img, svg, iframe{{
     min-height:100vh;
     display:flex;
     justify-content:center;
-    align-items:stretch;
+    align-items:center;
     padding:48px 24px;
-    height:100vh;
+    height:auto;
   }}
   .tocShell{{
     width:100%;
-    max-width:100%;
-    display:flex;
-    flex:1;
+    max-width:1100px;
+    margin:0 auto;
+    flex:0 0 auto;
+    display:block;
   }}
   .tocCard{{
     width:100%;
-    min-height:calc(100vh - 96px);
-    grid-template-rows:auto 1fr auto;
+    max-width:1100px;
+    min-height:0;
+    height:auto;
+    grid-template-rows:auto auto auto;
   }}
   .tocTop{{
     padding:0 18px 12px;
