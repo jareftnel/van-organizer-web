@@ -1123,6 +1123,15 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-middle-row-debug-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-middle-row-debug-patch */"
+            ".debug-middle-row{"
+            "  background:red !important;"
+            "}"
+            "</style>",
+        )
     if "</style>" in html and "tote-card-rows-patch" not in html:
         html = html.replace(
             "</style>",
@@ -1148,9 +1157,6 @@ def organizer_raw(jid: str):
             "  justify-self:center !important;"
             "  text-align:center !important;"
             "  flex:1 1 0 !important;"
-            "  background:rgba(255, 0, 0, 0.18) !important;"
-            "  outline:2px dashed rgba(255, 0, 0, 0.85) !important;"
-            "  outline-offset:-2px !important;"
             "  width:100% !important;"
             "  display:flex !important;"
             "  align-items:center !important;"
@@ -1284,6 +1290,42 @@ def organizer_raw(jid: str):
             "  }else{"
             "    run();"
             "  }"
+            "})();"
+            "</script>"
+            "</body>",
+        )
+    if "</body>" in html and "tote-middle-row-debug-script" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "/* tote-middle-row-debug-script */"
+            "(function(){"
+            "  function updateGrid(grid){"
+            "    var cards = Array.prototype.slice.call(grid.children || []);"
+            "    cards.forEach(function(card){"
+            "      card.classList.remove('debug-middle-row');"
+            "    });"
+            "    var computed = getComputedStyle(grid).gridTemplateColumns;"
+            "    var columns = computed ? computed.split(' ').filter(Boolean).length : 0;"
+            "    if(!columns){ return; }"
+            "    var middleRowIndex = 1;"
+            "    var start = middleRowIndex * columns;"
+            "    var end = start + columns;"
+            "    cards.forEach(function(card, i){"
+            "      if(i >= start && i < end){"
+            "        card.classList.add('debug-middle-row');"
+            "      }"
+            "    });"
+            "  }"
+            "  function run(){"
+            "    Array.prototype.forEach.call(document.querySelectorAll('.tote-grid'), updateGrid);"
+            "  }"
+            "  if(document.readyState === 'loading'){"
+            "    document.addEventListener('DOMContentLoaded', run, {once:true});"
+            "  }else{"
+            "    run();"
+            "  }"
+            "  window.addEventListener('resize', run);"
             "})();"
             "</script>"
             "</body>",
