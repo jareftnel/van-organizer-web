@@ -3055,120 +3055,89 @@ img, svg, iframe{{
   }}
 }}
 @media (min-width: 768px){{
+  /* 1) keep the whole TOC card centered like upload */
   .tocPage{{
     min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
     padding:48px 24px;
-    height:auto;
+    height:auto; /* stop forcing 100vh */
   }}
+
   .tocShell{{
     width:100%;
-    max-width:1100px;
+    max-width:1100px;   /* match heroWrap intent */
     margin:0 auto;
-    flex:0 0 auto;
+    flex:0 0 auto;      /* stop full-width stretching */
     display:block;
   }}
+
   .tocCard{{
     width:100%;
-    max-width:1100px;
-    min-height:0;
+    min-height:0;       /* remove calc(100vh - 96px) */
     height:auto;
-    grid-template-rows:auto auto auto;
+    grid-template-rows:auto auto auto; /* remove the 1fr “stretch row” */
   }}
-  .tocTop{{
-    padding:0 18px 12px;
-  }}
-  .tocTop .tocBanner{{
-    margin:0;
-  }}
+
+  /* 2) keep the same banner/glass look as mobile (don’t switch to contain/no-blur) */
   .tocBanner{{
     border-radius:24px;
-    overflow:hidden;
-    height:clamp(160px, 16vw, 220px);
+    height:clamp(150px, 14vw, 210px);
   }}
   .tocBanner .bannerImg{{
-    position:relative;
-    inset:auto;
-    width:100%;
-    height:auto;
-    max-height:none;
-    object-fit:contain;
-    background:#0b0f14;
-    transform:scale(1.02);
-    filter:blur(2px) contrast(1.05) saturate(1.05);
-  }}
-  .tocBanner .bannerGlass{{
-    backdrop-filter:none;
-    -webkit-backdrop-filter:none;
-    background:rgba(12,16,22,0.55);
-    border:1px solid rgba(255,255,255,0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.08),
-      0 10px 24px rgba(0,0,0,0.35);
-  }}
-  .tocBanner .bannerGlass::before{{
-    background:linear-gradient(
-      to bottom,
-      rgba(255,255,255,0.12),
-      rgba(255,255,255,0) 60%
-    );
-  }}
-  .tocDateBanner{{
     position:absolute;
     inset:0;
+    width:100%;
     height:100%;
-    border-radius:24px;
-    grid-template-columns:minmax(24px, 32px) 1fr minmax(24px, 32px);
-    padding:0 6px;
+    object-fit:cover;
+    transform:scale(1.04);
   }}
+  .tocBanner .bannerGlass{{
+    backdrop-filter:blur(var(--glass-blur));
+    -webkit-backdrop-filter:blur(var(--glass-blur));
+    background:rgba(15,18,22,var(--glass-tint));
+    border:1px solid rgba(255,255,255,var(--glass-border));
+  }}
+
+  /* 3) desktop typography scale (this is what you’re feeling) */
   .tocDateText{{
-    font-size:clamp(17px, 1.6vw, 22px);
-    letter-spacing:0.12em;
+    font-size:clamp(20px, 1.9vw, 28px);
+    letter-spacing:clamp(0.10em, 0.25vw, 0.14em);
   }}
   .tocDateIcon{{
-    min-width:24px;
-    width:32px;
-    font-size:20px;
+    width:44px;
+    min-width:36px;
+    font-size:clamp(20px, 1.6vw, 26px);
+    transform:translateY(-2px);
   }}
-  .tocMiddle{{
-    padding:0 18px 22px;
-    flex:1;
-    align-items:stretch;
-  }}
-  .tocMiddleInner{{
-    width:100%;
-    flex:1;
-    justify-content:stretch;
-  }}
-  .tocPanel{{
-    margin-top:12px;
-    border-radius:22px;
-    padding:18px 18px 20px;
-    background:rgba(10,14,18,0.78);
-    border:1px solid rgba(255,255,255,0.08);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    box-shadow:0 14px 40px rgba(0,0,0,0.45);
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-  }}
-  .routesDownloadBtn{{
+
+  .tocCount{{
     height:44px;
-    border-radius:14px;
+    font-size:13px;        /* was 12px */
+    padding:0 44px 0 18px; /* a bit more breathing room */
   }}
-  .tocSelectors{{
-    margin-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
+
+  .selectLabel{{ font-size:13px; }}
+
+  .selectInput{{
+    height:54px;
+    font-size:clamp(15px, 1.0vw, 18px); /* bigger max than 16 */
   }}
-  .openRouteBtn{{
-    margin-top:16px;
-    width:100%;
+
+  #waveControl[data-has-value="false"],
+  #routeControl[data-has-value="false"]{{
+    font-size:13px; /* was clamped to 12 */
+  }}
+
+  .selectionCard{{
+    padding:22px;
+    gap:14px;
+  }}
+
+  .buildBtn{{
+    height:54px;
+    font-size:clamp(18px, 1.2vw, 22px);
   }}
 }}
 @media (max-width: 480px){{
