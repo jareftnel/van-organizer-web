@@ -1151,6 +1151,7 @@ def organizer_raw(jid: str):
             "  align-items:flex-start !important;"
             "  justify-content:space-between !important;"
             "  padding-top:2px !important;"
+            "  min-height:0 !important;"
             "}"
             ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.card,.cell,.toteCard) > :nth-child(2){"
             "  align-self:center !important;"
@@ -1161,17 +1162,30 @@ def organizer_raw(jid: str):
             "  display:flex !important;"
             "  align-items:center !important;"
             "  justify-content:center !important;"
+            "  min-height:0 !important;"
             "}"
             ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.card,.cell,.toteCard) > :nth-child(3){"
             "  align-self:end !important;"
             "  justify-self:start !important;"
             "  flex:1 1 0 !important;"
+            "  min-height:0 !important;"
             "}"
             ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.card,.cell,.toteCard):not(:has(> :nth-child(3)))::after{"
             "  content:\"\";"
             "  display:block;"
             "  align-self:stretch;"
             "  justify-self:stretch;"
+            "}"
+            "</style>",
+        )
+    if "</style>" in html and "tote-equal-rows-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-equal-rows-patch */"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteTopRow,.toteMiddleRow,.toteBottomRow){"
+            "  flex:1 1 0 !important;"
+            "  min-height:0 !important;"
+            "  width:100% !important;"
             "}"
             "</style>",
         )
