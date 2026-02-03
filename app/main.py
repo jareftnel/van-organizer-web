@@ -22,21 +22,8 @@ store = JobStore(str(JOBS_DIR))
 app = FastAPI()
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-STATIC_DIR = Path(__file__).parent / "static"
+STATIC_DIR = REPO_ROOT / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-
-
-@app.get("/van.png")
-def van_icon():
-    return FileResponse(REPO_ROOT / "van.png", media_type="image/png")
-
-
-@app.get("/banner.png")
-def banner_image():
-    return FileResponse(
-        REPO_ROOT / "banner_clean_1600x400 (1).png",
-        media_type="image/png",
-    )
 
 
 # ---------------------------
@@ -491,7 +478,7 @@ button{
 <body>
   <div class="uploadPage">
     <div class="heroWrap tocShell">
-      <img class="brandBanner" src="/banner.png" alt="Van Organizer Banner" />
+      <img class="brandBanner" src="/static/img/banner_clean_1600x400.png" alt="Van Organizer Banner" />
       <div class="tagGlass">
         <div class="taglineText">OPTIMIZE YOUR ROUTE</div>
       </div>
@@ -566,12 +553,6 @@ button{
 </body>
 </html>
 """
-
-
-@app.get("/banner.png")
-def banner_png():
-    banner_path = REPO_ROOT / "banner.png"
-    return FileResponse(str(banner_path))
 
 
 @app.post("/upload")
@@ -801,7 +782,7 @@ body{
         <div class="road" aria-hidden="true">
           <div class="lane"></div>
           <div class="van building moving" id="vanIcon" style="left: __PCT__%">
-            <img src="/van.png" alt="" aria-hidden="true" />
+            <img src="/static/img/van.png" alt="" aria-hidden="true" />
           </div>
         </div>
         <div class="progress-meta">
@@ -2063,7 +2044,7 @@ iframe{{border:0; display:block; width:100%; height:100%}}
 </head>
 <body>
   <div class="banner">
-    <img src="/banner.png" alt="Van organizer banner" />
+    <img src="/static/img/banner_clean_1600x400.png" alt="Van organizer banner" />
     <div id="bannerHUD">
       <div class="hudLeft">
         <button class="hudTab" data-tab="bags_overflow">Bags + Overflow</button>
@@ -3794,7 +3775,7 @@ img, svg, iframe{{
       <div class="uploadCard tocCard glassCard">
         <div class="tocTop">
           <div class="tocBanner">
-            <img class="brandBanner bannerImg" src="/banner.png" alt="Van Organizer Banner" />
+            <img class="brandBanner bannerImg" src="/static/img/banner_clean_1600x400.png" alt="Van Organizer Banner" />
             <div class="bannerGlass" aria-hidden="true"></div>
             <button class="tocDateBanner tapBtn" id="tocDateBanner" type="button" aria-label="Open summary" title="Open summary">
               <span class="tocDateSpacer" aria-hidden="true"></span>
