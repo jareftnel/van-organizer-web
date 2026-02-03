@@ -1141,6 +1141,7 @@ def organizer_raw(jid: str):
             "  grid-template-rows:repeat(3, minmax(0, 1fr)) !important;"
             "  grid-auto-rows:minmax(0, 1fr) !important;"
             "  align-items:stretch !important;"
+            "  row-gap:0 !important;"
             "  overflow:visible !important;"
             "}"
             ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.card,.cell,.toteCard) > :first-child{"
@@ -1187,6 +1188,14 @@ def organizer_raw(jid: str):
             "  height:100% !important;"
             "  min-height:0 !important;"
             "  width:100% !important;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteMiddleRow){"
+            "  margin:0 !important;"
+            "  padding:0 !important;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteMiddleRow) > *{"
+            "  margin:0 !important;"
+            "  padding:0 !important;"
             "}"
             "</style>",
         )
