@@ -1175,6 +1175,52 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
+    if "</style>" in html and "tote-top-bottom-debug-fills" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-top-bottom-debug-fills */"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :first-child,"
+            ".toteTopRow{"
+            "  position:relative !important;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :last-child,"
+            ".toteBottomRow{"
+            "  position:relative !important;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :first-child::before,"
+            ".toteTopRow::before{"
+            "  content:\"\";"
+            "  position:absolute;"
+            "  inset:0;"
+            "  background:linear-gradient(90deg,"
+            "    rgba(0,255,255,0.22) 0%,"
+            "    rgba(0,255,0,0.22) 35%,"
+            "    rgba(255,0,255,0.22) 100%"
+            "  ) !important;"
+            "  pointer-events:none;"
+            "  z-index:0;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :last-child::before,"
+            ".toteBottomRow::before{"
+            "  content:\"\";"
+            "  position:absolute;"
+            "  inset:0;"
+            "  background:linear-gradient(90deg,"
+            "    rgba(255,165,0,0.20) 0%,"
+            "    rgba(255,255,0,0.20) 50%,"
+            "    rgba(255,0,0,0.20) 100%"
+            "  ) !important;"
+            "  pointer-events:none;"
+            "  z-index:0;"
+            "}"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :first-child > *,"
+            ":where(.organizer-grid,.tote-grid,.cards-grid) :where(.toteCard,.card,.cell) > :last-child > *,"
+            ".toteTopRow > *, .toteBottomRow > *{"
+            "  position:relative;"
+            "  z-index:1;"
+            "}"
+            "</style>",
+        )
     if False and "</style>" in html and "tote-top-gap-patch" not in html:
         html = html.replace(
             "</style>",
