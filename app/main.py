@@ -1175,7 +1175,7 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
-    if "</style>" in html and "tote-top-gap-patch" not in html:
+    if False and "</style>" in html and "tote-top-gap-patch" not in html:
         html = html.replace(
             "</style>",
             "/* tote-top-gap-patch */"
@@ -1226,7 +1226,7 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
-    if "</style>" in html and "tote-bottom-row-columns-patch" not in html:
+    if False and "</style>" in html and "tote-bottom-row-columns-patch" not in html:
         html = html.replace(
             "</style>",
             "/* tote-bottom-row-columns-patch */"
@@ -1261,7 +1261,7 @@ def organizer_raw(jid: str):
             "}"
             "</style>",
         )
-    if "</style>" in html and "tote-card-column-enforce-patch" not in html:
+    if False and "</style>" in html and "tote-card-column-enforce-patch" not in html:
         html = html.replace(
             "</style>",
             "/* tote-card-column-enforce-patch */"
@@ -1322,7 +1322,7 @@ def organizer_raw(jid: str):
             "</script>"
             "</body>",
         )
-    if "</body>" in html and "tote-card-column-enforce-script" not in html:
+    if False and "</body>" in html and "tote-card-column-enforce-script" not in html:
         html = html.replace(
             "</body>",
             "<script>"
@@ -1504,6 +1504,49 @@ def organizer_raw(jid: str):
             "    run();"
             "  }"
             "  window.addEventListener('resize', run);"
+            "})();"
+            "</script>"
+            "</body>",
+        )
+    if "</style>" in html and "tote-middle-row-mark-patch" not in html:
+        html = html.replace(
+            "</style>",
+            "/* tote-middle-row-mark-patch */"
+            ".toteMiddleRow{"
+            "  background:rgba(255,0,0,0.18) !important;"
+            "  outline:2px dashed rgba(255,0,0,0.85) !important;"
+            "  outline-offset:-2px !important;"
+            "}"
+            "</style>",
+        )
+    if "</body>" in html and "tote-middle-row-marker-script" not in html:
+        html = html.replace(
+            "</body>",
+            "<script>"
+            "/* tote-middle-row-marker-script */"
+            "(function(){"
+            "  function mark(){"
+            "    document.querySelectorAll('.toteTopRow').forEach(function(top){"
+            "      var card = top.closest('.toteCard, .card, [data-card]');"
+            "      if(!card) return;"
+            "      var bottom = card.querySelector('.toteBottomRow');"
+            "      if(!bottom) return;"
+            "      var kids = Array.prototype.slice.call(card.children);"
+            "      var ti = kids.indexOf(top);"
+            "      var bi = kids.indexOf(bottom);"
+            "      if(ti === -1 || bi === -1) return;"
+            "      var mid = kids.slice(ti + 1, bi)[0];"
+            "      if(mid) mid.classList.add('toteMiddleRow');"
+            "    });"
+            "  }"
+            "  if(document.readyState === 'loading'){"
+            "    document.addEventListener('DOMContentLoaded', mark, {once:true});"
+            "  }else{"
+            "    mark();"
+            "  }"
+            "  if(window.MutationObserver){"
+            "    new MutationObserver(mark).observe(document.body, {childList:true, subtree:true});"
+            "  }"
             "})();"
             "</script>"
             "</body>",
