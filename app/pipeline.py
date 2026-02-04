@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import colorsys
 import json
 import os
 import re
@@ -121,7 +120,6 @@ class WaveBand:
     y_start: int
     y_end: int
     rgb: np.ndarray
-    color_name: str
 
 
 def _margin_samples(arr: np.ndarray) -> np.ndarray:
@@ -140,27 +138,6 @@ def _margin_samples(arr: np.ndarray) -> np.ndarray:
 
 def _median_color(block: np.ndarray) -> np.ndarray:
     return np.median(block.reshape(-1, 3), axis=0)
-
-
-def _classify_color(rgb: np.ndarray) -> str:
-    r, g, b = [float(v) / 255.0 for v in rgb]
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-
-    if v >= 0.9 and s <= 0.12:
-        return "white"
-
-    hue = h * 360.0
-    if 250 <= hue < 310:
-        return "purple"
-    if 210 <= hue < 250:
-        return "blue"
-    if 120 <= hue < 180:
-        return "green"
-    if 40 <= hue < 70:
-        return "yellow"
-    if hue < 20 or hue >= 330:
-        return "red"
-    return "unknown"
 
 
 def _detect_color_bands(image: Image.Image) -> list[tuple[int, int, np.ndarray]]:
@@ -249,13 +226,11 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
                 img = img.convert("RGB")
                 bands = sorted(_detect_color_bands(img), key=lambda band: band[0])
                 for y_start, y_end, rgb in bands:
-                    color_name = _classify_color(rgb)
                     detected_bands.append(
                         WaveBand(
                             y_start=y_start,
                             y_end=y_end,
                             rgb=rgb,
-                            color_name=color_name,
                         )
                     )
         except Exception as exc:
@@ -275,11 +250,11 @@ def extract_wave_color_map(image_paths: list[Path], toc_entries: list[dict]) -> 
     mapping = {time_labels[i]: detected_bands[i] for i in range(count)}
 
     print("[wave-colors] Final mapping:")
-    print("timeKey | colorName | rgb | bandY")
+    print("timeKey | rgb | bandY")
     for time_key in time_labels[:count]:
         band = mapping[time_key]
         rgb = [int(round(v)) for v in band.rgb]
-        print(f"{time_key} | {band.color_name} | {rgb} | {band.y_start}-{band.y_end}")
+        print(f"{time_key} | {rgb} | {band.y_start}-{band.y_end}")
 
     return {time_key: _rgb_to_hex(mapping[time_key].rgb) for time_key in time_labels[:count]}
 
