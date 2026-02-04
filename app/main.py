@@ -16,8 +16,7 @@ from fastapi.responses import (
 
 from .pipeline import JobStore, process_job
 
-JOBS_DIR = Path("/tmp/vanorg_jobs")
-store = JobStore(str(JOBS_DIR))
+store = JobStore()
 
 app = FastAPI()
 
