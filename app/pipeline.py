@@ -35,17 +35,20 @@ DATE_RE = re.compile(r"\b(?:MON|TUE|WED|THU|FRI|SAT|SUN),\s+[A-Z]{3}\s+\d{1,2},\
 STAGE_WEIGHTS = {
     "parse_pdf": 0.3333333333,
     "excel": 0.2,
-    "build_html": 0.4666666667,
+    "build_optisheets": 0.2666666667,
+    "build_organizer": 0.2,
 }
 STAGE_TEXT = {
     "parse_pdf": "Processing File…",
     "excel": "Generating Data…",
-    "build_html": "Building Organizer + OptiSheets…",
+    "build_optisheets": "Building OptiSheets…",
+    "build_organizer": "Constructing Organizer…",
 }
 DEFAULT_STAGE_SECONDS = {
     "parse_pdf": 25.0,
     "excel": 15.0,
-    "build_html": 35.0,
+    "build_optisheets": 45.0,
+    "build_organizer": 25.0,
 }
 PROGRESS_SLACK = 1.5
 STAGE_PROGRESS_CAP = 0.98
@@ -373,14 +376,14 @@ def run_builder_html(
         if not progress_cb:
             return
         payload = {
-            "stage": "build_html",
+            "stage": "build_organizer",
             "msg": msg,
         }
         if extra:
             payload.update(extra)
         progress_cb(**payload)
 
-    report("Building organizer…")
+    report("Constructing Organizer…")
 
     builder = Path(__file__).resolve().parents[1] / "tools" / "build_van_organizer_v21_hide_combined_ORIGPDF.py"
     cmd = [
@@ -393,7 +396,7 @@ def run_builder_html(
     ]
 
     # quick mid-progress marker (this step is usually short)
-    report("Building organizer…")
+    report("Constructing Organizer…")
     subprocess.check_call(cmd)
     report("Organizer ready.")
 
@@ -627,22 +630,22 @@ def process_job(store: JobStore, jid: str) -> None:
         # 1) Excel
         generate_bags_xlsx_from_routesheets(str(pdf_path), str(xlsx_path), progress_cb=cb)
 
-        # 2) HTML
-        run_builder_html(str(pdf_path), str(xlsx_path), str(html_path), progress_cb=cb)
-
-        # 3) Stacked PDF (with progress callback)
-        cb(stage="build_html", msg=STAGE_TEXT["build_html"])
+        # 2) Stacked PDF (with progress callback)
+        cb(stage="build_optisheets", msg=STAGE_TEXT["build_optisheets"])
         date_label = auto_detect_date_label(str(pdf_path))
 
         def stack_cb(**payload):
-            payload["stage"] = "build_html"
-            payload.setdefault("msg", STAGE_TEXT["build_html"])
+            payload["stage"] = "build_optisheets"
+            payload.setdefault("msg", STAGE_TEXT["build_optisheets"])
             store.set_progress(jid, payload)
 
         stack_results = run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
         toc_entries = (stack_results or {}).get("toc_entries", [])
         wave_images = list(job_dir.glob("wave_image_*"))
         wave_colors = extract_wave_color_map(wave_images, toc_entries)
+
+        # 3) HTML
+        run_builder_html(str(pdf_path), str(xlsx_path), str(html_path), progress_cb=cb)
 
         store.complete_current_stage(jid)
         store.set(
