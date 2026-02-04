@@ -17,7 +17,10 @@ from PIL import Image
 
 # we vendor these scripts into /tools
 import sys
-sys.path.append(str(Path(__file__).resolve().parents[1] / "tools"))
+tools_dir = Path(__file__).resolve().parents[1] / "tools"
+tools_dir_str = str(tools_dir)
+if tools_dir_str not in sys.path:
+    sys.path.insert(0, tools_dir_str)
 
 from route_stacker import (
     parse_route_page,
