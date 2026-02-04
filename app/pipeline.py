@@ -463,9 +463,11 @@ class JobStore:
         root_dir = root_dir or os.environ.get("VANORG_STATE_DIR") or "/tmp/vanorg_jobs"
         self.root = Path(root_dir)
         self.root.mkdir(parents=True, exist_ok=True)
+        print(f"[state] JobStore root = {self.root} (exists={self.root.exists()})")
         self._lock = threading.Lock()
         self._jobs: Dict[str, Dict[str, Any]] = {}
         self._ema = ProgressEmaStore(self.root / "progress_ema.json")
+        print(f"[state] EMA path = {self._ema.path}")
 
     def _job_dir(self, jid: str) -> Path:
         return self.root / jid
