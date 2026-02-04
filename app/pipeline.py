@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import colorsys
 import json
+import os
 import re
 import threading
 import time
@@ -458,7 +459,8 @@ class JobStore:
     Persist jobs to disk so they survive Render restarts.
     Each job folder contains job.json.
     """
-    def __init__(self, root_dir: str):
+    def __init__(self, root_dir: Optional[str] = None):
+        root_dir = root_dir or os.environ.get("VANORG_STATE_DIR") or "/tmp/vanorg_jobs"
         self.root = Path(root_dir)
         self.root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
