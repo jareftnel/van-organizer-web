@@ -466,7 +466,7 @@ class JobStore:
         self._lock = threading.Lock()
         self._jobs: Dict[str, Dict[str, Any]] = {}
         self._ema = ProgressEmaStore(self.root / "progress_ema.json")
-        print(f"[state] EMA path = {self._ema.path}")
+        print(f"[state] EMA path = {self._ema.path} (exists={self._ema.path.exists()})")
 
     def _job_dir(self, jid: str) -> Path:
         return self.root / jid
