@@ -47,7 +47,7 @@ DEFAULT_STAGE_SECONDS = {
     "excel": 15.0,
     "build_html": 35.0,
 }
-PROGRESS_SLACK = 1.25
+PROGRESS_SLACK = 1.5
 STAGE_PROGRESS_CAP = 0.98
 EMA_ALPHA = 0.25
 
