@@ -456,8 +456,7 @@ class ProgressEmaStore:
 
 class JobStore:
     """
-    Persist jobs to disk so they survive Render restarts.
-    Each job folder contains job.json.
+    Persist jobs to disk. For persistence across Render restarts/deploys, set VANORG_STATE_DIR to a path on a Render Persistent Disk (e.g. /var/data/vanorg_jobs).
     """
     def __init__(self, root_dir: Optional[str] = None):
         root_dir = root_dir or os.environ.get("VANORG_STATE_DIR") or "/tmp/vanorg_jobs"
