@@ -49,7 +49,7 @@ DEFAULT_STAGE_SECONDS = {
 }
 PROGRESS_SLACK = 1.5
 STAGE_PROGRESS_CAP = 0.98
-EMA_ALPHA = 0.25
+EMA_ALPHA = 0.35
 
 
 def auto_detect_date_label(pdf_path: str) -> str:
