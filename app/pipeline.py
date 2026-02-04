@@ -32,9 +32,9 @@ from route_stacker import (
 DATE_RE = re.compile(r"\b(?:MON|TUE|WED|THU|FRI|SAT|SUN),\s+[A-Z]{3}\s+\d{1,2},\s+\d{4}\b")
 
 STAGE_WEIGHTS = {
-    "parse_pdf": 0.25,
-    "excel": 0.35,
-    "build_html": 0.40,
+    "parse_pdf": 0.3333333333,
+    "excel": 0.2,
+    "build_html": 0.4666666667,
 }
 STAGE_TEXT = {
     "parse_pdf": "Parsing PDF…",
