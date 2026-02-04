@@ -37,9 +37,9 @@ STAGE_WEIGHTS = {
     "build_html": 0.4666666667,
 }
 STAGE_TEXT = {
-    "parse_pdf": "Parsing PDF…",
-    "excel": "Generating Excel…",
-    "build_html": "Building organizer…",
+    "parse_pdf": "Processing File…",
+    "excel": "Generating Data…",
+    "build_html": "Building Organizer + OptiSheets…",
 }
 DEFAULT_STAGE_SECONDS = {
     "parse_pdf": 25.0,
