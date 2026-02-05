@@ -286,7 +286,7 @@ def generate_bags_xlsx_from_routesheets(
             payload.update(extra)
         progress_cb(**payload)
 
-    report("parse_pdf", "Parsing PDF…")
+    report("parse_pdf", STAGE_TEXT["parse_pdf"])
 
     with pdfplumber.open(pdf_path) as pdf:
         total_pages = len(pdf.pages) or 1
@@ -295,7 +295,7 @@ def generate_bags_xlsx_from_routesheets(
             # progress update
             report(
                 "parse_pdf",
-                f"Parsing PDF… ({i}/{total_pages})",
+                f"{STAGE_TEXT['parse_pdf']} ({i}/{total_pages})",
                 {"page": i, "pages": total_pages},
             )
 
