@@ -381,8 +381,6 @@ def run_builder_html(
             payload.update(extra)
         progress_cb(**payload)
 
-    report(STAGE_TEXT["build_organizer"])
-
     builder = Path(__file__).resolve().parents[1] / "tools" / "build_van_organizer_v21_hide_combined_ORIGPDF.py"
     cmd = [
         "python",
@@ -393,7 +391,6 @@ def run_builder_html(
         "--no-cache",
     ]
 
-    # quick mid-progress marker (this step is usually short)
     report(STAGE_TEXT["build_organizer"])
     subprocess.check_call(cmd)
     report("Organizer ready.")
