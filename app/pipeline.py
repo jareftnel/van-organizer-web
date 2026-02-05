@@ -497,6 +497,40 @@ class JobStore:
     def _job_json(self, jid: str) -> Path:
         return self._job_dir(jid) / "job.json"
 
+    def _read_payload_from_disk(self, jid: str) -> Optional[Dict[str, Any]]:
+        jfile = self._job_json(jid)
+        if not jfile.exists():
+            return None
+
+        try:
+            raw = jfile.read_text(encoding="utf-8")
+            payload = json.loads(raw)
+            if not isinstance(payload, dict):
+                raise ValueError("job.json payload is not an object")
+        except Exception as exc:
+            print(f"[jobstore] Failed to read {jfile.name} for jid={jid}: {exc}")
+            payload = {
+                "status": "error",
+                "progress": {"stage": "error", "msg": "Corrupt job.json"},
+                "error": "Corrupt job.json",
+                "outputs": None,
+            }
+
+        # If outputs exist, mark done (even after restart)
+        d = self._job_dir(jid)
+        outs = {
+            "xlsx": "Bags_with_Overflow.xlsx",
+            "html": "van_organizer.html",
+            "stacked": "STACKED.pdf",
+        }
+        if payload.get("status") == "error":
+            pass
+        elif all((d / v).exists() for v in outs.values()):
+            payload["status"] = "done"
+            payload["outputs"] = outs
+
+        return payload
+
     def create(self) -> str:
         jid = uuid.uuid4().hex[:10]
         d = self._job_dir(jid)
@@ -526,49 +560,24 @@ class JobStore:
         with self._lock:
             if jid in self._jobs:
                 return dict(self._jobs[jid])
+        payload = self._read_payload_from_disk(jid)
+        if payload is None:
+            return {"status": "missing"}
 
-        jfile = self._job_json(jid)
-        if jfile.exists():
-            try:
-                raw = jfile.read_text(encoding="utf-8")
-                payload = json.loads(raw)
-                if not isinstance(payload, dict):
-                    raise ValueError("job.json payload is not an object")
-            except Exception as exc:
-                print(f"[jobstore] Failed to read {jfile.name} for jid={jid}: {exc}")
-                payload = {
-                    "status": "error",
-                    "progress": {"stage": "error", "msg": "Corrupt job.json"},
-                    "error": "Corrupt job.json",
-                    "outputs": None,
-                }
-
-            # If outputs exist, mark done (even after restart)
-            d = self._job_dir(jid)
-            outs = {
-                "xlsx": "Bags_with_Overflow.xlsx",
-                "html": "van_organizer.html",
-                "stacked": "STACKED.pdf",
-            }
-            if payload.get("status") == "error":
-                pass
-            elif all((d / v).exists() for v in outs.values()):
-                payload["status"] = "done"
-                payload["outputs"] = outs
-
-            with self._lock:
-                self._jobs[jid] = payload
-            return dict(payload)
-
-        return {"status": "missing"}
+        with self._lock:
+            self._jobs[jid] = payload
+        return dict(payload)
 
     def set(self, jid: str, **patch):
-        payload = self.get(jid)
-        payload.update(patch)
-        d = self._job_dir(jid)
-        d.mkdir(parents=True, exist_ok=True)
-        _atomic_write_json(self._job_json(jid), payload)
         with self._lock:
+            if jid in self._jobs:
+                payload = dict(self._jobs[jid])
+            else:
+                payload = self._read_payload_from_disk(jid) or {"status": "missing"}
+            payload.update(patch)
+            d = self._job_dir(jid)
+            d.mkdir(parents=True, exist_ok=True)
+            _atomic_write_json(self._job_json(jid), payload)
             self._jobs[jid] = payload
 
     def set_progress(self, jid: str, payload: Dict[str, Any]):
