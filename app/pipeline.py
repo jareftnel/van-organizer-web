@@ -649,7 +649,7 @@ class JobStore:
         progress = job.get("progress") or {}
         stage = progress.get("stage")
         if status == "error":
-            stage_text = "Error"
+            stage_text = progress.get("msg") or "Error"
         else:
             stage_text = progress.get("msg") or STAGE_TEXT.get(stage, "Working…")
 
