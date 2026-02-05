@@ -407,14 +407,16 @@ class ProgressEmaStore:
             return
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
-        except Exception:
+        except Exception as exc:
+            print(f"[progress-ema] Failed to load {self.path.name}: {exc}")
             return
-        if isinstance(raw, dict):
-            for key, value in raw.items():
-                try:
-                    self._data[str(key)] = float(value)
-                except Exception:
-                    continue
+        if not isinstance(raw, dict):
+            return
+        for key, value in raw.items():
+            try:
+                self._data[str(key)] = float(value)
+            except Exception:
+                continue
 
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
