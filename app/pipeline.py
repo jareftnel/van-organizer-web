@@ -449,9 +449,17 @@ class ProgressEmaStore:
         _atomic_write_json(self.path, payload)
 
     def expected(self, stage: str) -> float:
-        if stage in self._data:
-            return float(self._data[stage])
-        return float(DEFAULT_STAGE_SECONDS.get(stage, 10.0))
+        raw = self._data.get(stage, DEFAULT_STAGE_SECONDS.get(stage, 10.0))
+        try:
+            val = float(raw)
+        except Exception:
+            val = float(DEFAULT_STAGE_SECONDS.get(stage, 10.0))
+
+        if not math.isfinite(val):
+            val = float(DEFAULT_STAGE_SECONDS.get(stage, 10.0))
+
+        val = max(EMA_EXPECTED_MIN_SECONDS, min(EMA_EXPECTED_MAX_SECONDS, val))
+        return val
 
     def update(self, stage: str, observed: float) -> None:
         if not math.isfinite(observed) or observed <= 0:
