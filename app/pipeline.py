@@ -32,12 +32,6 @@ from route_stacker import (
 
 DATE_RE = re.compile(r"\b(?:MON|TUE|WED|THU|FRI|SAT|SUN),\s+[A-Z]{3}\s+\d{1,2},\s+\d{4}\b")
 
-STAGE_WEIGHTS = {
-    "parse_pdf": 0.3333333333,
-    "excel": 0.2,
-    "build_optisheets": 0.2666666667,
-    "build_organizer": 0.2,
-}
 STAGE_TEXT = {
     "parse_pdf": "Processing File…",
     "excel": "Generating Data…",
@@ -49,6 +43,11 @@ DEFAULT_STAGE_SECONDS = {
     "excel": 15.0,
     "build_optisheets": 45.0,
     "build_organizer": 25.0,
+}
+_stage_seconds_total = sum(DEFAULT_STAGE_SECONDS.values())
+STAGE_WEIGHTS = {
+    stage: (seconds / _stage_seconds_total) if _stage_seconds_total > 0 else 0.0
+    for stage, seconds in DEFAULT_STAGE_SECONDS.items()
 }
 PROGRESS_SLACK = 1.5
 STAGE_PROGRESS_CAP = 0.98
@@ -652,7 +651,7 @@ class JobStore:
         if status == "error":
             stage_text = "Error"
         else:
-            stage_text = STAGE_TEXT.get(stage, "Working…")
+            stage_text = progress.get("msg") or STAGE_TEXT.get(stage, "Working…")
 
         if status == "done":
             return 100, "Done"
@@ -665,7 +664,7 @@ class JobStore:
         started_at = progress.get("stage_started_at")
         if stage and started_at is not None and stage_weight > 0:
             elapsed = max(0.0, _monotonic_seconds() - float(started_at))
-            expected = max(0.1, self._ema.expected(stage))
+            expected = self._ema.expected(stage)
             stage_progress = min(elapsed / (expected * PROGRESS_SLACK), STAGE_PROGRESS_CAP)
 
         total = 100 * (completed_weight + (stage_weight * stage_progress))
