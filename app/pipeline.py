@@ -581,35 +581,47 @@ class JobStore:
             self._jobs[jid] = payload
 
     def set_progress(self, jid: str, payload: Dict[str, Any]):
-        existing = (self.get(jid).get("progress") or {})
-        merged = dict(existing)
-        merged.update(payload)
+        payload = {key: value for key, value in payload.items() if value is not None}
+        with self._lock:
+            if jid in self._jobs:
+                job_payload = dict(self._jobs[jid])
+            else:
+                job_payload = self._read_payload_from_disk(jid) or {"status": "missing"}
 
-        new_stage = merged.get("stage")
-        old_stage = existing.get("stage")
-        if new_stage and new_stage != old_stage:
-            now = _monotonic_seconds()
-            old_started = existing.get("stage_started_at")
-            if old_stage and old_started is not None:
-                self._ema.update(old_stage, max(0.0, now - float(old_started)))
-                completed = list(existing.get("completed_stages") or [])
-                if old_stage not in completed and old_stage in STAGE_WEIGHTS:
-                    completed.append(old_stage)
-                merged["completed_stages"] = completed
-            merged["stage_started_at"] = now
-        elif "stage_started_at" not in merged and existing.get("stage_started_at") is not None:
-            merged["stage_started_at"] = existing.get("stage_started_at")
+            existing = job_payload.get("progress") or {}
+            merged = dict(existing)
+            merged.update(payload)
 
-        if "completed_stages" not in merged and existing.get("completed_stages") is not None:
-            merged["completed_stages"] = existing.get("completed_stages")
+            new_stage = merged.get("stage")
+            old_stage = existing.get("stage")
+            if new_stage and new_stage != old_stage:
+                now = _monotonic_seconds()
+                old_started = existing.get("stage_started_at")
+                if old_stage and old_started is not None:
+                    self._ema.update(old_stage, max(0.0, now - float(old_started)))
+                    completed = list(existing.get("completed_stages") or [])
+                    if old_stage not in completed and old_stage in STAGE_WEIGHTS:
+                        completed.append(old_stage)
+                    merged["completed_stages"] = completed
+                merged["stage_started_at"] = now
+            elif "stage_started_at" not in merged and existing.get("stage_started_at") is not None:
+                merged["stage_started_at"] = existing.get("stage_started_at")
 
-        if "last_reported_percent" not in merged and existing.get("last_reported_percent") is not None:
-            merged["last_reported_percent"] = existing.get("last_reported_percent")
+            if "completed_stages" not in merged and existing.get("completed_stages") is not None:
+                merged["completed_stages"] = existing.get("completed_stages")
 
-        # Ensure pct exists and stays 0..100 (legacy fields)
-        if "pct" in merged:
-            merged["pct"] = _clamp_pct(merged["pct"])
-        self.set(jid, progress=merged)
+            if "last_reported_percent" not in merged and existing.get("last_reported_percent") is not None:
+                merged["last_reported_percent"] = existing.get("last_reported_percent")
+
+            # Ensure pct exists and stays 0..100 (legacy fields)
+            if "pct" in merged:
+                merged["pct"] = _clamp_pct(merged["pct"])
+
+            job_payload["progress"] = merged
+            d = self._job_dir(jid)
+            d.mkdir(parents=True, exist_ok=True)
+            _atomic_write_json(self._job_json(jid), job_payload)
+            self._jobs[jid] = job_payload
 
     def complete_current_stage(self, jid: str) -> None:
         progress = self.get(jid).get("progress") or {}
