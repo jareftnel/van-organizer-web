@@ -329,8 +329,6 @@ def generate_bags_xlsx_from_routesheets(
             safe = sheet_name[:31]  # Excel sheet name max length
             df.to_excel(writer, sheet_name=safe, index=False, header=False)
 
-        idx = pd.DataFrame([[name] for name, _df in wb_routes], columns=["Sheets"])
-        idx.to_excel(writer, sheet_name="INDEX", index=False)
 
     report("excel", "Excel ready.")
     return out
