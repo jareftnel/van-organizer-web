@@ -636,9 +636,13 @@ class JobStore:
         completed = list(progress.get("completed_stages") or [])
         if stage not in completed and stage in STAGE_WEIGHTS:
             completed.append(stage)
-        progress["completed_stages"] = completed
-        progress["stage_started_at"] = started
-        self.set(jid, progress=progress)
+        self.set_progress(
+            jid,
+            {
+                "completed_stages": completed,
+                "stage_started_at": started,
+            },
+        )
 
     def compute_progress_percent(self, jid: str) -> tuple[int, str]:
         job = self.get(jid)
