@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import threading
@@ -52,6 +53,8 @@ DEFAULT_STAGE_SECONDS = {
 PROGRESS_SLACK = 1.5
 STAGE_PROGRESS_CAP = 0.98
 EMA_ALPHA = 0.35
+EMA_EXPECTED_MIN_SECONDS = 0.5
+EMA_EXPECTED_MAX_SECONDS = 600.0
 
 
 def auto_detect_date_label(pdf_path: str) -> str:
@@ -429,11 +432,17 @@ class ProgressEmaStore:
         return float(DEFAULT_STAGE_SECONDS.get(stage, 10.0))
 
     def update(self, stage: str, observed: float) -> None:
-        if observed <= 0:
+        if not math.isfinite(observed) or observed <= 0:
             return
         with self._lock:
             old = self._data.get(stage, DEFAULT_STAGE_SECONDS.get(stage, observed))
-            new = (self.alpha * observed) + ((1 - self.alpha) * old)
+            if not math.isfinite(old):
+                old = observed
+            alpha = max(0.0, min(1.0, self.alpha))
+            new = (alpha * observed) + ((1 - alpha) * old)
+            if not math.isfinite(new):
+                new = observed
+            new = max(EMA_EXPECTED_MIN_SECONDS, min(EMA_EXPECTED_MAX_SECONDS, new))
             self._data[stage] = float(new)
             self._save()
 
