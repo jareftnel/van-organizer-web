@@ -550,10 +550,11 @@ class JobStore:
                 "html": "van_organizer.html",
                 "stacked": "STACKED.pdf",
             }
-            if payload.get("status") != "error":
-                if all((d / v).exists() for v in outs.values()):
-                    payload["status"] = "done"
-                    payload["outputs"] = outs
+            if payload.get("status") == "error":
+                pass
+            elif all((d / v).exists() for v in outs.values()):
+                payload["status"] = "done"
+                payload["outputs"] = outs
 
             with self._lock:
                 self._jobs[jid] = payload
