@@ -530,9 +530,18 @@ class JobStore:
         jfile = self._job_json(jid)
         if jfile.exists():
             try:
-                payload = json.loads(jfile.read_text(encoding="utf-8"))
-            except Exception:
-                payload = {"status": "error", "progress": {}, "error": "Corrupt job.json", "outputs": None}
+                raw = jfile.read_text(encoding="utf-8")
+                payload = json.loads(raw)
+                if not isinstance(payload, dict):
+                    raise ValueError("job.json payload is not an object")
+            except Exception as exc:
+                print(f"[jobstore] Failed to read {jfile.name} for jid={jid}: {exc}")
+                payload = {
+                    "status": "error",
+                    "progress": {"stage": "error", "msg": "Corrupt job.json"},
+                    "error": "Corrupt job.json",
+                    "outputs": None,
+                }
 
             # If outputs exist, mark done (even after restart)
             d = self._job_dir(jid)
