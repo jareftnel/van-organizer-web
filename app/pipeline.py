@@ -82,13 +82,27 @@ def _monotonic_seconds() -> float:
     return time.monotonic()
 
 
-def _atomic_write_json(path: Path, obj: Any) -> None:
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    with tmp_path.open("w", encoding="utf-8") as handle:
-        handle.write(json.dumps(obj))
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.replace(tmp_path, path)
+def _atomic_write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + f".tmp-{uuid.uuid4().hex}")
+
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(text)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)  # atomic on POSIX
+    finally:
+        # If something exploded before replace, don't leave junk behind
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+
+
+def _atomic_write_json(path: Path, payload: Any) -> None:
+    _atomic_write_text(path, json.dumps(payload, ensure_ascii=False))
 
 
 def _normalize_time_label(label: str, require_ampm: bool = False) -> str:
@@ -431,7 +445,6 @@ class ProgressEmaStore:
                 continue
 
     def _save(self) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {k: round(v, 3) for k, v in self._data.items()}
         _atomic_write_json(self.path, payload)
 
