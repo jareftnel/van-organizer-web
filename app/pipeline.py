@@ -501,7 +501,19 @@ class JobStore:
         jid = uuid.uuid4().hex[:10]
         d = self._job_dir(jid)
         d.mkdir(parents=True, exist_ok=True)
-        payload = {"status": "queued", "progress": {"pct": 0, "stage": "queued", "msg": "Queued"}, "error": None, "outputs": None}
+        payload = {
+            "status": "queued",
+            "progress": {
+                "pct": 0,
+                "stage": "queued",
+                "msg": "Queued",
+                "stage_started_at": _monotonic_seconds(),
+                "last_reported_percent": 0,
+                "completed_stages": [],
+            },
+            "error": None,
+            "outputs": None,
+        }
         _atomic_write_json(self._job_json(jid), payload)
         with self._lock:
             self._jobs[jid] = payload
