@@ -321,7 +321,7 @@ def generate_bags_xlsx_from_routesheets(
     if out["routes"] == 0:
         raise RuntimeError("No routes were parsed from the uploaded PDF.")
 
-    report("excel", f"Generating Excel… ({out['routes']} routes)")
+    report("excel", f"{STAGE_TEXT['excel']} ({out['routes']} routes)")
 
     Path(out_xlsx).parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
@@ -332,7 +332,7 @@ def generate_bags_xlsx_from_routesheets(
         idx = pd.DataFrame([[name] for name, _df in wb_routes], columns=["Sheets"])
         idx.to_excel(writer, sheet_name="INDEX", index=False)
 
-    report("excel", "Excel ready.")
+    report("excel", "Generating Data… Done.")
     return out
 
 
