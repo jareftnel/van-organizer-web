@@ -581,7 +581,7 @@ class JobStore:
             self._jobs[jid] = payload
 
     def set_progress(self, jid: str, payload: Dict[str, Any]):
-        payload = {key: value for key, value in payload.items() if value is not None}
+        payload = {k: v for k, v in payload.items() if v is not None}
         with self._lock:
             if jid in self._jobs:
                 job_payload = dict(self._jobs[jid])
@@ -599,7 +599,7 @@ class JobStore:
                 old_started = existing.get("stage_started_at")
                 if old_stage and old_started is not None:
                     self._ema.update(old_stage, max(0.0, now - float(old_started)))
-                    completed = list(existing.get("completed_stages") or [])
+                    completed = list(merged.get("completed_stages") or existing.get("completed_stages") or [])
                     if old_stage not in completed and old_stage in STAGE_WEIGHTS:
                         completed.append(old_stage)
                     merged["completed_stages"] = completed
