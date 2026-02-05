@@ -712,10 +712,15 @@ def process_job(store: JobStore, jid: str) -> None:
 
         stack_results = run_stacker(str(pdf_path), str(stacked_pdf), date_label, progress_cb=stack_cb)
         toc_entries = (stack_results or {}).get("toc_entries", [])
-        wave_images = list(job_dir.glob("wave_image_*"))
+        wave_images = [
+            p
+            for p in job_dir.glob("wave_image_*")
+            if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif", ".tif", ".tiff"}
+        ]
         wave_colors = extract_wave_color_map(wave_images, toc_entries)
 
         # 3) HTML
+        cb(stage="build_organizer", msg=STAGE_TEXT["build_organizer"])
         run_builder_html(str(pdf_path), str(xlsx_path), str(html_path), progress_cb=cb)
 
         store.complete_current_stage(jid)
@@ -744,4 +749,4 @@ def process_job(store: JobStore, jid: str) -> None:
         )
     except Exception as e:
         store.set(jid, status="error", error=str(e))
-        store.set_progress(jid, {"stage": "error", "msg": "Error"})
+        store.set_progress(jid, {"stage": "error", "msg": f"Error: {e}"})
