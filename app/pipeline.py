@@ -466,6 +466,10 @@ class ProgressEmaStore:
             return
         with self._lock:
             old = self._data.get(stage, DEFAULT_STAGE_SECONDS.get(stage, observed))
+            try:
+                old = float(old)
+            except Exception:
+                old = observed
             if not math.isfinite(old):
                 old = observed
             alpha = max(0.0, min(1.0, self.alpha))
