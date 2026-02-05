@@ -380,11 +380,17 @@ def run_stacker(
     date_label: str,
     progress_cb: Optional[Callable[..., None]] = None,
 ) -> Dict[str, Any]:
+    def cb(**payload: Any) -> None:
+        payload["stage"] = "build_optisheets"
+        payload.setdefault("msg", STAGE_TEXT["build_optisheets"])
+        if progress_cb:
+            progress_cb(**payload)
+
     return build_stacked_pdf_with_summary_grouped(
         str(pdf_path),
         str(out_pdf),
         date_label,
-        progress_cb=progress_cb
+        progress_cb=(cb if progress_cb else None),
     )
 
 
