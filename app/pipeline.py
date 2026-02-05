@@ -622,8 +622,6 @@ class JobStore:
                 merged["pct"] = _clamp_pct(merged["pct"])
 
             job_payload["progress"] = merged
-            d = self._job_dir(jid)
-            d.mkdir(parents=True, exist_ok=True)
             _atomic_write_json(self._job_json(jid), job_payload)
             self._jobs[jid] = job_payload
 
