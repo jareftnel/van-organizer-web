@@ -82,6 +82,15 @@ def _monotonic_seconds() -> float:
     return time.monotonic()
 
 
+def _atomic_write_json(path: Path, obj: Any) -> None:
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    with tmp_path.open("w", encoding="utf-8") as handle:
+        handle.write(json.dumps(obj))
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(tmp_path, path)
+
+
 def _normalize_time_label(label: str, require_ampm: bool = False) -> str:
     match = re.search(
         r"(\d{1,2})\s*[:.]\s*(\d{2})\s*([AaPp])?\s*([Mm])?",
@@ -424,7 +433,7 @@ class ProgressEmaStore:
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {k: round(v, 3) for k, v in self._data.items()}
-        self.path.write_text(json.dumps(payload), encoding="utf-8")
+        _atomic_write_json(self.path, payload)
 
     def expected(self, stage: str) -> float:
         if stage in self._data:
@@ -455,6 +464,8 @@ class JobStore:
         root_dir = root_dir or os.environ.get("VANORG_STATE_DIR") or "/tmp/vanorg_jobs"
         self.root = Path(root_dir)
         self.root.mkdir(parents=True, exist_ok=True)
+        env_set = os.environ.get("VANORG_STATE_DIR") is not None
+        print(f"[jobstore] root={self.root.resolve()} env_set={env_set}")
         self._lock = threading.Lock()
         self._jobs: Dict[str, Dict[str, Any]] = {}
         self._ema = ProgressEmaStore(self.root / "progress_ema.json")
@@ -470,7 +481,7 @@ class JobStore:
         d = self._job_dir(jid)
         d.mkdir(parents=True, exist_ok=True)
         payload = {"status": "queued", "progress": {"pct": 0, "stage": "queued", "msg": "Queued"}, "error": None, "outputs": None}
-        self._job_json(jid).write_text(json.dumps(payload), encoding="utf-8")
+        _atomic_write_json(self._job_json(jid), payload)
         with self._lock:
             self._jobs[jid] = payload
         return jid
@@ -512,7 +523,7 @@ class JobStore:
         payload.update(patch)
         d = self._job_dir(jid)
         d.mkdir(parents=True, exist_ok=True)
-        self._job_json(jid).write_text(json.dumps(payload), encoding="utf-8")
+        _atomic_write_json(self._job_json(jid), payload)
         with self._lock:
             self._jobs[jid] = payload
 
