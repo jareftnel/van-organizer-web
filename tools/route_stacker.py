@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 # CONFIG
 # =========================
-DPI = 200
+DPI = 300
 LETTER_W_IN, LETTER_H_IN = 8.5, 11.0
 MARGIN_IN = 0.5
 
