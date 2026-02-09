@@ -1,17 +1,17 @@
 # route_stacker.py
 from __future__ import annotations
 
-import math
-import re
-import json
-import time
-from pathlib import Path
 from collections import OrderedDict
+import json
+import math
+from pathlib import Path
+import re
+import time
 from typing import Any
 
-import pdfplumber
 import numpy as np
 import pandas as pd
+import pdfplumber
 from PIL import Image, ImageDraw, ImageFont
 
 
