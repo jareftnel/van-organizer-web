@@ -63,7 +63,7 @@ STYLE = {
     "row_stripe_height": spx(6),
     "table_cell_height": spx(64),
     "banner_height": spx(54),
-    "table_margin": spx(18),
+    "table_margin": spx(22),
     "bag_colors": {
         "yellow": (255, 235, 140),
         "green": (40, 160, 90),
