@@ -57,7 +57,7 @@ STYLE = {
     "meta_grey": (120, 120, 120),
     "royal_blue": (0, 32, 194),
     "purple": (75, 0, 130),
-    "lavender": (232, 223, 245),
+    "lavender": (228, 209, 243),
     "bright_red": (220, 0, 0),
     "soft_red_stripe": (220, 80, 80),
     "row_stripe_height": spx(4),
