@@ -18,9 +18,10 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 # CONFIG
 # =========================
-DPI = 300
-LETTER_W_IN, LETTER_H_IN = 8.5, 11.0
-MARGIN_IN = 0.5
+DPI: int = 300  # render resolution (pixels per inch)
+LETTER_W_IN: float = 8.5
+LETTER_H_IN: float = 11.0
+MARGIN_IN: float = 0.5
 
 PAGE_W_PX = int(LETTER_W_IN * DPI)
 PAGE_H_PX = int(LETTER_H_IN * DPI)
