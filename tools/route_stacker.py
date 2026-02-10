@@ -32,7 +32,10 @@ CONTENT_W_PX = PAGE_W_PX - 2 * MARGIN_PX
 
 TOP_MARGIN_PX = MARGIN_PX
 BOTTOM_MARGIN_PX = MARGIN_PX
-GAP_PX = 14
+
+GAP_IN: float = 0.07
+GAP_PX: int = round(GAP_IN * DPI)
+
 ROWS_GRID = 3  # tote rows
 
 # Table columns: Bag | Zones | Total
