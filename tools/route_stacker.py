@@ -65,7 +65,7 @@ STYLE = {
     "banner_height": spx(54),
     "table_margin": spx(22),
     "bag_colors": {
-        "yellow": (225, 212, 0),
+        "yellow": (230, 190, 60),
         "green": (0, 140, 65),
         "orange": (235, 145, 60),
         "black": (0, 0, 0),
