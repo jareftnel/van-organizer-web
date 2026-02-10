@@ -56,7 +56,7 @@ STYLE = {
     "banner_bg": (235, 235, 235),
     "meta_grey": (120, 120, 120),
     "royal_blue": (0, 32, 194),
-    "purple": (128, 0, 128),
+    "purple": (75, 0, 130),
     "lavender": (232, 223, 245),
     "bright_red": (220, 0, 0),
     "soft_red_stripe": (220, 80, 80),
