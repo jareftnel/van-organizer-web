@@ -55,7 +55,7 @@ COLS_W = [int(CONTENT_W_PX * w / COLS_SUM) for w in COLS_BASE]
 STYLE = {
     "banner_bg": (235, 235, 235),
     "meta_grey": (120, 120, 120),
-    "royal_blue": (65, 105, 225),
+    "royal_blue": (0, 32, 194),
     "purple": (128, 0, 128),
     "lavender": (232, 223, 245),
     "bright_red": (220, 0, 0),
