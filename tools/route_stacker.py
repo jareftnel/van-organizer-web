@@ -716,7 +716,7 @@ def render_table(
         d.rectangle([x, top, right, bot], outline="black", width=spx(2))
 
         if r % 3 == 0:
-            d.rectangle([x + spx(2), bot - STYLE["row_stripe_height"], right - spx(2), bot - spx(2)], fill=STYLE["soft_red_stripe"])
+            d.rectangle([x + spx(2), bot - STYLE["row_stripe_height"], right - spx(2), bot - spx(2)], fill=STYLE["soft_stripe"])
 
         cx = x
         df_idx = r - 1
