@@ -624,13 +624,26 @@ def draw_tote(df, bags):
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
                 d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
 
-        # Overflow chips
+        # Overflow chips (BOTTOM-ALIGNED)
         chips = cache[i]
         if chips:
-            cy = y0 + base_h + spx(8)
+            top_pad = spx(8)     # space below the big number area
+            bot_pad = spx(10)    # space above the tile border
+            gap = spx(4)
+
+            stack_h = sum(ch for _, _, ch, _ in chips) + gap * (len(chips) - 1)
+
+            # Try to place the whole stack flush-ish to the bottom...
+            cy = (y0 + tile_h) - bot_pad - stack_h
+
+            # ...but never let it rise into the number zone.
+            min_cy = y0 + base_h + top_pad
+            if cy < min_cy:
+                cy = min_cy
+
             for chip_img, cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
-                cy += ch + spx(4)
+                cy += ch + gap
 
     return img
 
