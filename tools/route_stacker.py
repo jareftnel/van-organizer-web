@@ -20,9 +20,9 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 # CONFIG
 # =========================
-DPI: int = 300  # render resolution (pixels per inch)
-BASE_DPI: int = 200
-SCALE: float = DPI / BASE_DPI
+DPI: int = 225  # render resolution (pixels per inch)
+BASE_DPI: int = 225
+SCALE: float = 1.0
 
 
 def spx(x: float) -> int:
