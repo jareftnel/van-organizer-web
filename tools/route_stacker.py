@@ -58,7 +58,7 @@ STYLE = {
     "royal_blue": (0, 32, 194),
     "purple": (75, 0, 130),
     "lavender": (228, 209, 243),
-    "bright_red": (170, 30, 30),
+    "bright_red": (210 , 40, 40),
     "soft_red_stripe": (220, 80, 80),
     "row_stripe_height": spx(4),
     "table_cell_height": spx(64),
