@@ -59,7 +59,7 @@ STYLE = {
     "purple": (75, 0, 130),
     "lavender": (236, 232, 255),
     "bright_red": (210 , 40, 40),
-    "soft_red_stripe": (220, 80, 80),
+    "soft_stripe": (190, 200, 220),
     "row_stripe_height": spx(4),
     "table_cell_height": spx(64),
     "banner_height": spx(54),
