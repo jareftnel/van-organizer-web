@@ -47,7 +47,7 @@ GAP_PX: int = round(GAP_IN * DPI)
 ROWS_GRID = 3  # tote rows
 
 # Table columns: Bag | Zones | Total
-COLS_BASE = [360, 900, 240]
+COLS_BASE = [spx(360), spx(900), spx(240)]
 COLS_SUM = sum(COLS_BASE)
 COLS_W = [int(CONTENT_W_PX * w / COLS_SUM) for w in COLS_BASE]
 
@@ -437,7 +437,7 @@ def draw_chip_fullwidth(draw, text, tile_w):
                 cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
             cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
             return chip, chip_w, chip_h, outer
-        size -= 1
+        size -= max(1, spx(1))
 
     fnt = FONT_TOTE_TAG_MIN
     bbox = draw.textbbox((0, 0), clean, font=fnt)
@@ -1083,7 +1083,7 @@ def render_toc_page(date_label: str, route_entries):
         return idx % cols
 
     best = None
-    for row_size in range(spx(34), spx(16), -1):
+    for row_size in range(spx(34), spx(16), -max(1, spx(1))):
         wave_size = max(spx(24), int(round(row_size * 1.22)))
         row_font = get_font(row_size)
         wave_font = get_font(wave_size)
