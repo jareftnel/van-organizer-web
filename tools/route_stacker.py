@@ -20,13 +20,13 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 # CONFIG
 # =========================
-DPI: int = 225  # render resolution (pixels per inch)
-BASE_DPI: int = 225
+DPI: int = 200
+BASE_DPI: int = 200
 SCALE: float = 1.0
 
 
 def spx(x: float) -> int:
-    return int(round(x))
+    return int(round(x * SCALE))  # keep it consistent
 
 
 LETTER_W_IN: float = 8.5
