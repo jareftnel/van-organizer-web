@@ -500,7 +500,19 @@ def draw_tote(df, bags):
 
     cols = max(1, math.ceil(n / ROWS_GRID))
     pad_x, pad_y = spx(6), spx(8)
-    tile_w = (CONTENT_W_PX - (cols - 1) * pad_x) // cols
+    inner_w = CONTENT_W_PX - (cols - 1) * pad_x
+    base_w = inner_w // cols
+    extra = inner_w - base_w * cols
+    # First `extra` columns get +1 px
+    col_ws = [base_w + (1 if i < extra else 0) for i in range(cols)]
+
+    col_x0 = []
+    x = 0
+    for w in col_ws:
+        col_x0.append(x)
+        x += w + pad_x
+
+    tile_w = max(col_ws)
 
     base_h = int(tile_w * 0.55)
     heights, cache = measure_tile_heights(df, tile_w)
@@ -532,10 +544,10 @@ def draw_tote(df, bags):
 
     for i in range(n):
         col, row = positions[i]
-        x0 = col * (tile_w + pad_x)
+        x0 = col_x0[col]
         y0 = row_y[row]
         tile_h = row_heights[row]
-        x1 = x0 + tile_w
+        x1 = x0 + col_ws[col]
 
         bg = color_for_bag(df.iat[i, 0])
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
