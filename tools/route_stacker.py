@@ -26,7 +26,7 @@ SCALE: float = DPI / BASE_DPI
 
 
 def spx(x: float) -> int:
-    return int(round(x * SCALE))
+    return int(round(x))
 
 
 LETTER_W_IN: float = 8.5
