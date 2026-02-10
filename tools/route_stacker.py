@@ -21,6 +21,14 @@ from PIL import Image, ImageDraw, ImageFont
 # CONFIG
 # =========================
 DPI: int = 300  # render resolution (pixels per inch)
+BASE_DPI: int = 200
+SCALE: float = DPI / BASE_DPI
+
+
+def spx(x: float) -> int:
+    return int(round(x * SCALE))
+
+
 LETTER_W_IN: float = 8.5
 LETTER_H_IN: float = 11.0
 MARGIN_IN: float = 0.5
@@ -52,10 +60,10 @@ STYLE = {
     "lavender": (232, 223, 245),
     "bright_red": (220, 0, 0),
     "soft_red_stripe": (220, 80, 80),
-    "row_stripe_height": 4,
-    "table_cell_height": 64,
-    "banner_height": 54,
-    "table_margin": 18,
+    "row_stripe_height": spx(4),
+    "table_cell_height": spx(64),
+    "banner_height": spx(54),
+    "table_margin": spx(18),
     "bag_colors": {
         "yellow": (255, 235, 140),
         "green": (40, 160, 90),
@@ -104,18 +112,18 @@ def get_font(size: int):
     _FONT_CACHE[size] = f
     return f
 
-FONT_BANNER = get_font(40)
-FONT_TABLE = get_font(32)
-FONT_SUMMARY = get_font(32)
-FONT_TOTE_NUM = get_font(40)
-FONT_TOTE_TAG_BASE = get_font(22)
-FONT_TOTE_TAG_MIN = get_font(14)
-FONT_TOTE_PKGS = get_font(22)
-FONT_STYLE_TAG = get_font(22)
-FONT_DATE = get_font(22)
-FONT_ZONE = get_font(16)
+FONT_BANNER = get_font(spx(40))
+FONT_TABLE = get_font(spx(32))
+FONT_SUMMARY = get_font(spx(32))
+FONT_TOTE_NUM = get_font(spx(40))
+FONT_TOTE_TAG_BASE = get_font(spx(22))
+FONT_TOTE_TAG_MIN = get_font(spx(14))
+FONT_TOTE_PKGS = get_font(spx(22))
+FONT_STYLE_TAG = get_font(spx(22))
+FONT_DATE = get_font(spx(22))
+FONT_ZONE = get_font(spx(16))
 
-_CHIP_DUMMY_IMG = Image.new("RGB", (10, 10), "white")
+_CHIP_DUMMY_IMG = Image.new("RGB", (spx(10), spx(10)), "white")
 _CHIP_D = ImageDraw.Draw(_CHIP_DUMMY_IMG)
 
 
@@ -406,7 +414,7 @@ def df_from(bags, texts, totals):
 # CHIP RENDERING
 # =========================
 def draw_chip_fullwidth(draw, text, tile_w):
-    outer = 6
+    outer = spx(6)
     max_w = tile_w - 2 * outer
     clean = str(text).strip()
     is99 = is_99_tag(clean)
@@ -418,13 +426,13 @@ def draw_chip_fullwidth(draw, text, tile_w):
         fnt = get_font(size)
         bbox = draw.textbbox((0, 0), clean, font=fnt)
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        if tw + 12 <= max_w:
+        if tw + spx(12) <= max_w:
             chip_w = max_w
-            chip_h = th + 8
+            chip_h = th + spx(8)
             chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
             cd = ImageDraw.Draw(chip)
             try:
-                cd.rounded_rectangle([0, 0, chip_w - 1, chip_h - 1], radius=6, fill=bg_color)
+                cd.rounded_rectangle([0, 0, chip_w - 1, chip_h - 1], radius=spx(6), fill=bg_color)
             except Exception:
                 cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
             cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
@@ -435,7 +443,7 @@ def draw_chip_fullwidth(draw, text, tile_w):
     bbox = draw.textbbox((0, 0), clean, font=fnt)
     th = bbox[3] - bbox[1]
     chip_w = max_w
-    chip_h = th + 8
+    chip_h = th + spx(8)
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
     cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
@@ -459,9 +467,9 @@ def measure_tile_heights(df, tile_w):
             total_h += ch
 
         if toks:
-            total_h += 4 * (len(toks) - 1)
+            total_h += spx(4) * (len(toks) - 1)
 
-        heights.append(base_h + (4 if toks else 0) + total_h + 10)
+        heights.append(base_h + (spx(4) if toks else 0) + total_h + spx(10))
         cache.append(chips)
 
     return heights, cache
@@ -473,7 +481,7 @@ def measure_tile_heights(df, tile_w):
 def draw_tote(df, bags):
     n = len(df)
     if n == 0:
-        return Image.new("RGB", (CONTENT_W_PX, 10), "white")
+        return Image.new("RGB", (CONTENT_W_PX, spx(10)), "white")
 
     def fmt_zone(sz):
         if not sz:
@@ -491,7 +499,7 @@ def draw_tote(df, bags):
             zone_display.append(fmt_zone(last) if last else "")
 
     cols = max(1, math.ceil(n / ROWS_GRID))
-    pad_x, pad_y = 6, 8
+    pad_x, pad_y = spx(6), spx(8)
     tile_w = (CONTENT_W_PX - (cols - 1) * pad_x) // cols
 
     base_h = int(tile_w * 0.55)
@@ -530,7 +538,7 @@ def draw_tote(df, bags):
         x1 = x0 + tile_w
 
         bg = color_for_bag(df.iat[i, 0])
-        d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=2)
+        d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
 
         label = df.iat[i, 0]
         num = str(label).split()[-1]
@@ -541,7 +549,7 @@ def draw_tote(df, bags):
         halo_center = (0, 0, 0) if lum < 140 else (255, 255, 255)
 
         num_x = (x0 + x1) // 2
-        num_y = y0 + base_h // 2 + 14  # your “14” vertical center shift
+        num_y = y0 + base_h // 2 + spx(14)  # your “14” vertical center shift
 
         try:
             d.text(
@@ -550,13 +558,13 @@ def draw_tote(df, bags):
                 anchor="mm",
                 font=FONT_TOTE_NUM,
                 fill=num_fill,
-                stroke_width=3,
+                stroke_width=spx(3),
                 stroke_fill=halo_center,
             )
         except TypeError:
             bbox = d.textbbox((0, 0), num, font=FONT_TOTE_NUM)
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            pad = 3
+            pad = spx(3)
             d.rectangle(
                 (num_x - tw // 2 - pad, num_y - th // 2 - pad, num_x + tw // 2 + pad, num_y + th // 2 + pad),
                 fill=halo_center,
@@ -568,20 +576,20 @@ def draw_tote(df, bags):
         if zdisp:
             try:
                 d.text(
-                    (x0 + 6, y0 + 4),
+                    (x0 + spx(6), y0 + spx(4)),
                     zdisp,
                     anchor="la",
                     font=FONT_TOTE_PKGS,
                     fill=(70, 70, 70),
-                    stroke_width=2,
+                    stroke_width=spx(2),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
                 bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_PKGS)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                pad = 1
-                d.rectangle((x0 + 6 - pad, y0 + 4 - pad, x0 + 6 + tw + pad, y0 + 4 + th + pad), fill=(255, 255, 255))
-                d.text((x0 + 6, y0 + 4), zdisp, anchor="la", font=FONT_TOTE_PKGS, fill=(70, 70, 70))
+                pad = spx(1)
+                d.rectangle((x0 + spx(6) - pad, y0 + spx(4) - pad, x0 + spx(6) + tw + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
+                d.text((x0 + spx(6), y0 + spx(4)), zdisp, anchor="la", font=FONT_TOTE_PKGS, fill=(70, 70, 70))
 
         # Top-right pkgs with white halo
         binfo = bags[i]
@@ -589,28 +597,28 @@ def draw_tote(df, bags):
             pk_txt = str(int(binfo["pkgs"]))
             try:
                 d.text(
-                    (x1 - 6, y0 + 4),
+                    (x1 - spx(6), y0 + spx(4)),
                     pk_txt,
                     anchor="ra",
                     font=FONT_TOTE_PKGS,
                     fill=STYLE["bright_red"],
-                    stroke_width=2,
+                    stroke_width=spx(2),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
                 bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_PKGS)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                pad = 1
-                d.rectangle((x1 - 6 - tw - pad, y0 + 4 - pad, x1 - 6 + pad, y0 + 4 + th + pad), fill=(255, 255, 255))
-                d.text((x1 - 6, y0 + 4), pk_txt, anchor="ra", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
+                pad = spx(1)
+                d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
+                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
 
         # Overflow chips
         chips = cache[i]
         if chips:
-            cy = y0 + base_h + 8
+            cy = y0 + base_h + spx(8)
             for chip_img, cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
-                cy += ch + 4
+                cy += ch + spx(4)
 
     return img
 
@@ -650,12 +658,12 @@ def render_table(
         left = str(date_label)
 
     if left:
-        d.text((12, banner_h // 2), left, anchor="lm", font=FONT_DATE, fill=STYLE["meta_grey"])
+        d.text((spx(12), banner_h // 2), left, anchor="lm", font=FONT_DATE, fill=STYLE["meta_grey"])
 
     d.text((width // 2, banner_h // 2), title, anchor="mm", font=FONT_BANNER, fill="black")
 
     if style_label:
-        d.text((width - 12, banner_h // 2), str(style_label).upper(), anchor="rm", font=FONT_STYLE_TAG, fill=STYLE["meta_grey"])
+        d.text((width - spx(12), banner_h // 2), str(style_label).upper(), anchor="rm", font=FONT_STYLE_TAG, fill=STYLE["meta_grey"])
 
     x = margin
     y0 = banner_h + margin
@@ -669,10 +677,10 @@ def render_table(
     # Top summary row
     top = y0
     bot = top + cell_h
-    d.rectangle([x, top, right, bot], outline="black", width=2)
-    d.text((x + 10, (top + bot) // 2), f"{bag_count} bags", anchor="lm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
-    d.text((right - 10, (top + bot) // 2), f"{declared_overflow} overflow", anchor="rm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
-    d.line([x, bot, right, bot], fill=STYLE["royal_blue"], width=5)
+    d.rectangle([x, top, right, bot], outline="black", width=spx(2))
+    d.text((x + spx(10), (top + bot) // 2), f"{bag_count} bags", anchor="lm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
+    d.text((right - spx(10), (top + bot) // 2), f"{declared_overflow} overflow", anchor="rm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
+    d.line([x, bot, right, bot], fill=STYLE["royal_blue"], width=spx(5))
 
     # Bag rows
     last_zone_for_display = None
@@ -680,10 +688,10 @@ def render_table(
     for r in range(1, len(df) + 1):
         top = y0 + r * cell_h
         bot = top + cell_h
-        d.rectangle([x, top, right, bot], outline="black", width=2)
+        d.rectangle([x, top, right, bot], outline="black", width=spx(2))
 
         if r % 3 == 0:
-            d.rectangle([x + 2, bot - STYLE["row_stripe_height"], right - 2, bot - 2], fill=STYLE["soft_red_stripe"])
+            d.rectangle([x + spx(2), bot - STYLE["row_stripe_height"], right - spx(2), bot - spx(2)], fill=STYLE["soft_red_stripe"])
 
         cx = x
         df_idx = r - 1
@@ -719,18 +727,18 @@ def render_table(
                         except Exception:
                             pkg_txt = ""
 
-                start_x = cx + 10
+                start_x = cx + spx(10)
 
                 if zone_display:
                     d.text((start_x, ym), zone_display, anchor="lm", font=FONT_ZONE, fill=STYLE["meta_grey"])
                     zb = d.textbbox((0, 0), zone_display, font=FONT_ZONE)
-                    start_x += (zb[2] - zb[0]) + 6
+                    start_x += (zb[2] - zb[0]) + spx(6)
 
                 d.text((start_x, ym), label, anchor="lm", font=FONT_TABLE, fill="black")
 
                 if pkg_txt:
                     lb = d.textbbox((0, 0), label, font=FONT_TABLE)
-                    d.text((start_x + (lb[2] - lb[0]) + 6, ym), pkg_txt, anchor="lm", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
+                    d.text((start_x + (lb[2] - lb[0]) + spx(6), ym), pkg_txt, anchor="lm", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
 
             # Overflow zones column
             elif c_idx == 1:
@@ -752,7 +760,7 @@ def render_table(
                     bb = d.textbbox((0, 0), seg, font=FONT_TABLE)
                     total_w += bb[2] - bb[0]
 
-                sx = cx + max((w - total_w) // 2, 4)
+                sx = cx + max((w - total_w) // 2, spx(4))
                 for seg, color in segs:
                     bb = d.textbbox((0, 0), seg, font=FONT_TABLE)
                     sw = bb[2] - bb[0]
@@ -761,23 +769,23 @@ def render_table(
 
             # Overflow totals column
             else:
-                d.text((cx + w - 10, ym), text, anchor="rm", font=FONT_TABLE, fill="black")
+                d.text((cx + w - spx(10), ym), text, anchor="rm", font=FONT_TABLE, fill="black")
 
             cx += w
 
     # Bottom totals row
     br_top = y0 + (len(df) + 1) * cell_h
     br_bot = br_top + cell_h
-    d.rectangle([x, br_top, right, br_bot], outline="black", width=4)
+    d.rectangle([x, br_top, right, br_bot], outline="black", width=spx(4))
 
     if commercial_pkgs is not None:
-        d.text((x + 10, (br_top + br_bot) // 2), f"{int(commercial_pkgs)} Commercial", anchor="lm", font=FONT_TABLE, fill=STYLE["bright_red"])
+        d.text((x + spx(10), (br_top + br_bot) // 2), f"{int(commercial_pkgs)} Commercial", anchor="lm", font=FONT_TABLE, fill=STYLE["bright_red"])
 
     if total_pkgs is not None:
-        d.text((right - 10, (br_top + br_bot) // 2), f"{int(total_pkgs)} Total", anchor="rm", font=FONT_TABLE, fill=STYLE["bright_red"])
+        d.text((right - spx(10), (br_top + br_bot) // 2), f"{int(total_pkgs)} Total", anchor="rm", font=FONT_TABLE, fill=STYLE["bright_red"])
 
     # Outer border
-    d.rectangle([x, y0, right, y0 + total_rows * cell_h], outline="black", width=2)
+    d.rectangle([x, y0, right, y0 + total_rows * cell_h], outline="black", width=spx(2))
 
     return im
 
@@ -837,13 +845,13 @@ def render_summary_pages(
       - Pg (right-aligned)
     """
     header_font = FONT_BANNER
-    body_font = get_font(24)
-    label_font = get_font(18)
+    body_font = get_font(spx(24))
+    label_font = get_font(spx(18))
 
     x_left = MARGIN_PX
     x_mid = MARGIN_PX + int(CONTENT_W_PX * 0.62)
     x_right = PAGE_W_PX - MARGIN_PX
-    bottom_guard = 80
+    bottom_guard = spx(80)
 
     pages = []
     specs_pages = []
@@ -851,11 +859,11 @@ def render_summary_pages(
     def _start_page():
         page = Image.new("RGB", (PAGE_W_PX, PAGE_H_PX), "white")
         d = ImageDraw.Draw(page)
-        d.text((x_right, 46), "Pg", anchor="ra", font=label_font, fill=(90, 90, 90))
+        d.text((x_right, spx(46)), "Pg", anchor="ra", font=label_font, fill=(90, 90, 90))
         return page, d, []
 
     page, d, link_specs = _start_page()
-    y = 70
+    y = spx(70)
     current_section = None
 
     def _push_page():
@@ -863,7 +871,7 @@ def render_summary_pages(
         pages.append(page)
         specs_pages.append(link_specs)
         page, d, link_specs = _start_page()
-        y = 70
+        y = spx(70)
 
     def _ensure_space(needed_h, repeat_section=False):
         nonlocal y, current_section
@@ -878,7 +886,7 @@ def render_summary_pages(
         nonlocal current_section
         current_section = title
         d.text((x_left, y_in), title, anchor="la", font=header_font, fill="black")
-        return y_in + 44
+        return y_in + spx(44)
 
     def _row(route, metric, page_no, y_in, *, color="black", clickable=True):
         link_color = (0, 0, 238) if clickable else color
@@ -891,22 +899,22 @@ def render_summary_pages(
                 bbox = body_font.getbbox(route)
                 w = bbox[2] - bbox[0]
                 h = bbox[3] - bbox[1]
-                uy = y_in + h + 1
-                d.line([(x_left, uy), (x_left + w, uy)], fill=link_color, width=2)
-                rect = (x_left, y_in - 2, x_left + w + 6, y_in + h + 2)
+                uy = y_in + h + spx(1)
+                d.line([(x_left, uy), (x_left + w, uy)], fill=link_color, width=spx(2))
+                rect = (x_left, y_in - spx(2), x_left + w + spx(6), y_in + h + spx(2))
                 link_specs.append({"rect": rect, "page": int(page_no)})
             except Exception:
                 pass
-        return y_in + 26
+        return y_in + spx(26)
 
     # 1) Verification
-    y = _ensure_space(44 + 12)
+    y = _ensure_space(spx(44) + spx(12))
     y = _section("Verification", y)
-    y += 6
+    y += spx(6)
 
     if mismatches:
         for m in mismatches:
-            y = _ensure_space(26, repeat_section=True)
+            y = _ensure_space(spx(26), repeat_section=True)
             route = m.get("title", "Route")
             page_no = int(m.get("output_page") or 0)
 
@@ -918,45 +926,45 @@ def render_summary_pages(
             metric = " | ".join(parts) if parts else "Mismatch"
 
             y = _row(route, metric, page_no, y, color=(220, 0, 0))
-        y += 12
+        y += spx(12)
     else:
-        y = _ensure_space(44)
+        y = _ensure_space(spx(44))
         d.text((x_left, y), "OK (NO MISMATCHES)", anchor="la", font=body_font, fill=(0, 140, 0))
-        y += 44
+        y += spx(44)
 
     # 2) Routes with 30+ Bags
-    y = _ensure_space(44 + 12)
+    y = _ensure_space(spx(44) + spx(12))
     y = _section("Routes with 30+ Bags", y)
-    y += 6
+    y += spx(6)
     for bag_count, title, output_page in (routes_over_30 or []):
-        y = _ensure_space(26, repeat_section=True)
+        y = _ensure_space(spx(26), repeat_section=True)
         y = _row(title, f"{bag_count} bags", output_page, y)
-    y += 12
+    y += spx(12)
 
     # 3) Routes with 50+ Overflow
-    y = _ensure_space(44 + 12)
+    y = _ensure_space(spx(44) + spx(12))
     y = _section("Routes with 50+ Overflow", y)
-    y += 6
+    y += spx(6)
     for overflow_count, title, output_page in (routes_over_50_overflow or []):
-        y = _ensure_space(26, repeat_section=True)
+        y = _ensure_space(spx(26), repeat_section=True)
         y = _row(title, f"{overflow_count} overflow", output_page, y)
-    y += 12
+    y += spx(12)
 
     # 4) Heaviest Totals (Top 10)
-    y = _ensure_space(44 + 12)
+    y = _ensure_space(spx(44) + spx(12))
     y = _section("Routes with Heaviest Package Counts", y)
-    y += 6
+    y += spx(6)
     for total_pkgs, title, output_page in (top10_heavy_totals or []):
-        y = _ensure_space(26, repeat_section=True)
+        y = _ensure_space(spx(26), repeat_section=True)
         y = _row(title, f"{total_pkgs} total", output_page, y)
-    y += 12
+    y += spx(12)
 
     # 5) Heaviest Commercial (Top 10)
-    y = _ensure_space(44 + 12)
+    y = _ensure_space(spx(44) + spx(12))
     y = _section("Routes with Heaviest Commercial", y)
-    y += 6
+    y += spx(6)
     for comm_pkgs, title, output_page in (top10_commercial or []):
-        y = _ensure_space(26, repeat_section=True)
+        y = _ensure_space(spx(26), repeat_section=True)
         y = _row(title, f"{comm_pkgs} commercial", output_page, y)
 
     pages.append(page)
@@ -990,23 +998,23 @@ def render_toc_page(date_label: str, route_entries):
     d = ImageDraw.Draw(page)
 
     # Stable title block
-    title_font = get_font(72)
-    date_font = get_font(34)
-    sub_font = get_font(28)
+    title_font = get_font(spx(72))
+    date_font = get_font(spx(34))
+    sub_font = get_font(spx(28))
 
     x_center = PAGE_W_PX // 2
-    y = 120
+    y = spx(120)
 
     d.text((x_center, y), "Route Sheets", anchor="ma", font=title_font, fill="black")
-    y += 82
+    y += spx(82)
     d.text((x_center, y), str(date_label), anchor="ma", font=date_font, fill="black")
-    y += 46
+    y += spx(46)
     n = len(route_entries or [])
     d.text((x_center, y), f"({n} Routes)", anchor="ma", font=sub_font, fill=(60, 60, 60))
-    y += 40
+    y += spx(40)
 
-    d.line([(MARGIN_PX, y), (PAGE_W_PX - MARGIN_PX, y)], fill=(0, 0, 0), width=3)
-    y += 22
+    d.line([(MARGIN_PX, y), (PAGE_W_PX - MARGIN_PX, y)], fill=(0, 0, 0), width=spx(3))
+    y += spx(22)
 
     entries = list(route_entries or [])
 
@@ -1048,14 +1056,14 @@ def render_toc_page(date_label: str, route_entries):
         return page, []
 
     cols = 3
-    gap_x = 36
-    gap_y = 22
+    gap_x = spx(36)
+    gap_y = spx(22)
     col_w = (CONTENT_W_PX - gap_x * (cols - 1)) // cols
     col_x = [MARGIN_PX + i * (col_w + gap_x) for i in range(cols)]
     col_mid = [x + col_w // 2 for x in col_x]
 
-    bottom_limit = PAGE_H_PX - 110
-    available_h = max(10, bottom_limit - y)
+    bottom_limit = PAGE_H_PX - spx(110)
+    available_h = max(spx(10), bottom_limit - y)
 
     def _text_w(font, s):
         try:
@@ -1075,15 +1083,15 @@ def render_toc_page(date_label: str, route_entries):
         return idx % cols
 
     best = None
-    for row_size in range(34, 16, -1):
-        wave_size = max(24, int(round(row_size * 1.22)))
+    for row_size in range(spx(34), spx(16), -1):
+        wave_size = max(spx(24), int(round(row_size * 1.22)))
         row_font = get_font(row_size)
         wave_font = get_font(wave_size)
 
-        line_h = _text_h(row_font) + 6
-        header_h = _text_h(wave_font) + 8
-        pad_top = 6
-        pad_bottom = 4
+        line_h = _text_h(row_font) + spx(6)
+        header_h = _text_h(wave_font) + spx(8)
+        pad_top = spx(6)
+        pad_bottom = spx(4)
 
         heights = []
         for label, items in wave_blocks:
@@ -1128,11 +1136,11 @@ def render_toc_page(date_label: str, route_entries):
         break
 
     if best is None:
-        row_font = get_font(22)
-        wave_font = get_font(28)
-        line_h = _text_h(row_font) + 6
-        header_h = _text_h(wave_font) + 8
-        pad_top = 6
+        row_font = get_font(spx(22))
+        wave_font = get_font(spx(28))
+        line_h = _text_h(row_font) + spx(6)
+        header_h = _text_h(wave_font) + spx(8)
+        pad_top = spx(6)
         rows = (len(wave_blocks) + cols - 1) // cols
         row_heights = [0] * rows
         best = {
@@ -1191,9 +1199,9 @@ def render_toc_page(date_label: str, route_entries):
                     htxt = bbox[3] - bbox[1]
                     x0 = xm - w / 2.0
                     x1 = xm + w / 2.0
-                    uy = yy + htxt + 1
-                    d.line([(x0, uy), (x1, uy)], fill=link_color, width=2)
-                    rect = (x0 - 3, yy - 2, x1 + 3, yy + htxt + 2)
+                    uy = yy + htxt + spx(1)
+                    d.line([(x0, uy), (x1, uy)], fill=link_color, width=spx(2))
+                    rect = (x0 - spx(3), yy - spx(2), x1 + spx(3), yy + htxt + spx(2))
                     link_specs.append({"rect": rect, "page": pg, "page_num": 1})
                 except Exception:
                     pass
