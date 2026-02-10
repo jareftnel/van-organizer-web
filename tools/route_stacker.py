@@ -1,14 +1,16 @@
 # route_stacker.py
 from __future__ import annotations
 
-from collections import OrderedDict
+# stdlib
 import json
 import math
-from pathlib import Path
 import re
 import time
+from collections import OrderedDict
+from pathlib import Path
 from typing import Any
 
+# third-party
 import numpy as np
 import pandas as pd
 import pdfplumber
