@@ -432,9 +432,9 @@ def draw_chip_fullwidth(draw, text, tile_w):
             chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
             cd = ImageDraw.Draw(chip)
             try:
-                cd.rounded_rectangle([0, 0, chip_w - 1, chip_h - 1], radius=spx(6), fill=bg_color)
+                cd.rounded_rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], radius=spx(6), fill=bg_color)
             except Exception:
-                cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
+                cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
             cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
             return chip, chip_w, chip_h, outer
         size -= max(1, spx(1))
@@ -446,7 +446,7 @@ def draw_chip_fullwidth(draw, text, tile_w):
     chip_h = th + spx(8)
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
-    cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
+    cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
     cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
     return chip, chip_w, chip_h, outer
 
