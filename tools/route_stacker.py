@@ -63,7 +63,7 @@ STYLE = {
     "purple": (75, 0, 130),
     "lavender": (236, 232, 255),
     "bright_red": (210, 40, 40),
-    "row_fill_teal": (210, 235, 235),
+    "row_fill_teal": (238, 247, 247),
     "divider_teal": (0, 140, 140),
     "divider_grey": (170,170, 170),
     "row_divider_h": spx(2),
