@@ -252,7 +252,7 @@ def parse_route_page(text: str):
                 ptr + 4 < len(toks)
                 and toks[ptr].isdigit()
                 and is_zone(toks[ptr + 1])
-                and toks[ptr + 2] in BAG_COLORS_ALLOWED
+                and toks[ptr + 2].istitle()
             ):
                 idx_val = parse_int_safe(toks[ptr], "Bag index", route_title)
                 bag_num_str = extract_bag_num_str(toks[ptr + 3], "Bag number (with zone)", route_title)
@@ -313,7 +313,7 @@ def parse_route_page(text: str):
         return None
 
     bags.sort(key=lambda b: b.get("idx", 10**6))
-    style_label = infer_style_label(text, rs)
+    style_label = infer_style_label(text)
     time_label = extract_time_label(text)
 
     return (
