@@ -153,7 +153,7 @@ def is_99_tag(label: str) -> bool:
     first = clean.split()[0] if clean else ""
     return first.startswith("99.")
 
-def infer_style_label(text: str, rs: str | None) -> str:
+def infer_style_label(text: str) -> str:
     t = (text or "").lower()
 
     if "on-road experience" in t or "on road experience" in t:
