@@ -707,7 +707,8 @@ def render_table(
 
     min_mid = spx(520)
     min_side = spx(240)
-    max_side = max(0, (right - x - min_mid) // 2)
+    available_w = right - x
+    max_side = max(0, (available_w - min_mid) // 2)
 
     max_w = 0
     last_zone_for_measure = None
@@ -743,24 +744,22 @@ def render_table(
             max_w = max_side
             break
 
-    target_mid = min_mid
-
     # Start with measured width clamped to what can fit
     side = int(min(max_w, max_side))
 
-    # Only enforce min_side if it doesn't violate target_mid
-    if (right - x) - 2 * min_side >= target_mid:
+    # Only enforce min_side if it doesn't violate min_mid
+    if available_w - 2 * min_side >= min_mid:
         side = max(side, min_side)
 
-    mid = (right - x) - 2 * side
+    mid = available_w - 2 * side
 
     # Safety net: if mid got squeezed too far, reduce sides
-    if mid < target_mid:
-        max_side_for_target = max(0, ((right - x) - target_mid) // 2)
+    if mid < min_mid:
+        max_side_for_target = max(0, (available_w - min_mid) // 2)
         side = max(0, min(side, max_side_for_target))
-        if (right - x) - 2 * min_side >= target_mid:
+        if available_w - 2 * min_side >= min_mid:
             side = max(side, min_side)
-        mid = (right - x) - 2 * side
+        mid = available_w - 2 * side
 
     col_w = [side, mid, side]
 
