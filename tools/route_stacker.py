@@ -57,13 +57,13 @@ COLS_W = [side, w2, side]
 
 
 STYLE = {
-    "banner_bg": (235, 235, 235),
-    "meta_grey": (120, 120, 120),
+    "banner_bg": (211, 211, 211),
+    "meta_grey": (85, 85, 85),
     "royal_blue": (0, 32, 194),
     "purple": (75, 0, 130),
     "lavender": (236, 232, 255),
     "bright_red": (210, 40, 40),
-    "soft_stripe": (230, 150, 150),
+    "soft_stripe": (0, 140, 140),
     "row_stripe_height": spx(6),
     "table_cell_height": spx(64),
     "banner_height": spx(54),
