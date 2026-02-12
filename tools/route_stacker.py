@@ -695,10 +695,78 @@ def render_table(
     y0 = banner_h + margin
     right = width - margin
 
-    col_w = COLS_W[:]
-    diff = (right - x) - sum(col_w)
-    if diff:
-        col_w[1] += diff
+    def _tw(font, s) -> int:
+        s = "" if s is None else str(s)
+        if not s:
+            return 0
+        try:
+            box = d.textbbox((0, 0), s, font=font)
+            return int(box[2] - box[0])
+        except Exception:
+            try:
+                return int(d.textlength(s, font=font))
+            except Exception:
+                return int(len(s) * (getattr(font, "size", 12) * 0.6))
+
+    pad_lr = spx(10)
+    zone_gap = spx(6)
+    pkg_gap = spx(6)
+
+    min_mid = spx(520)
+    min_side = spx(240)
+    max_side = max(0, (right - x - min_mid) // 2)
+
+    max_w = 0
+    last_zone_for_measure = None
+
+    for df_idx in range(len(df)):
+        label = str(df.iat[df_idx, 0] or "")
+        bag_w = _tw(FONT_TABLE, label)
+
+        zone_display = ""
+        pkg_txt = ""
+
+        if df_idx < len(bags):
+            binfo = bags[df_idx]
+            actual_sz = binfo.get("sort_zone")
+
+            if actual_sz:
+                last_zone_for_measure = actual_sz
+                zone_display = actual_sz.split("-", 1)[1] if "-" in actual_sz else actual_sz
+            elif last_zone_for_measure:
+                zone_display = last_zone_for_measure.split("-", 1)[1] if "-" in last_zone_for_measure else last_zone_for_measure
+
+            if actual_sz and binfo.get("pkgs") not in ("", None):
+                try:
+                    pkg_txt = f" ({int(binfo['pkgs'])})"
+                except Exception:
+                    pkg_txt = ""
+
+        zone_w = _tw(FONT_ZONE, zone_display) + (zone_gap if zone_display else 0)
+        pkg_w = _tw(FONT_TOTE_PKGS, pkg_txt) + (pkg_gap if pkg_txt else 0)
+
+        max_w = max(max_w, zone_w + bag_w + pkg_w + pad_lr * 2)
+        if max_w >= max_side:
+            max_w = max_side
+            break
+
+    target_mid = spx(120)
+    side = int(min(max_w, max_side))
+    if (right - x) - 2 * min_side >= target_mid:
+        side = max(side, min_side)
+    mid = (right - x) - 2 * side
+
+    # safety net
+    if mid < target_mid:
+        # compute max possible side that still leaves target_mid
+        max_side_for_target = max(0, ((right - x) - target_mid) // 2)
+        side = max(0, min(side, max_side_for_target))
+        # still honor min_side ONLY if it fits
+        if (right - x) - 2 * min_side >= target_mid:
+            side = max(side, min_side)
+        mid = (right - x) - 2 * side
+
+    col_w = [side, mid, side]
 
     # Top summary row
     top = y0
