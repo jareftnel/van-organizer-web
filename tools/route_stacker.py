@@ -46,7 +46,6 @@ GAP_PX: int = round(GAP_IN * DPI)
 
 ROWS_GRID = 3  # tote rows
 
-# Table columns: Bag | Zones | Total
 
 STYLE = {
     "banner_bg": (211, 211, 211),
@@ -744,7 +743,7 @@ def render_table(
             max_w = max_side
             break
 
-    target_mid = spx(120)
+    target_mid = min_mid
 
     # Start with measured width clamped to what can fit
     side = int(min(max_w, max_side))
