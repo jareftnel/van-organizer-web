@@ -63,8 +63,10 @@ STYLE = {
     "purple": (75, 0, 130),
     "lavender": (236, 232, 255),
     "bright_red": (210, 40, 40),
-    "soft_stripe": (0, 140, 140),
-    "row_stripe_height": spx(6),
+    "row_fill_teal": (210, 235, 235),
+    "divider_teal": (0, 140, 140),
+    "divider_grey": (170,170, 170),
+    "row_divider_h": spx(2),
     "table_cell_height": spx(64),
     "banner_height": spx(54),
     "table_margin": spx(22),
@@ -714,8 +716,20 @@ def render_table(
         bot = top + cell_h
         d.rectangle([x, top, right, bot], outline="black", width=spx(2))
 
+        # --- teal/white rhythm: 3 teal rows, 3 white rows, repeat ---
+        block = (r - 1) // 3              # 0,1,2,3...
+        teal_block = (block % 2) == 0     # teal blocks: 0,2,4...
+
+        # fill teal rows (white rows stay default)
+        if teal_block:
+            d.rectangle([x, top, right, bot], fill=STYLE["row_fill_teal"])
+
+        # divider under each 3-row block
         if r % 3 == 0:
-            d.rectangle([x + spx(2), bot - STYLE["row_stripe_height"], right - spx(2), bot - spx(2)], fill=STYLE["soft_stripe"])
+            h = STYLE["row_divider_h"]
+            div_color = STYLE["divider_teal"] if teal_block else STYLE["divider_grey"]
+            d.rectangle([x + spx(2), bot - h, right - spx(2), bot], fill=div_color)
+
 
         cx = x
         df_idx = r - 1
