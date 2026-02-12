@@ -21,7 +21,6 @@ from PIL import Image, ImageDraw, ImageFont
 # CONFIG
 # =========================
 DPI: int = 200
-BASE_DPI: int = 200
 SCALE: float = 1.0
 
 
