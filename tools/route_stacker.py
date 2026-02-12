@@ -47,14 +47,6 @@ GAP_PX: int = round(GAP_IN * DPI)
 ROWS_GRID = 3  # tote rows
 
 # Table columns: Bag | Zones | Total
-COLS_BASE = [spx(325), spx(850), spx(325)]
-COLS_SUM = sum(COLS_BASE)
-w1 = int(CONTENT_W_PX * COLS_BASE[0] / COLS_SUM)
-w3 = int(CONTENT_W_PX * COLS_BASE[2] / COLS_SUM)
-side = max(w1, w3)
-w2 = CONTENT_W_PX - 2 * side
-COLS_W = [side, w2, side]
-
 
 STYLE = {
     "banner_bg": (211, 211, 211),
@@ -695,6 +687,8 @@ def render_table(
     y0 = banner_h + margin
     right = width - margin
 
+    # --- Dynamic column widths:
+    # col1 fits longest Bag cell (zone + bag + pkgs), col3 matches col1, col2 gets the rest.
     def _tw(font, s) -> int:
         s = "" if s is None else str(s)
         if not s:
@@ -751,17 +745,20 @@ def render_table(
             break
 
     target_mid = spx(120)
+
+    # Start with measured width clamped to what can fit
     side = int(min(max_w, max_side))
+
+    # Only enforce min_side if it doesn't violate target_mid
     if (right - x) - 2 * min_side >= target_mid:
         side = max(side, min_side)
+
     mid = (right - x) - 2 * side
 
-    # safety net
+    # Safety net: if mid got squeezed too far, reduce sides
     if mid < target_mid:
-        # compute max possible side that still leaves target_mid
         max_side_for_target = max(0, ((right - x) - target_mid) // 2)
         side = max(0, min(side, max_side_for_target))
-        # still honor min_side ONLY if it fits
         if (right - x) - 2 * min_side >= target_mid:
             side = max(side, min_side)
         mid = (right - x) - 2 * side
