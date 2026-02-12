@@ -862,6 +862,7 @@ def render_table(
                     cx += w
                     continue
 
+                # Build colored segments ("; " separators included)
                 segs = []
                 first = True
                 for tok in toks:
@@ -870,17 +871,68 @@ def render_table(
                     color = STYLE["purple"] if is_99_tag(tok) else (0, 0, 0)
                     segs.append((prefix + tok, color))
 
-                total_w = 0
-                for seg, _ in segs:
-                    bb = d.textbbox((0, 0), seg, font=FONT_TABLE)
-                    total_w += bb[2] - bb[0]
+                pad = spx(8)
+                max_w = max(0, w - 2 * pad)
 
-                sx = cx + max((w - total_w) // 2, spx(4))
+                def seg_width(font, s: str) -> int:
+                    bb = d.textbbox((0, 0), s, font=font)
+                    return bb[2] - bb[0]
+
+                def total_width(font) -> int:
+                    return sum(seg_width(font, s) for s, _ in segs)
+
+                # Try font sizes from normal down to a minimum
+                start_size = int(getattr(FONT_TABLE, "size", spx(32)))
+                min_size = spx(18)  # floor so it doesn't become microscopic
+                font = FONT_TABLE
+
+                tw = total_width(font)
+                if tw > max_w:
+                    chosen = None
+                    for sz in range(start_size - 1, min_size - 1, -1):
+                        f = get_font(sz)
+                        if total_width(f) <= max_w:
+                            chosen = f
+                            break
+                    font = chosen if chosen is not None else get_font(min_size)
+                    tw = total_width(font)
+
+                # If it fits now, center and draw
+                if tw <= max_w:
+                    sx = cx + (w - tw) // 2
+                    for seg, color in segs:
+                        sw = seg_width(font, seg)
+                        d.text((sx, ym), seg, anchor="lm", font=font, fill=color)
+                        sx += sw
+                    cx += w
+                    continue
+
+                # Last-resort fallback: truncate with ellipsis at min font (never overlap)
+                ell = "…"
+                ell_w = seg_width(font, ell)
+                sx = cx + pad
+                remaining = max_w
+
                 for seg, color in segs:
-                    bb = d.textbbox((0, 0), seg, font=FONT_TABLE)
-                    sw = bb[2] - bb[0]
-                    d.text((sx, ym), seg, anchor="lm", font=FONT_TABLE, fill=color)
-                    sx += sw
+                    if remaining <= ell_w:
+                        d.text((sx, ym), ell, anchor="lm", font=font, fill=(0, 0, 0))
+                        break
+
+                    sw = seg_width(font, seg)
+                    if sw <= remaining:
+                        d.text((sx, ym), seg, anchor="lm", font=font, fill=color)
+                        sx += sw
+                        remaining -= sw
+                        continue
+
+                    cut = seg
+                    while cut and seg_width(font, cut) + ell_w > remaining:
+                        cut = cut[:-1]
+                    if cut:
+                        d.text((sx, ym), cut + ell, anchor="lm", font=font, fill=color)
+                    else:
+                        d.text((sx, ym), ell, anchor="lm", font=font, fill=(0, 0, 0))
+                    break
 
             # Overflow totals column
             else:
