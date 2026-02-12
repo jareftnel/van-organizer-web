@@ -253,7 +253,9 @@ def parse_route_page(text: str):
                 and toks[ptr].isdigit()
                 and is_zone(toks[ptr + 1])
                 and toks[ptr + 2].istitle()
+                and toks[ptr + 2].isalpha()
             ):
+                color = toks[ptr + 2]
                 idx_val = parse_int_safe(toks[ptr], "Bag index", route_title)
                 bag_num_str = extract_bag_num_str(toks[ptr + 3], "Bag number (with zone)", route_title)
                 pk = parse_int_safe(toks[ptr + 4], "Bag pkgs", route_title)
@@ -261,9 +263,11 @@ def parse_route_page(text: str):
                     bags.append({
                         "idx": idx_val,
                         "sort_zone": toks[ptr + 1],
-                        "bag": f"{toks[ptr + 2]} {bag_num_str}",
+                        "bag": f"{color} {bag_num_str}",
                         "pkgs": pk,
                     })
+                    if color not in BAG_COLORS_ALLOWED:
+                        warn(f"Unknown bag color {color!r} in [{route_title}] line: {ln}")
                 ptr += 5
                 continue
 
@@ -271,8 +275,10 @@ def parse_route_page(text: str):
             if (
                 ptr + 3 < len(toks)
                 and toks[ptr].isdigit()
-                and toks[ptr + 1] in BAG_COLORS_ALLOWED
+                and toks[ptr + 1].istitle()
+                and toks[ptr + 1].isalpha()
             ):
+                color = toks[ptr + 1]
                 idx_val = parse_int_safe(toks[ptr], "Bag index (no zone)", route_title)
                 bag_num_str = extract_bag_num_str(toks[ptr + 2], "Bag number (no zone)", route_title)
                 pk = parse_int_safe(toks[ptr + 3], "Bag pkgs (no zone)", route_title)
@@ -280,9 +286,11 @@ def parse_route_page(text: str):
                     bags.append({
                         "idx": idx_val,
                         "sort_zone": None,
-                        "bag": f"{toks[ptr + 1]} {bag_num_str}",
+                        "bag": f"{color} {bag_num_str}",
                         "pkgs": pk,
                     })
+                    if color not in BAG_COLORS_ALLOWED:
+                        warn(f"Unknown bag color {color!r} in [{route_title}] line: {ln}")
                 ptr += 4
                 continue
 
@@ -297,15 +305,6 @@ def parse_route_page(text: str):
                     overs.append((toks[ptr + 1], pk_val))
                 ptr += 3
                 continue
-
-            # Debug: detect unknown bag colors so we can add them later
-            if ptr + 3 < len(toks) and toks[ptr].isdigit():
-                maybe_color = toks[ptr + 1]
-                maybe_bag = toks[ptr + 2]
-                maybe_pkgs = toks[ptr + 3]
-                if maybe_color.istitle() and maybe_color not in BAG_COLORS_ALLOWED:
-                    if re.search(r"\d", maybe_bag) and re.fullmatch(r"\d+", maybe_pkgs):
-                        warn(f"Unknown bag color token {maybe_color!r} in [{route_title}] line: {ln}")
 
             ptr += 1
 
