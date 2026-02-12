@@ -47,9 +47,13 @@ GAP_PX: int = round(GAP_IN * DPI)
 ROWS_GRID = 3  # tote rows
 
 # Table columns: Bag | Zones | Total
-COLS_BASE = [spx(360), spx(900), spx(240)]
+COLS_BASE = [spx(325), spx(850), spx(325)]
 COLS_SUM = sum(COLS_BASE)
-COLS_W = [int(CONTENT_W_PX * w / COLS_SUM) for w in COLS_BASE]
+w1 = int(CONTENT_W_PX * COLS_BASE[0] / COLS_SUM)
+w3 = int(CONTENT_W_PX * COLS_BASE[2] / COLS_SUM)
+side = max(w1, w3)
+w2 = CONTENT_W_PX - 2 * side
+COLS_W = [side, w2, side]
 
 
 STYLE = {
@@ -692,7 +696,7 @@ def render_table(
     col_w = COLS_W[:]
     diff = (right - x) - sum(col_w)
     if diff:
-        col_w[-1] += diff
+        col_w[1] += diff
 
     # Top summary row
     top = y0
