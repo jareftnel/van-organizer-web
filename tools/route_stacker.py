@@ -80,10 +80,7 @@ ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")
 SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 
-BAG_COLORS_ALLOWED = {
-    "Yellow", "Green", "Orange", "Black", "Navy",
-    "Blue", "Brown", "Grey", "Gray", "Purple"
-}
+BAG_COLORS_ALLOWED = {"Yellow", "Green", "Orange", "Black", "Navy"}
 
 
 # =========================
@@ -302,6 +299,15 @@ def parse_route_page(text: str):
                     overs.append((toks[ptr + 1], pk_val))
                 ptr += 3
                 continue
+
+            # Debug: detect unknown bag colors so we can add them later
+            if ptr + 3 < len(toks) and toks[ptr].isdigit():
+                maybe_color = toks[ptr + 1]
+                maybe_bag = toks[ptr + 2]
+                maybe_pkgs = toks[ptr + 3]
+                if maybe_color.istitle() and maybe_color not in BAG_COLORS_ALLOWED:
+                    if re.search(r"\d", maybe_bag) and re.fullmatch(r"\d+", maybe_pkgs):
+                        warn(f"Unknown bag color token {maybe_color!r} in [{route_title}] line: {ln}")
 
             ptr += 1
 
