@@ -55,11 +55,7 @@ STYLE = {
     "bright_red": (210, 40, 40),
     "row_fill_teal": (238, 247, 247),
     "divider_teal": (0, 140, 140),
-    "divider_grey": (170,170, 170),
-    "row_divider_h": spx(2),
-    "table_cell_height": spx(64),
-    "banner_height": spx(54),
-    "table_margin": spx(22),
+    "divider_grey": (170, 170, 170),
     "bag_colors": {
         "yellow": (246, 217, 74),
         "green": (83, 182, 53),
@@ -67,6 +63,13 @@ STYLE = {
         "black": (12, 10, 11),
         "navy": (57, 128, 240),
     },
+}
+
+LAYOUT = {
+    "row_divider_h": spx(2),
+    "table_cell_height": spx(64),
+    "banner_height": spx(54),
+    "table_margin": spx(22),
 }
 
 # Overflow pairing
@@ -654,9 +657,9 @@ def render_table(
     total_pkgs,
     bags,
 ):
-    cell_h = STYLE["table_cell_height"]
-    margin = STYLE["table_margin"]
-    banner_h = STYLE["banner_height"]
+    cell_h = LAYOUT["table_cell_height"]
+    margin = LAYOUT["table_margin"]
+    banner_h = LAYOUT["banner_height"]
     total_rows = len(df) + 2  # summary + rows + bottom totals
     width = CONTENT_W_PX
     height = banner_h + total_rows * cell_h + margin * 2
@@ -792,7 +795,7 @@ def render_table(
 
         # divider under each 3-row block
         if r % 3 == 0:
-            h = STYLE["row_divider_h"]
+            h = LAYOUT["row_divider_h"]
             div_color = STYLE["divider_teal"] if teal_block else STYLE["divider_grey"]
             d.rectangle([x + spx(2), bot - h, right - spx(2), bot], fill=div_color)
 
