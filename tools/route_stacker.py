@@ -714,22 +714,25 @@ def render_table(
     for r in range(1, len(df) + 1):
         top = y0 + r * cell_h
         bot = top + cell_h
-        d.rectangle([x, top, right, bot], outline="black", width=spx(2))
 
         # --- teal/white rhythm: 3 teal rows, 3 white rows, repeat ---
-        block = (r - 1) // 3              # 0,1,2,3...
-        teal_block = (block % 2) == 0     # teal blocks: 0,2,4...
+        block = (r - 1) // 3
+        teal_block = (block % 2) == 0
 
-        # fill teal rows (white rows stay default)
+        # fill first
         if teal_block:
             d.rectangle([x, top, right, bot], fill=STYLE["row_fill_teal"])
+        else:
+            d.rectangle([x, top, right, bot], fill="white")
+
+        # then outline on top of fill
+        d.rectangle([x, top, right, bot], outline="black", width=spx(2))
 
         # divider under each 3-row block
         if r % 3 == 0:
             h = STYLE["row_divider_h"]
             div_color = STYLE["divider_teal"] if teal_block else STYLE["divider_grey"]
             d.rectangle([x + spx(2), bot - h, right - spx(2), bot], fill=div_color)
-
 
         cx = x
         df_idx = r - 1
