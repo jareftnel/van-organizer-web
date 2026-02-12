@@ -170,9 +170,9 @@ def infer_style_label(text: str) -> str:
 def extract_time_label(text: str):
     head = "\n".join((text or "").splitlines()[:10])
     m = TIME_RE.search(head)
-    if m:
-        return m.group(1).upper().replace("  ", " ")
-    return None
+    if not m:
+        return None
+    return " ".join(m.group(1).upper().split())
 
 def extract_declared_counts(lines, route_title: str = ""):
     bag_ct = ov_ct = None
@@ -190,18 +190,24 @@ def extract_pkg_summaries(lines, route_title: str = ""):
     commercial = total = None
     for l in lines:
         s = l.strip().lower()
-        if s.startswith("commercial packages"):
+
+        if commercial is None and s.startswith("commercial packages"):
             for tok in reversed(l.split()):
                 v = parse_int_safe(tok, "Commercial packages", route_title)
                 if v is not None:
                     commercial = v
                     break
-        if s.startswith("total packages"):
+
+        if total is None and s.startswith("total packages"):
             for tok in reversed(l.split()):
                 v = parse_int_safe(tok, "Total packages", route_title)
                 if v is not None:
                     total = v
                     break
+
+        if commercial is not None and total is not None:
+            break
+
     return commercial, total
 
 
