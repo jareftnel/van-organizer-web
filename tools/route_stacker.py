@@ -122,7 +122,7 @@ _CHIP_D = ImageDraw.Draw(_CHIP_DUMMY_IMG)
 # HELPERS
 # =========================
 def warn(msg: str):
-    print("[WARN]", msg, flush=True)
+    print(f"[WARN {time.strftime('%H:%M:%S')}]", msg, flush=True)
 
 def is_zone(token: str) -> bool:
     return bool(ZONE_RE.match(token))
@@ -155,18 +155,16 @@ def is_99_tag(label: str) -> bool:
 
 def infer_style_label(text: str, rs: str | None) -> str:
     t = (text or "").lower()
+
     if "on-road experience" in t or "on road experience" in t:
         return "Standard: On-Road Experience (Driver)"
-    if rs and rs.upper().startswith("K.7"):
-        return "Standard: On-Road Experience (Driver)"
-    if "nursery route level 3" in t or "nursery lvl 3" in t:
-        return "Nursery LVL 3"
-    if "nursery route level 2" in t or "nursery lvl 2" in t:
-        return "Nursery LVL 2"
-    if "nursery route level 1" in t or "nursery lvl 1" in t:
-        return "Nursery LVL 1"
-    if "nursery route" in t:
+
+    if "nursery" in t:
+        for lvl in (3, 2, 1):
+            if f"level {lvl}" in t or f"lvl {lvl}" in t:
+                return f"Nursery LVL {lvl}"
         return "Nursery"
+
     return "Standard"
 
 def extract_time_label(text: str):
