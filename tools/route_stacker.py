@@ -253,19 +253,20 @@ def parse_route_page(text: str):
     data_lines = []
     for line in lines[hdr_idx + 1:]:
         norm = _norm_line(line)
-        if norm:
-            data_lines.append(norm)
+        if not norm:
+            continue
+        low = norm.lower()
+        if HEADER_RE.search(norm):
+            continue
+        if low.startswith(("total packages", "commercial packages")):
+            continue        
+        data_lines.append(norm)
             
     bags: list[dict[str, Any]] = []
     overs: list[tuple[str, int]] = []
 
     for norm in data_lines:
-        if HEADER_RE.search(norm):
-            continue
-        low = norm.lower()
-        if low.startswith(("total packages", "commercial packages")):
-            continue
-
+       
         toks = norm.split()
 
         ptr = 0
