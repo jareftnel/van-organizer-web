@@ -420,7 +420,7 @@ def df_from(bags, texts, totals):
     rows = []
     for b, tags, tot in zip(bags, texts, totals):
         mid = "; ".join(tags)
-        tot_disp = int(tot) if (mid and tot) else ""  # blank if no overflow
+        tot_disp = int(tot) if mid else ""  # blank if no overflow
         rows.append([b["bag"], mid, tot_disp])
     df = pd.DataFrame(rows, columns=["Bag", "Overflow Zone(s)", "Overflow Pkgs (total)"])
     df["Overflow Zone(s)"] = df["Overflow Zone(s)"].replace({np.nan: ""})
