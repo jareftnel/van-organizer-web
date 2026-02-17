@@ -81,6 +81,9 @@ SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 _WS_RE = re.compile(r"\s+")
 HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
+STG_RE = re.compile(r"\bSTG\.([A-Z0-9]+(?:\.[A-Z0-9]+)*\.\d+)\b", re.I)
+CX_RE  = re.compile(r"\b(?:CX|TX)\d{1,3}\b", re.I)
+
 
 def _norm_line(s: str) -> str:
     return _WS_RE.sub(" ", (s or "")).strip()
@@ -226,10 +229,13 @@ def parse_route_page(text: str):
     Bags are ordered by their printed index number (the leftmost index token on each bag row).
     """
     text = text or ""
-    m = re.search(r"\bSTG\.([A-Z]+\.\d+)\b", text, flags=re.I)
+
+    head = "\n".join(text.splitlines()[:40])
+    
+    m = STG_RE.search(text)
     rs = m.group(1).upper() if m else None
 
-    m2 = re.search(r"\b(?:CX|TX)\d{1,3}\b", text, flags=re.I)
+    m2 = CX_RE.search(text)
     cx = m2.group(0).upper() if m2 else None
 
 
