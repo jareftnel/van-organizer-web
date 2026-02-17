@@ -417,6 +417,7 @@ def assign_overflows(bags, overs):
 # DATAFRAME
 # =========================
 def df_from(bags, texts, totals):
+    assert len(bags) == len(texts) == len(totals), "Length mismatch in df_from inputs"
     rows = []
     for b, tags, tot in zip(bags, texts, totals):
         mid = "; ".join(tags)
