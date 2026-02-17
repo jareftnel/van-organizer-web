@@ -230,7 +230,7 @@ def parse_route_page(text: str):
     """
     text = text or ""
 
-    head = "\n".join(text.splitlines()[:40])
+    head = "\n".join(lines[:40])
     
     m = STG_RE.search(text)
     rs = m.group(1).upper() if m else None
