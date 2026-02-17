@@ -312,7 +312,7 @@ def parse_route_page(text: str):
             if ptr + 2 < len(toks):
                 zone = toks[ptr + 1].upper()
                 pk_tok = toks[ptr + 2]
-                if is_zone(zone) and re.search(r"\d", pk_tok):
+                if is_zone(zone) and any(ch.isdigit() for ch in pk_tok):
                     pk_val = parse_int_safe(pk_tok, "Overflow line", route_title)
                     if pk_val is not None:
                         overs.append((zone, pk_val))
