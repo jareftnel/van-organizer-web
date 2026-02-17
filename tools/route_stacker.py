@@ -347,9 +347,15 @@ def parse_route_page(text: str):
 # OVERFLOW ASSIGNMENT
 # =========================
 def split_zone_for_index(z: str):
+    z = str(z or "").strip().upper()
+    if len(z) < 2:
+        return z, ""
+
     if "-" not in z:
         return z[:-1], z[-1]
+
     prefix, tail = z.split("-", 1)
+    tail = tail.strip()
     m = SPLIT_RE.match(tail)
     if m:
         num, letters = m.groups()
