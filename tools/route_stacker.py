@@ -268,7 +268,7 @@ def parse_route_page(text: str):
         ptr = 0
 
         while ptr < len(toks):
-            if not toks[ptr].isdigit():
+            if not re.search(r"\d", toks[ptr]):   # token has at least one digit
                 ptr += 1
                 continue
 
