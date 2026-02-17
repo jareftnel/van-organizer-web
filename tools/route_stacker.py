@@ -250,33 +250,27 @@ def parse_route_page(text: str):
         return None
 
 
-    data_lines = []
+    bags: list[dict[str, Any]] = []
+    overs: list[tuple[str, int]] = []
+
     for line in lines[hdr_idx + 1:]:
         norm = _norm_line(line)
         if not norm:
             continue
-        low = norm.lower()
         if HEADER_RE.search(norm):
             continue
+        low = norm.lower()
         if low.startswith(("total packages", "commercial packages")):
-            continue        
-        data_lines.append(norm)
-            
-    bags: list[dict[str, Any]] = []
-    overs: list[tuple[str, int]] = []
+            continue
 
-    for norm in data_lines:
-       
         toks = norm.split()
-
         ptr = 0
+
         while ptr < len(toks):
-            
-            # If current token isn't a number, it can't start a bag/overflow row
             if not toks[ptr].isdigit():
                 ptr += 1
                 continue
-                
+
             # 1) Bag row WITH sort zone: idx zone color bag pkgs
             if ptr + 4 < len(toks):
                 zone = toks[ptr + 1].upper()
@@ -294,7 +288,7 @@ def parse_route_page(text: str):
                         })
                     ptr += 5
                     continue
-          
+
             # 2) Bag row WITHOUT sort zone: idx color bag pkgs
             if ptr + 3 < len(toks):
                 color = toks[ptr + 1].capitalize()
@@ -316,16 +310,15 @@ def parse_route_page(text: str):
             if ptr + 2 < len(toks):
                 zone = toks[ptr + 1].upper()
                 pk_tok = toks[ptr + 2]
-                if is_zone(zone) and re.search(r"\d", pk_tok): # must contain at least one digit
+                if is_zone(zone) and re.search(r"\d", pk_tok):
                     pk_val = parse_int_safe(pk_tok, "Overflow line", route_title)
                     if pk_val is not None:
                         overs.append((zone, pk_val))
                     ptr += 3
                     continue
 
-            # If nothing matched, move forward 1 token and try again
             ptr += 1
-
+      
 
     if not bags:
         return None
