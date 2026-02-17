@@ -77,7 +77,7 @@ PAIR_MAP = {"A": "T", "B": "U", "C": "W", "D": "X", "E": "Y", "G": "Z"}
 INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 
 ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")
-SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
+SPLIT_RE = re.compile(r"^(\d+(?:\.\d+)*)?([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 _WS_RE = re.compile(r"\s+")
 HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
@@ -356,7 +356,7 @@ def split_zone_for_index(z: str):
 
     prefix, tail = z.split("-", 1)
     tail = tail.strip()
-    m = SPLIT_RE.match(tail)
+    m = SPLIT_RE.fullmatch(tail)
     if m:
         num, letters = m.groups()
         core = f"{prefix}-{num}" if num else prefix
