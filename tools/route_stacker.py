@@ -79,6 +79,11 @@ INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")
 SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
+_WS_RE = re.compile(r"\s+")
+HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
+
+def _norm_line(s: str) -> str:
+    return _WS_RE.sub(" ", (s or "")).strip()
 
 BAG_COLORS_ALLOWED = {"Yellow", "Green", "Orange", "Black", "Navy"}
 
@@ -177,7 +182,7 @@ def extract_time_label(text: str):
 def extract_declared_counts(lines, route_title: str = ""):
     bag_ct = ov_ct = None
     for l in lines:
-        if "Sort Zone Bag Pkgs" in l:
+        if HEADER_RE.search(_norm_line(l)):
             break
         m = re.search(r"(\d+)\s+bags?\s+(\d+)\s+over", l.lower())
         if m:
@@ -216,27 +221,29 @@ def extract_pkg_summaries(lines, route_title: str = ""):
 # =========================
 def parse_route_page(text: str):
     """
-    Parse a single route page into bag + overflow structures.
+    Parse route text into (rs, cx, style_label, time_label, bags, overs, decl_bags, decl_over, comm_pkgs, total_pkgs).
 
-    Bags are ordered by their printed index number (leftmost digit on each bag row).
+    Bags are ordered by their printed index number (the leftmost index token on each bag row).
     """
     text = text or ""
-    m = re.search(r"STG\.([A-Z]+\.\d+)", text)
+    m = re.search(r"\bSTG\.([A-Z]+\.\d+)\b", text, flags=re.I)
     rs = m.group(1) if m else None
 
-    m2 = re.search(r"((?:CX|TX)\d{1,3})", text)
-    cx = m2.group(1) if m2 else None
+    m2 = re.search(r"\b(?:CX|TX)\d{1,3}\b", text, flags=re.I)
+    cx = m2.group(0).upper() if m2 else None
+
 
     route_title = f"{rs} ({cx})" if rs and cx else (rs or cx or "")
 
     lines = text.splitlines()
     decl_bags, decl_over = extract_declared_counts(lines, route_title)
     comm_pkgs, total_pkgs = extract_pkg_summaries(lines, route_title)
-
+    
     try:
-        hdr_idx = next(i for i, l in enumerate(lines) if "Sort Zone Bag Pkgs" in l)
+        hdr_idx = next(i for i, l in enumerate(lines) if HEADER_RE.search(_norm_line(l)))
     except StopIteration:
         return None
+
 
     data_lines = [l.strip() for l in lines[hdr_idx + 1:] if l.strip()]
 
