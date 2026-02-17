@@ -229,19 +229,18 @@ def parse_route_page(text: str):
     Bags are ordered by their printed index number (the leftmost index token on each bag row).
     """
     text = text or ""
-
+    lines = text.splitlines()
     head = "\n".join(lines[:40])
     
-    m = STG_RE.search(text)
+    m = STG_RE.search(head) or STG_RE.search(text)
     rs = m.group(1).upper() if m else None
 
-    m2 = CX_RE.search(text)
+    m2 = CX_RE.search(head) or CX_RE.search(text)
     cx = m2.group(0).upper() if m2 else None
 
 
     route_title = f"{rs} ({cx})" if rs and cx else (rs or cx or "")
 
-    lines = text.splitlines()
     decl_bags, decl_over = extract_declared_counts(lines, route_title)
     comm_pkgs, total_pkgs = extract_pkg_summaries(lines, route_title)
     
