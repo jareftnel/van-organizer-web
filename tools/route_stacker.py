@@ -77,7 +77,7 @@ PAIR_MAP = {"A": "T", "B": "U", "C": "W", "D": "X", "E": "Y", "G": "Z"}
 INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 
 ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")
-SPLIT_RE = re.compile(r"^([0-9.]*)([A-Z]+)$")
+SPLIT_RE = re.compile(r"^(\d+(?:\.\d+)*)?([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 _WS_RE = re.compile(r"\s+")
 HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
@@ -347,10 +347,16 @@ def parse_route_page(text: str):
 # OVERFLOW ASSIGNMENT
 # =========================
 def split_zone_for_index(z: str):
+    z = str(z or "").strip().upper()
+    if len(z) < 2:
+        return z, ""
+
     if "-" not in z:
         return z[:-1], z[-1]
+
     prefix, tail = z.split("-", 1)
-    m = SPLIT_RE.match(tail)
+    tail = tail.strip()
+    m = SPLIT_RE.fullmatch(tail)
     if m:
         num, letters = m.groups()
         core = f"{prefix}-{num}" if num else prefix
