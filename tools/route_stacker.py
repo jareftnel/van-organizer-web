@@ -251,12 +251,13 @@ def parse_route_page(text: str):
     overs: list[tuple[str, int]] = []
 
     for ln in data_lines:
-        s = _norm_line(ln).lower()
+        norm = _norm_line(ln)
+        s = norm.lower()
         if s.startswith("total packages") or s.startswith("commercial packages"):
             continue
 
 
-        toks = ln.split()
+        toks = norm.split()
         if not toks:
             continue
 
