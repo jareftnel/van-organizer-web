@@ -227,7 +227,7 @@ def parse_route_page(text: str):
     """
     text = text or ""
     m = re.search(r"\bSTG\.([A-Z]+\.\d+)\b", text, flags=re.I)
-    rs = m.group(1) if m else None
+    rs = m.group(1).upper() if m else None
 
     m2 = re.search(r"\b(?:CX|TX)\d{1,3}\b", text, flags=re.I)
     cx = m2.group(0).upper() if m2 else None
@@ -245,80 +245,81 @@ def parse_route_page(text: str):
         return None
 
 
-    data_lines = [l.strip() for l in lines[hdr_idx + 1:] if l.strip()]
-
+    data_lines = []
+    for line in lines[hdr_idx + 1:]:
+        norm = _norm_line(line)
+        if norm:
+            data_lines.append(norm)
+            
     bags: list[dict[str, Any]] = []
     overs: list[tuple[str, int]] = []
 
-    for ln in data_lines:
-        norm = _norm_line(ln)
-        s = norm.lower()
-        if s.startswith("total packages") or s.startswith("commercial packages"):
+    for norm in data_lines:
+        if HEADER_RE.search(norm):
             continue
-
+        low = norm.lower()
+        if low.startswith(("total packages", "commercial packages")):
+            continue
 
         toks = norm.split()
-        if not toks:
-            continue
 
         ptr = 0
         while ptr < len(toks):
-            # Bag row with sort zone: idx zone color bag pkgs
-            if (
-                ptr + 4 < len(toks)
-                and toks[ptr].isdigit()
-                and is_zone(toks[ptr + 1])
-                and toks[ptr + 2].isalpha()
-                and toks[ptr + 2].capitalize() in BAG_COLORS_ALLOWED
-            ):
+            
+            # If current token isn't a number, it can't start a bag/overflow row
+            if not toks[ptr].isdigit():
+                ptr += 1
+                continue
+                
+            # 1) Bag row WITH sort zone: idx zone color bag pkgs
+            if ptr + 4 < len(toks):
+                zone = toks[ptr + 1].upper()
                 color = toks[ptr + 2].capitalize()
-                idx_val = parse_int_safe(toks[ptr], "Bag index", route_title)
-                bag_num_str = extract_bag_num_str(toks[ptr + 3], "Bag number (with zone)", route_title)
-                pk = parse_int_safe(toks[ptr + 4], "Bag pkgs", route_title)
-                if idx_val is not None and bag_num_str is not None and pk is not None:
-                    bags.append({
-                        "idx": idx_val,
-                        "sort_zone": toks[ptr + 1].upper(),
-                        "bag": f"{color} {bag_num_str}",
-                        "pkgs": pk,
-                    })
-                ptr += 5
-                continue
-
-            # Bag row without sort zone: idx color bag pkgs
-            if (
-                ptr + 3 < len(toks)
-                and toks[ptr].isdigit()
-                and toks[ptr + 1].isalpha()
-                and toks[ptr + 1].capitalize() in BAG_COLORS_ALLOWED
-            ):
+                if is_zone(zone) and color in BAG_COLORS_ALLOWED:
+                    idx_val = parse_int_safe(toks[ptr], "Bag index", route_title)
+                    bag_num_str = extract_bag_num_str(toks[ptr + 3], "Bag number (with zone)", route_title)
+                    pk = parse_int_safe(toks[ptr + 4], "Bag pkgs", route_title)
+                    if idx_val is not None and bag_num_str is not None and pk is not None:
+                        bags.append({
+                            "idx": idx_val,
+                            "sort_zone": zone,
+                            "bag": f"{color} {bag_num_str}",
+                            "pkgs": pk,
+                        })
+                    ptr += 5
+                    continue
+          
+            # 2) Bag row WITHOUT sort zone: idx color bag pkgs
+            if ptr + 3 < len(toks):
                 color = toks[ptr + 1].capitalize()
-                idx_val = parse_int_safe(toks[ptr], "Bag index (no zone)", route_title)
-                bag_num_str = extract_bag_num_str(toks[ptr + 2], "Bag number (no zone)", route_title)
-                pk = parse_int_safe(toks[ptr + 3], "Bag pkgs (no zone)", route_title)
-                if idx_val is not None and bag_num_str is not None and pk is not None:
-                    bags.append({
-                        "idx": idx_val,
-                        "sort_zone": None,
-                        "bag": f"{color} {bag_num_str}",
-                        "pkgs": pk,
-                    })
-                ptr += 4
-                continue
+                if color in BAG_COLORS_ALLOWED:
+                    idx_val = parse_int_safe(toks[ptr], "Bag index (no zone)", route_title)
+                    bag_num_str = extract_bag_num_str(toks[ptr + 2], "Bag number (no zone)", route_title)
+                    pk = parse_int_safe(toks[ptr + 3], "Bag pkgs (no zone)", route_title)
+                    if idx_val is not None and bag_num_str is not None and pk is not None:
+                        bags.append({
+                            "idx": idx_val,
+                            "sort_zone": None,
+                            "bag": f"{color} {bag_num_str}",
+                            "pkgs": pk,
+                        })
+                    ptr += 4
+                    continue
 
-            # Overflow row: idx zone pkgs
-            if (
-                ptr + 2 < len(toks)
-                and toks[ptr].isdigit()
-                and is_zone(toks[ptr + 1].upper())
-            ):
-                pk_val = parse_int_safe(toks[ptr + 2], "Overflow line", route_title)
-                if pk_val is not None:
-                    overs.append((toks[ptr + 1], pk_val))
-                ptr += 3
-                continue
+            # 3) Overflow row: idx zone pkgs
+            if ptr + 2 < len(toks):
+                zone = toks[ptr + 1].upper()
+                pk_tok = toks[ptr + 2]
+                if is_zone(zone) and re.search(r"\d", pk_tok): # must contain at least one digit
+                    pk_val = parse_int_safe(pk_tok, "Overflow line", route_title)
+                    if pk_val is not None:
+                        overs.append((zone, pk_val))
+                    ptr += 3
+                    continue
 
+            # If nothing matched, move forward 1 token and try again
             ptr += 1
+
 
     if not bags:
         return None
