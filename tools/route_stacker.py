@@ -268,7 +268,8 @@ def parse_route_page(text: str):
         ptr = 0
 
         while ptr < len(toks):
-            if not toks[ptr].isdigit():
+            tok0 = toks[ptr]
+            if not tok0.isdigit():
                 ptr += 1
                 continue
 
@@ -277,7 +278,7 @@ def parse_route_page(text: str):
                 zone = toks[ptr + 1].upper()
                 color = toks[ptr + 2].capitalize()
                 if is_zone(zone) and color in BAG_COLORS_ALLOWED:
-                    idx_val = parse_int_safe(toks[ptr], "Bag index", route_title)
+                    idx_val = parse_int_safe(tok0, "Bag index", route_title)
                     bag_num_str = extract_bag_num_str(toks[ptr + 3], "Bag number (with zone)", route_title)
                     pk = parse_int_safe(toks[ptr + 4], "Bag pkgs", route_title)
                     if idx_val is not None and bag_num_str is not None and pk is not None:
@@ -294,7 +295,7 @@ def parse_route_page(text: str):
             if ptr + 3 < len(toks):
                 color = toks[ptr + 1].capitalize()
                 if color in BAG_COLORS_ALLOWED:
-                    idx_val = parse_int_safe(toks[ptr], "Bag index (no zone)", route_title)
+                    idx_val = parse_int_safe(tok0, "Bag index (no zone)", route_title)
                     bag_num_str = extract_bag_num_str(toks[ptr + 2], "Bag number (no zone)", route_title)
                     pk = parse_int_safe(toks[ptr + 3], "Bag pkgs (no zone)", route_title)
                     if idx_val is not None and bag_num_str is not None and pk is not None:
