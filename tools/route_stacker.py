@@ -355,6 +355,7 @@ def split_zone_for_index(z: str):
         return z[:-1], z[-1]
 
     prefix, tail = z.split("-", 1)
+    tail = tail.strip()
     m = SPLIT_RE.match(tail)
     if m:
         num, letters = m.groups()
