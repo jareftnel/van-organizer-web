@@ -259,6 +259,7 @@ def parse_route_page(text: str):
             continue
         if HEADER_RE.search(norm):
             continue
+
         low = norm.lower()
         if low.startswith(("total packages", "commercial packages")):
             continue
