@@ -22,6 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 DPI: int = 200
 SCALE: float = 1.0
+STRICT_TOTE_DATA: bool = False  # set True to hard flag the run if any route has no bags parsed
 
 
 def spx(x: float) -> int:
@@ -1614,6 +1615,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
     routes_over_30 = []
     routes_over_50_overflow = []
     combined_routes = []
+    routes_missing_tote_data = []
     route_total_pkgs = []  # (total_pkgs, title, output_page)
     route_comm_pkgs = []   # (comm_pkgs, title, output_page)
 
@@ -1655,6 +1657,10 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
 
         title = f"{rs} ({cx})" if (rs and cx) else (rs or cx or "Route")
         pages_used = [i + 1 for i in g]
+
+        if not bags:
+            routes_missing_tote_data.append(title)
+            warn(f"{title}: no tote data parsed for this route")
 
         bag_count = int(decl_bags) if decl_bags is not None else len(bags)
         declared_overflow = int(decl_over) if decl_over is not None else int(sum(pk for _, pk in overs))
@@ -1749,6 +1755,10 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
 
     _cb(total_routes, done_routes, done_routes, "Summary", "Building summary & TOC…")
 
+    if routes_missing_tote_data and STRICT_TOTE_DATA:
+        missing = ", ".join(routes_missing_tote_data)
+        raise RuntimeError(f"Strict tote data mode enabled: missing tote data for route(s): {missing}")
+
     routes_over_30.sort(key=lambda x: (-x[0], x[1]))
     routes_over_50_overflow.sort(key=lambda x: (-x[0], x[1]))
     combined_routes.sort(key=lambda x: x[1][0])
@@ -1798,6 +1808,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         "top10_heavy_totals": top10_heavy_totals,
         "top10_commercial": top10_commercial,
         "combined_routes": combined_routes,
+        "routes_missing_tote_data": routes_missing_tote_data,
         "toc_entries": toc_entries,
         "date_label": date_label,
     }
