@@ -500,24 +500,37 @@ def draw_chip_fullwidth(draw, text, tile_w):
 
 def measure_tile_heights(df, tile_w):
     base_h = int(tile_w * 0.55)
+
+    # MUST match draw_tote() chip placement padding
+    top_pad = spx(8)
+    bot_pad = spx(10)
+    gap = spx(4)
+
     heights = []
     cache = []
 
     for i in range(len(df)):
-        mid = str(df.iat[i, 1] or "")
+        cell = df.iat[i, 1]
+        mid = "" if pd.isna(cell) else str(cell)
+
         toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
+
         chips = []
-        total_h = 0
-
-        for t in toks:
-            chip, cw, ch, margin = draw_chip_fullwidth(_CHIP_D, t, tile_w)
-            chips.append((chip, cw, ch, margin))
-            total_h += ch
-
         if toks:
-            total_h += spx(4) * (len(toks) - 1)
+            stack_h = 0
+            for j, t in enumerate(toks):
+                chip, cw, ch, margin = draw_chip_fullwidth(_CHIP_D, t, tile_w)
+                chips.append((chip, cw, ch, margin))
+                stack_h += ch
+                if j:
+                    stack_h += gap
 
-        heights.append(base_h + (spx(4) if toks else 0) + total_h + spx(10))
+            tile_h = base_h + top_pad + stack_h + bot_pad
+        else:
+            # Minimal height when no chips
+            tile_h = base_h + bot_pad
+
+        heights.append(tile_h)
         cache.append(chips)
 
     return heights, cache
