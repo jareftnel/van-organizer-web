@@ -561,7 +561,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
     """Render the tote-board image from the tote dataframe and parsed bag metadata."""
     n = len(df)
     if n == 0:
-        return Image.new("RGB", (CONTENT_W_PX, spx(10)), "white")
+        warn("draw_tote(): empty df (no tote rows). Rendering MISSING TOTE DATA placeholder.")
+        return render_missing_tote_placeholder("")
 
     def fmt_zone(sz):
         if not sz:
