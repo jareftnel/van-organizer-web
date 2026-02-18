@@ -225,7 +225,8 @@ def extract_pkg_summaries(lines, route_title: str = ""):
 # =========================
 def parse_route_page(text: str):
     """
-    Parse route text into (rs, cx, style_label, time_label, bags, overs, decl_bags, decl_over, comm_pkgs, total_pkgs).
+    Parse route text into
+    (rs, cx, style_label, time_label, bags, overs, decl_bags, decl_over, comm_pkgs, total_pkgs).
 
     Bags are ordered by their printed index number (the leftmost index token on each bag row).
     """
@@ -339,8 +340,8 @@ def parse_route_page(text: str):
             ptr += 1
       
 
-    if not bags:
-        return None
+    # DO NOT return None just because bags is empty
+    # (leave bags empty and let the builder handle it)
 
     bags.sort(key=lambda b: b.get("idx", 10**6))
     style_label = infer_style_label(text)
@@ -724,6 +725,16 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
                 cy += ch + gap
 
+    return img
+
+
+def render_missing_tote_placeholder(title: str) -> Image.Image:
+    h = spx(220)
+    img = Image.new("RGB", (CONTENT_W_PX, h), "white")
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, CONTENT_W_PX - 1, h - 1], outline=(220, 0, 0), width=spx(4))
+    d.text((CONTENT_W_PX // 2, h // 2), "MISSING TOTE DATA", anchor="mm", font=FONT_TOTE_PKGS, fill=(220, 0, 0))
+    d.text((CONTENT_W_PX // 2, h // 2 + spx(42)), str(title), anchor="mm", font=get_font(spx(18)), fill=(80, 80, 80))
     return img
 
 
@@ -1166,6 +1177,8 @@ def render_summary_pages(
                 parts.append(f"Overflow {m.get('declared_overflow')}→{m.get('computed_overflow')}")
             if m.get("total_mismatch"):
                 parts.append(f"Total {m.get('declared_total')}→{m.get('computed_total')}")
+            if m.get("tote_missing"):
+                parts.append("NO TOTE DATA")
             metric = " | ".join(parts) if parts else "Mismatch"
 
             y = _row(route, metric, page_no, y, color=(220, 0, 0))
@@ -1655,6 +1668,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             total_pkgs,
         ) = parsed
 
+        tote_missing = (len(bags) == 0)
+
         title = f"{rs} ({cx})" if (rs and cx) else (rs or cx or "Route")
         pages_used = [i + 1 for i in g]
 
@@ -1674,8 +1689,38 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         if len(g) > 1:
             combined_routes.append((title, pages_used, bag_count))
 
-        texts, totals = assign_overflows(bags, overs)
-        df = df_from(bags, texts, totals)
+        if tote_missing:
+            texts, totals = [], []
+            df = df_from([], [], [])
+            table_img = render_table(
+                df=df,
+                title=title,
+                style_label=style_label,
+                date_label=date_label,
+                time_label=time_label,
+                bag_count=bag_count,
+                declared_overflow=declared_overflow,
+                commercial_pkgs=comm_pkgs,
+                total_pkgs=total_pkgs,
+                bags=bags,
+            )
+            tote_img = render_missing_tote_placeholder(title)
+        else:
+            texts, totals = assign_overflows(bags, overs)
+            df = df_from(bags, texts, totals)
+            table_img = render_table(
+                df=df,
+                title=title,
+                style_label=style_label,
+                date_label=date_label,
+                time_label=time_label,
+                bag_count=bag_count,
+                declared_overflow=declared_overflow,
+                commercial_pkgs=comm_pkgs,
+                total_pkgs=total_pkgs,
+                bags=bags,
+            )
+            tote_img = draw_tote(df, bags)
 
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
         computed_overflow_total = int(sum(int(t or 0) for t in totals if str(t).strip() != ""))
@@ -1696,19 +1741,10 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 "total_mismatch": total_mismatch,
             }
 
-        table_img = render_table(
-            df=df,
-            title=title,
-            style_label=style_label,
-            date_label=date_label,
-            time_label=time_label,
-            bag_count=bag_count,
-            declared_overflow=declared_overflow,
-            commercial_pkgs=comm_pkgs,
-            total_pkgs=total_pkgs,
-            bags=bags,
-        )
-        tote_img = draw_tote(df, bags)
+        if tote_missing and mismatch_payload is None:
+            mismatch_payload = {"title": title, "tote_missing": True}
+        elif tote_missing:
+            mismatch_payload["tote_missing"] = True
 
         available_h = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX
         needed_h = table_img.height + GAP_PX + tote_img.height
