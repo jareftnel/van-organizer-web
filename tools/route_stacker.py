@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 # =========================
 DPI: int = 200
 SCALE: float = 1.0
-STRICT_TOTE_DATA: bool = False  # set True to hard flag the run if any route has no bags parsed
+STRICT_TOTE_DATA: bool = False  # set True to hard-fail the run if any route has no bags parsed
 
 
 def spx(x: float) -> int:
