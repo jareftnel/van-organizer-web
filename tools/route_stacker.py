@@ -432,7 +432,9 @@ def df_from(bags, texts, totals):
 # CHIP RENDERING
 # =========================
 def draw_chip_fullwidth(draw, text, tile_w):
-    outer = spx(6)
+    # Outer margin inside the tile for the chip (scales with tile width)
+    outer = int(round(tile_w * 0.02))          # ~2% of tile width
+    outer = max(spx(4), min(outer, spx(12)))   # clamp between 4px and 12px (scaled)
     max_w = tile_w - 2 * outer
     clean = str(text).strip()
     is99 = is_99_tag(clean)
