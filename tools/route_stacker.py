@@ -1668,22 +1668,17 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             total_pkgs,
         ) = parsed
 
-        tote_missing = (len(bags) == 0)
-
         title = f"{rs} ({cx})" if (rs and cx) else (rs or cx or "Route")
         pages_used = [i + 1 for i in g]
-
-        if not bags:
-            routes_missing_tote_data.append(title)
-            warn(f"{title}: no tote data parsed for this route")
-
-        bag_count = int(decl_bags) if decl_bags is not None else len(bags)
         tote_missing = (len(bags) == 0)
 
         if tote_missing:
+            routes_missing_tote_data.append(title)
             warn(f"{title}: NO BAG/TOTE DATA PARSED (source pages {pages_used})")
             if STRICT_TOTE_DATA:
                 raise RuntimeError(f"{title}: NO BAG/TOTE DATA PARSED (pages {pages_used})")
+
+        bag_count = int(decl_bags) if decl_bags is not None else len(bags)
         declared_overflow = int(decl_over) if decl_over is not None else int(sum(pk for _, pk in overs))
 
         if len(g) > 1:
