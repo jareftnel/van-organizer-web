@@ -459,15 +459,43 @@ def draw_chip_fullwidth(draw, text, tile_w):
             return chip, chip_w, chip_h, outer
         size -= max(1, spx(1))
 
-    fnt = FONT_TOTE_TAG_MIN
-    bbox = draw.textbbox((0, 0), clean, font=fnt)
+    # Fallback: render at MIN font size and ellipsize so we NEVER return None
+    fnt = get_font(FONT_TOTE_TAG_MIN.size)
+
+    pad_w = spx(12)  # same padding used in the fit test
+    ell = "…"
+
+    # Build a fitted string that always fits
+    clean_fit = clean
+    if clean_fit:
+        eb = draw.textbbox((0, 0), ell, font=fnt)
+        if (eb[2] - eb[0]) + pad_w > max_w:
+            clean_fit = ell
+        else:
+            while clean_fit:
+                bb = draw.textbbox((0, 0), clean_fit, font=fnt)
+                tw = bb[2] - bb[0]
+                if tw + pad_w <= max_w:
+                    break
+                clean_fit = clean_fit[:-1]
+            if clean_fit != clean:
+                clean_fit = (clean_fit + ell) if clean_fit else ell
+    else:
+        clean_fit = ""
+
+    bbox = draw.textbbox((0, 0), clean_fit, font=fnt)
     th = bbox[3] - bbox[1]
     chip_w = max_w
     chip_h = th + spx(8)
+
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
-    cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
-    cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
+    try:
+        cd.rounded_rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], radius=spx(6), fill=bg_color)
+    except (AttributeError, TypeError):
+        cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
+
+    cd.text((chip_w // 2, chip_h // 2), clean_fit, anchor="mm", font=fnt, fill=txt_color)
     return chip, chip_w, chip_h, outer
 
 def measure_tile_heights(df, tile_w):
