@@ -298,13 +298,29 @@ def parse_route_page(text: str):
                     idx_val = parse_int_safe(tok0, "Bag index (no zone)", route_title)
                     bag_num_str = extract_bag_num_str(toks[ptr + 2], "Bag number (no zone)", route_title)
                     pk = parse_int_safe(toks[ptr + 3], "Bag pkgs (no zone)", route_title)
+
                     if idx_val is not None and bag_num_str is not None and pk is not None:
+                        # RULE: this is usually a second bag with the SAME sort zone as the bag above,
+                        # but the PDF text dropped the zone. We do NOT "merge" bags.
+                        # We:
+                        # 1) inherit the previous bag's zone so it doesn't display as "no zone"
+                        # 2) roll THIS bag's pkgs up into the previous bag (doubling effect)
+                        # 3) hide pkgs on THIS bag (keep bag entry)
+                        inherited_zone = None
+                        pk_out = pk
+
+                        if bags and bags[-1].get("sort_zone"):
+                            inherited_zone = bags[-1]["sort_zone"]
+                            bags[-1]["pkgs"] = int(bags[-1].get("pkgs") or 0) + int(pk or 0)
+                            pk_out = None  # hide pkgs on the "no-zone" bag
+
                         bags.append({
                             "idx": idx_val,
-                            "sort_zone": None,
+                            "sort_zone": inherited_zone,
                             "bag": f"{color} {bag_num_str}",
-                            "pkgs": pk,
+                            "pkgs": pk_out,
                         })
+
                     ptr += 4
                     continue
 
