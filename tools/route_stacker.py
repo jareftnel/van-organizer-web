@@ -555,7 +555,8 @@ def measure_tile_heights(df, tile_w):
 # =========================
 # TOTE RENDERING
 # =========================
-def draw_tote(df, bags):
+def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
+    """Render the tote-board image from the tote dataframe and parsed bag metadata."""
     n = len(df)
     if n == 0:
         return Image.new("RGB", (CONTENT_W_PX, spx(10)), "white")
