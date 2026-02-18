@@ -436,7 +436,7 @@ def draw_chip_fullwidth(draw, text, tile_w):
     outer = int(round(tile_w * 0.02))          # ~2% of tile width
     outer = max(spx(4), min(outer, spx(12)))   # clamp between 4px and 12px (scaled)
     max_w = max(1, tile_w - 2 * outer)
-    clean = str(text).strip()
+    clean = "" if pd.isna(text) else str(text).strip()
     is99 = is_99_tag(clean)
     txt_color = STYLE["purple"] if is99 else (0, 0, 0)
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
