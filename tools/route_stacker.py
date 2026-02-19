@@ -45,6 +45,7 @@ GAP_IN: float = 0.07
 GAP_PX: int = round(GAP_IN * DPI)
 
 ROWS_GRID = 3  # tote rows
+TOTE_NUM_ZONE_RATIO = 0.55
 
 
 STYLE = {
@@ -516,8 +517,12 @@ def draw_chip_fullwidth(draw, text, tile_w):
     cd.text((chip_w // 2, chip_h // 2), clean_fit, anchor="mm", font=fnt, fill=txt_color)
     return chip, chip_w, chip_h, outer
 
+def compute_base_h(tile_w: int) -> int:
+    return int(tile_w * TOTE_NUM_ZONE_RATIO)
+
+
 def measure_tile_heights(df, tile_w):
-    base_h = int(tile_w * 0.55)
+    base_h = compute_base_h(tile_w)
 
     # MUST match draw_tote() chip placement padding
     top_pad = spx(8)
@@ -595,7 +600,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
 
     tile_w = max(col_ws)
 
-    base_h = int(tile_w * 0.55)
+    base_h = compute_base_h(tile_w)
     heights, cache = measure_tile_heights(df, tile_w)
 
     # Right-to-left, 3-row fill
