@@ -476,9 +476,18 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
             return ell
         if _text_w(font, s) <= avail_text_w:
             return s
-        cut = s
-        while cut and (_text_w(font, cut) + ell_w) > avail_text_w:
-            cut = cut[:-1]
+        # Binary search for the longest prefix that fits with the ellipsis.
+        lo, hi = 0, len(s)
+        best = 0
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if _text_w(font, s[:mid]) + ell_w <= avail_text_w:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+
+        cut = s[:best]
         return (cut + ell) if cut else ell
 
     if font_size is None:
