@@ -451,7 +451,9 @@ def df_from(bags, texts, totals):
 # CHIP RENDERING
 # =========================
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
-    clean = "" if pd.isna(text) else str(text).strip()
+    clean = "" if text is None else str(text).strip()
+    if clean.lower() == "nan":
+        clean = ""
     is99 = is_99_tag(clean)
     txt_color = STYLE["purple"] if is99 else (0, 0, 0)
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
@@ -463,9 +465,16 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     max_w = max(1, int(max_w))
     avail_text_w = max(1, max_w - 2 * pad_x)
 
+    _wcache: dict[str, int] = {}
+
     def _text_w(font, s: str) -> int:
+        key = s  # font is fixed inside this function call, so string key is enough here
+        if key in _wcache:
+            return _wcache[key]
         bb = draw.textbbox((0, 0), s, font=font)
-        return bb[2] - bb[0]
+        w = bb[2] - bb[0]
+        _wcache[key] = w
+        return w
 
     def _fit_text(font, s: str) -> str:
         if not s:
