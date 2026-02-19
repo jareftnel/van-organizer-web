@@ -450,62 +450,58 @@ def df_from(bags, texts, totals):
 # =========================
 # CHIP RENDERING
 # =========================
-def draw_chip_fullwidth(draw, text, tile_w):
-    # Outer margin inside the tile for the chip (scales with tile width)
-    outer = int(round(tile_w * 0.02))          # ~2% of tile width
-    outer = max(spx(4), min(outer, spx(12)))   # clamp between 4px and 12px (scaled)
-    max_w = max(1, tile_w - 2 * outer)
+def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     clean = "" if pd.isna(text) else str(text).strip()
     is99 = is_99_tag(clean)
     txt_color = STYLE["purple"] if is99 else (0, 0, 0)
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
 
-    size = FONT_TOTE_TAG_BASE.size
-    while size >= FONT_TOTE_TAG_MIN.size:
-        fnt = get_font(size)
-        bbox = draw.textbbox((0, 0), clean, font=fnt)
-        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        if tw + spx(12) <= max_w:
-            chip_w = max_w
-            chip_h = th + spx(8)
-            chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
-            cd = ImageDraw.Draw(chip)
-            try:
-                cd.rounded_rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], radius=spx(6), fill=bg_color)
-            except (AttributeError, TypeError):
-                cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
-            cd.text((chip_w // 2, chip_h // 2), clean, anchor="mm", font=fnt, fill=txt_color)
-            return chip, chip_w, chip_h, outer
-        size -= max(1, spx(1))
+    if pad_y is None:
+        pad_y = spx(8)
+    pad_x = spx(12)
 
-    # Fallback: render at MIN font size and ellipsize so we NEVER return None
-    fnt = get_font(FONT_TOTE_TAG_MIN.size)
+    max_w = max(1, int(max_w))
+    avail_text_w = max(1, max_w - pad_x)
 
-    pad_w = spx(12)  # same padding used in the fit test
-    ell = "…"
+    def _text_w(font, s: str) -> int:
+        bb = draw.textbbox((0, 0), s, font=font)
+        return bb[2] - bb[0]
 
-    # Build a fitted string that always fits
-    clean_fit = clean
-    if clean_fit:
-        eb = draw.textbbox((0, 0), ell, font=fnt)
-        if (eb[2] - eb[0]) + pad_w > max_w:
-            clean_fit = ell
-        else:
-            while clean_fit:
-                bb = draw.textbbox((0, 0), clean_fit, font=fnt)
-                tw = bb[2] - bb[0]
-                if tw + pad_w <= max_w:
-                    break
-                clean_fit = clean_fit[:-1]
-            if clean_fit != clean:
-                clean_fit = (clean_fit + ell) if clean_fit else ell
+    def _fit_text(font, s: str) -> str:
+        if not s:
+            return ""
+        ell = "…"
+        ell_w = _text_w(font, ell)
+        if ell_w > avail_text_w:
+            return ell
+        if _text_w(font, s) <= avail_text_w:
+            return s
+        cut = s
+        while cut and (_text_w(font, cut) + ell_w) > avail_text_w:
+            cut = cut[:-1]
+        return (cut + ell) if cut else ell
+
+    if font_size is None:
+        size = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
+        min_size = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
+        chosen = None
+        while size >= min_size:
+            f = get_font(size)
+            # fit test after ellipsizing
+            if _text_w(f, _fit_text(f, clean)) <= avail_text_w:
+                chosen = f
+                break
+            size -= max(1, spx(1))
+        font = chosen if chosen is not None else get_font(min_size)
     else:
-        clean_fit = ""
+        font = get_font(int(font_size))
 
-    bbox = draw.textbbox((0, 0), clean_fit, font=fnt)
+    fitted = _fit_text(font, clean)
+    bbox = draw.textbbox((0, 0), fitted, font=font)
     th = bbox[3] - bbox[1]
+
     chip_w = max_w
-    chip_h = th + spx(8)
+    chip_h = max(1, int(th + pad_y))
 
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
@@ -514,11 +510,142 @@ def draw_chip_fullwidth(draw, text, tile_w):
     except (AttributeError, TypeError):
         cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
 
-    cd.text((chip_w // 2, chip_h // 2), clean_fit, anchor="mm", font=fnt, fill=txt_color)
-    return chip, chip_w, chip_h, outer
+    cd.text((chip_w // 2, chip_h // 2), fitted, anchor="mm", font=font, fill=txt_color)
+    return chip, chip_w, chip_h
 
 def compute_base_h(tile_w: int) -> int:
     return int(tile_w * TOTE_NUM_ZONE_RATIO)
+
+
+def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
+    toks = [t.strip() for t in (toks or []) if t and str(t).strip()]
+    if not toks or chip_area_h <= 0:
+        return {"mode": "none", "chips": []}
+
+    outer = int(round(tile_w * 0.02))
+    outer = max(spx(4), min(outer, spx(12)))
+
+    base_fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
+    min_fs = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
+    pad_y_start, pad_y_min = spx(8), spx(4)
+    gap_start, gap_min = spx(4), spx(1)
+
+    def try_1col(font_size, pad_y, gap):
+        max_w = max(1, tile_w - 2 * outer)
+        chips = []
+        total_h = 0
+        for j, t in enumerate(toks):
+            chip, cw, ch = draw_chip_fitwidth(draw, t, max_w, font_size=font_size, pad_y=pad_y)
+            chips.append((chip, cw, ch, outer))
+            total_h += ch
+            if j:
+                total_h += gap
+            if total_h > chip_area_h:
+                return None
+        return {"mode": "1col", "chips": chips, "gap": gap, "outer": outer}
+
+    def try_2col(font_size, pad_y, gap):
+        col_gap = spx(6)
+        col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
+
+        left_toks = toks[0::2]
+        right_toks = toks[1::2]
+
+        def build_col(col_toks):
+            col_items = []
+            total_h = 0
+            for j, t in enumerate(col_toks):
+                chip, cw, ch = draw_chip_fitwidth(draw, t, col_w, font_size=font_size, pad_y=pad_y)
+                total_h += ch + (gap if j else 0)
+                if total_h > chip_area_h:
+                    return None
+                col_items.append((chip, cw, ch))
+            return col_items
+
+        left = build_col(left_toks)
+        if left is None:
+            return None
+        right = build_col(right_toks)
+        if right is None:
+            return None
+
+        return {
+            "mode": "2col",
+            "cols": [left, right],
+            "gap": gap,
+            "outer": outer,
+            "col_gap": col_gap,
+            "col_w": col_w,
+        }
+
+    # 1) normal 1-col
+    res = try_1col(base_fs, pad_y_start, gap_start)
+    if res is not None:
+        return res
+
+    # 2) shrink 1-col
+    for fs in range(base_fs, min_fs - 1, -1):
+        for pad_y in range(pad_y_start, pad_y_min - 1, -max(1, spx(1))):
+            for gap in range(gap_start, gap_min - 1, -max(1, spx(1))):
+                res = try_1col(fs, pad_y, gap)
+                if res is not None:
+                    return res
+
+    # 3) 2-col at mins
+    res2 = try_2col(min_fs, pad_y_min, gap_min)
+    if res2 is not None:
+        return res2
+
+    # 4) truncate into 2-col and add "+N more" if possible
+    col_gap = spx(6)
+    col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
+    gap = gap_min
+    pad_y = pad_y_min
+    fs = min_fs
+
+    cols = [[], []]
+    heights = [0, 0]
+    placed = 0
+
+    for pair_start in range(0, len(toks), 2):
+        left_tok = toks[pair_start]
+        right_tok = toks[pair_start + 1] if (pair_start + 1) < len(toks) else None
+
+        left_chip, lcw, lch = draw_chip_fitwidth(draw, left_tok, col_w, font_size=fs, pad_y=pad_y)
+        left_add_h = lch + (gap if cols[0] else 0)
+        if heights[0] + left_add_h > chip_area_h:
+            break
+        cols[0].append((left_chip, lcw, lch))
+        heights[0] += left_add_h
+        placed += 1
+
+        if right_tok is not None:
+            right_chip, rcw, rch = draw_chip_fitwidth(draw, right_tok, col_w, font_size=fs, pad_y=pad_y)
+            right_add_h = rch + (gap if cols[1] else 0)
+            if heights[1] + right_add_h > chip_area_h:
+                break
+            cols[1].append((right_chip, rcw, rch))
+            heights[1] += right_add_h
+            placed += 1
+
+    remaining = len(toks) - placed
+    if remaining > 0:
+        more_label = f"+{remaining} more"
+        more_chip, mcw, mch = draw_chip_fitwidth(draw, more_label, col_w, font_size=fs, pad_y=pad_y)
+
+        preferred = 1 if cols[1] else 0
+        add_h = mch + (gap if cols[preferred] else 0)
+        if heights[preferred] + add_h <= chip_area_h:
+            cols[preferred].append((more_chip, mcw, mch))
+            heights[preferred] += add_h
+        else:
+            alt = 1 - preferred
+            add_h2 = mch + (gap if cols[alt] else 0)
+            if heights[alt] + add_h2 <= chip_area_h:
+                cols[alt].append((more_chip, mcw, mch))
+                heights[alt] += add_h2
+
+    return {"mode": "2col", "cols": cols, "gap": gap, "outer": outer, "col_gap": col_gap, "col_w": col_w}
 
 
 def measure_tile_heights(df, tile_w):
@@ -542,8 +669,11 @@ def measure_tile_heights(df, tile_w):
         if toks:
             stack_h = 0
             for j, t in enumerate(toks):
-                chip, cw, ch, margin = draw_chip_fullwidth(_CHIP_D, t, tile_w)
-                chips.append((chip, cw, ch, margin))
+                outer = int(round(tile_w * 0.02))
+                outer = max(spx(4), min(outer, spx(12)))
+                max_w = max(1, tile_w - 2 * outer)
+                chip, cw, ch = draw_chip_fitwidth(_CHIP_D, t, max_w)
+                chips.append((chip, cw, ch, outer))
                 stack_h += ch
                 if j:
                     stack_h += gap
@@ -562,7 +692,7 @@ def measure_tile_heights(df, tile_w):
 # =========================
 # TOTE RENDERING
 # =========================
-def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
+def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = None) -> Image.Image:
     """Render the tote-board image from the tote dataframe and parsed bag metadata."""
     n = len(df)
     if n == 0:
@@ -601,7 +731,6 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
     tile_w = max(col_ws)
 
     base_h = compute_base_h(tile_w)
-    heights, cache = measure_tile_heights(df, tile_w)
 
     # Right-to-left, 3-row fill
     positions = []
@@ -609,14 +738,22 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
         for row in range(ROWS_GRID):
             positions.append((col, row))
 
-    row_heights = [0] * ROWS_GRID
-    for i, h in enumerate(heights):
-        if i >= len(positions):
-            break
-        _, row = positions[i]
-        row_heights[row] = max(row_heights[row], h)
+    if max_h is not None:
+        usable = max(1, int(max_h) - pad_y * (ROWS_GRID - 1))
+        fixed = max(1, usable // ROWS_GRID)
+        row_heights = [fixed] * ROWS_GRID
+        img_h = fixed * ROWS_GRID + pad_y * (ROWS_GRID - 1)
+    else:
+        heights, _cache = measure_tile_heights(df, tile_w)
+        row_heights = [0] * ROWS_GRID
+        for i, h in enumerate(heights):
+            if i >= len(positions):
+                break
+            _, row = positions[i]
+            row_heights[row] = max(row_heights[row], h)
+        row_heights = [max(1, h) for h in row_heights]
+        img_h = sum(row_heights) + pad_y * (ROWS_GRID - 1)
 
-    img_h = sum(row_heights) + pad_y * (ROWS_GRID - 1)
     img = Image.new("RGB", (CONTENT_W_PX, img_h), "white")
     d = ImageDraw.Draw(img)
 
@@ -710,29 +847,41 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]]) -> Image.Image:
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
                 d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
 
-        # Overflow chips (BOTTOM-ALIGNED)
-        chips = cache[i]
-        if chips:
-            top_pad = spx(8)     # space below the big number area
-            bot_pad = spx(10)    # space above the tile border
-            gap = spx(4)
+        cell = df.iat[i, 1]
+        mid = "" if pd.isna(cell) else str(cell)
+        toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
 
-            stack_h = sum(ch for _, _, ch, _ in chips) + gap * (len(chips) - 1)
+        top_pad = spx(8)
+        bot_pad = spx(10)
+        chip_area_top = y0 + base_h + top_pad
+        chip_area_bot = y0 + tile_h - bot_pad
+        chip_area_h = max(0, chip_area_bot - chip_area_top)
 
-            # Try to place the whole stack flush-ish to the bottom...
-            cy = (y0 + tile_h) - bot_pad - stack_h
-
-            # ...but never let it rise into the number zone.
-            min_cy = y0 + base_h + top_pad
-            if cy < min_cy:
-                cy = min_cy
-
-            for chip_img, cw, ch, margin in chips:
+        plan = plan_overflow_chips(d, toks, tile_w, chip_area_h)
+        if plan.get("mode") == "1col":
+            chips = plan.get("chips", [])
+            gap = plan.get("gap", spx(4))
+            stack_h = sum(ch for _, _, ch, _ in chips) + gap * max(0, len(chips) - 1)
+            cy = chip_area_bot - stack_h
+            for chip_img, _cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
                 cy += ch + gap
+        elif plan.get("mode") == "2col":
+            cols_plan = plan.get("cols", [[], []])
+            gap = plan.get("gap", spx(1))
+            outer = plan.get("outer", spx(4))
+            col_gap = plan.get("col_gap", spx(6))
+            col_w = plan.get("col_w", max(1, (tile_w - 2 * outer - col_gap) // 2))
+
+            for ci, col_chips in enumerate(cols_plan):
+                stack_h = sum(ch for _, _, ch in col_chips) + gap * max(0, len(col_chips) - 1)
+                cy = chip_area_bot - stack_h
+                cx = x0 + outer + ci * (col_w + col_gap)
+                for chip_img, _cw, ch in col_chips:
+                    img.paste(chip_img, (cx, cy), mask=chip_img)
+                    cy += ch + gap
 
     return img
-
 
 def render_missing_tote_placeholder(title: str) -> Image.Image:
     h = spx(220)
@@ -1721,7 +1870,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 total_pkgs=total_pkgs,
                 bags=bags,
             )
-            tote_img = draw_tote(df, bags)
+            max_tote_h = max(1, (PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX) - table_img.height - GAP_PX)
+            tote_img = draw_tote(df, bags, max_h=max_tote_h)
 
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
         computed_overflow_total = int(sum(int(t or 0) for t in totals if str(t).strip() != ""))
