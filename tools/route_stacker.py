@@ -511,7 +511,7 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
             if _text_w(f, _fit_text(f, clean)) <= avail_text_w:
                 chosen = f
                 break
-            size -= max(1, spx(1))
+            size -= 1
         font = chosen if chosen is not None else get_font(min_size)
     else:
         font = get_font(int(font_size))
