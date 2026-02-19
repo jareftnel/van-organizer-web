@@ -465,10 +465,12 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     max_w = max(1, int(max_w))
     avail_text_w = max(1, max_w - 2 * pad_x)
 
-    _wcache: dict[str, int] = {}
+    _wcache: dict[tuple[int, str], int] = {}
 
     def _text_w(font, s: str) -> int:
-        key = s  # font is fixed inside this function call, so string key is enough here
+        # Include font size in the cache key since this helper is called across size fallbacks.
+        fs = int(getattr(font, "size", 0))
+        key = (fs, s)
         if key in _wcache:
             return _wcache[key]
         bb = draw.textbbox((0, 0), s, font=font)
