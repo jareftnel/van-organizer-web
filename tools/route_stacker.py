@@ -457,8 +457,8 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
 
     if pad_y is None:
-        pad_y = spx(4)
-    pad_x = spx(6)
+        pad_y = spx(4)  # per-edge (top + bottom); total vertical padding = 2*pad_y
+    pad_x = spx(6)      # per-edge (left + right); total horizontal padding = 2*pad_x
 
     max_w = max(1, int(max_w))
     avail_text_w = max(1, max_w - 2 * pad_x)
