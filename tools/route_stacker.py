@@ -457,11 +457,11 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
 
     if pad_y is None:
-        pad_y = spx(8)
-    pad_x = spx(12)
+        pad_y = spx(4)
+    pad_x = spx(6)
 
     max_w = max(1, int(max_w))
-    avail_text_w = max(1, max_w - pad_x)
+    avail_text_w = max(1, max_w - 2 * pad_x)
 
     def _text_w(font, s: str) -> int:
         bb = draw.textbbox((0, 0), s, font=font)
@@ -501,7 +501,7 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     th = bbox[3] - bbox[1]
 
     chip_w = max_w
-    chip_h = max(1, int(th + pad_y))
+    chip_h = max(1, int(th + 2 * pad_y))
 
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
@@ -527,7 +527,7 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
 
     base_fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
     min_fs = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
-    pad_y_start, pad_y_min = spx(8), spx(4)
+    pad_y_start, pad_y_min = spx(4), spx(2)
     gap_start, gap_min = spx(4), spx(1)
 
     def try_1col(font_size, pad_y, gap):
