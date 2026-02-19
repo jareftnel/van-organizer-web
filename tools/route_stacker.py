@@ -450,7 +450,7 @@ def df_from(bags, texts, totals):
 # =========================
 # CHIP RENDERING
 # =========================
-def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
+def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_h=None):
     clean = "" if text is None else str(text).strip()
     if clean.lower() == "nan":
         clean = ""
@@ -521,7 +521,9 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None):
     th = bbox[3] - bbox[1]
 
     chip_w = max_w
-    chip_h = max(1, int(th + 2 * pad_y))
+    natural_h = max(1, int(th + 2 * pad_y))
+    chip_h = int(forced_h) if forced_h is not None else natural_h
+    chip_h = max(1, chip_h)
 
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
@@ -552,16 +554,32 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
 
     def try_1col(font_size, pad_y, gap):
         max_w = max(1, tile_w - 2 * outer)
-        chips = []
+
+        tmp = []
         total_h = 0
         for j, t in enumerate(toks):
             chip, cw, ch = draw_chip_fitwidth(draw, t, max_w, font_size=font_size, pad_y=pad_y)
-            chips.append((chip, cw, ch, outer))
-            total_h += ch
-            if j:
-                total_h += gap
+            tmp.append((t, cw, ch))
+            total_h += ch + (gap if j else 0)
             if total_h > chip_area_h:
                 return None
+
+        target_h = max(ch for _t, _cw, ch in tmp)
+
+        chips = []
+        total_h = 0
+        for j, (t, _cw, _ch) in enumerate(tmp):
+            chip, cw, ch = draw_chip_fitwidth(
+                draw,
+                t,
+                max_w,
+                font_size=font_size,
+                pad_y=pad_y,
+                forced_h=target_h,
+            )
+            chips.append((chip, cw, ch, outer))
+            total_h += ch + (gap if j else 0)
+
         return {"mode": "1col", "chips": chips, "gap": gap, "outer": outer}
 
     def try_2col(font_size, pad_y, gap):
@@ -572,13 +590,27 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         right_toks = toks[1::2]
 
         def build_col(col_toks):
-            col_items = []
+            tmp = []
             total_h = 0
             for j, t in enumerate(col_toks):
                 chip, cw, ch = draw_chip_fitwidth(draw, t, col_w, font_size=font_size, pad_y=pad_y)
+                tmp.append((t, cw, ch))
                 total_h += ch + (gap if j else 0)
                 if total_h > chip_area_h:
                     return None
+
+            target_h = max(ch for _t, _cw, ch in tmp) if tmp else 0
+
+            col_items = []
+            for t, _cw, _ch in tmp:
+                chip, cw, ch = draw_chip_fitwidth(
+                    draw,
+                    t,
+                    col_w,
+                    font_size=font_size,
+                    pad_y=pad_y,
+                    forced_h=target_h,
+                )
                 col_items.append((chip, cw, ch))
             return col_items
 
