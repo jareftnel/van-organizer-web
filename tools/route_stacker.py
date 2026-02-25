@@ -401,6 +401,7 @@ def assign_overflows(bags, overs):
     totals = [0 for _ in bags]
     last_assigned_bag = None
     used_fallback = False
+    fallback_events = []
 
     for zone, count in overs:
         core, L = split_zone_for_index(zone)
@@ -427,6 +428,7 @@ def assign_overflows(bags, overs):
         # otherwise dump it to first bag.
         if bi is None:
             used_fallback = True
+            fallback_events.append({"label_core": label_core, "count": int(count)})
             if last_assigned_bag is not None:
                 bi = last_assigned_bag
             elif bags:
@@ -437,7 +439,7 @@ def assign_overflows(bags, overs):
             totals[bi] += int(count)
             last_assigned_bag = bi
 
-    return texts, totals, used_fallback
+    return texts, totals, used_fallback, fallback_events
 
 
 # =========================
@@ -1404,8 +1406,6 @@ def render_summary_pages(
                 parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             if m.get("tote_missing"):
                 parts.append("NO TOTE DATA")
-            if m.get("overflow_fallback"):
-                parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             metric = " | ".join(parts) if parts else "Mismatch"
 
             y = _row(route, metric, page_no, y, color=(220, 0, 0), clickable=(page_no > 0))
@@ -1920,6 +1920,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             combined_routes.append((title, pages_used, bag_count))
 
         overflow_fallback_used = False
+        fallback_events = []
 
         if tote_missing:
             texts, totals = [], []
@@ -1938,7 +1939,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             )
             tote_img = render_missing_tote_placeholder(title)
         else:
-            texts, totals, overflow_fallback_used = assign_overflows(bags, overs)
+            texts, totals, overflow_fallback_used, fallback_events = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
             table_img = render_table(
                 df=df,
@@ -1962,7 +1963,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 )
 
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
-        computed_overflow_total = int(sum(int(t or 0) for t in totals if str(t).strip() != ""))
+        computed_overflow_total = int(sum(totals))
         sum_plus_overflow = int(bag_pk_total + computed_overflow_total)
 
         overflow_mismatch = (decl_over is not None and int(decl_over) != computed_overflow_total)
