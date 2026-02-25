@@ -947,11 +947,12 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
 
 def render_missing_tote_placeholder(title: str, target_h: int | None = None) -> Image.Image:
     h = max(1, int(target_h)) if target_h is not None else spx(220)
+    dy = max(spx(28), int(h * 0.18))
     img = Image.new("RGB", (CONTENT_W_PX, h), "white")
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, CONTENT_W_PX - 1, h - 1], outline=(220, 0, 0), width=spx(4))
     d.text((CONTENT_W_PX // 2, h // 2), "MISSING TOTE DATA", anchor="mm", font=FONT_TOTE_PKGS, fill=(220, 0, 0))
-    d.text((CONTENT_W_PX // 2, h // 2 + spx(42)), str(title), anchor="mm", font=get_font(spx(18)), fill=(80, 80, 80))
+    d.text((CONTENT_W_PX // 2, h // 2 + dy), str(title), anchor="mm", font=get_font(spx(18)), fill=(80, 80, 80))
     return img
 
 
@@ -2010,7 +2011,9 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 bags=bags,
                 render_scale=s,
             )
-            warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+            diff = abs(table_local.height - TARGET_TABLE_H)
+            if diff > 2 or abs(s - 1.0) > 0.01:
+                warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
 
             for _ in range(2):
                 if table_local.height <= 0:
@@ -2031,7 +2034,9 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                     bags=bags,
                     render_scale=s,
                 )
-                warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+                diff = abs(table_local.height - TARGET_TABLE_H)
+                if diff > 2 or abs(s - 1.0) > 0.01:
+                    warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
 
             return table_local
 
@@ -2053,7 +2058,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 )
 
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
-        computed_overflow_total = int(sum(totals))
+        computed_overflow_total = int(sum(int(t or 0) for t in totals))
         sum_plus_overflow = int(bag_pk_total + computed_overflow_total)
 
         overflow_mismatch = (decl_over is not None and int(decl_over) != computed_overflow_total)
