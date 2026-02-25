@@ -568,26 +568,24 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
 
     base_fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
     min_fs = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
-    pad_y_start, pad_y_min = CHIP_PAD_Y_PX, max(1, CHIP_PAD_Y_PX - 2)
-    gap_start, gap_min = CHIP_GAP_PX, max(1, CHIP_GAP_PX - 3)
+    pad_y = CHIP_PAD_Y_PX
+    gap = CHIP_GAP_PX
 
-    def try_1col(font_size, pad_y, gap):
+    def _chip_h(font_size):
+        f = get_font(int(font_size))
+        bb = draw.textbbox((0, 0), "Ag", font=f)
+        th = bb[3] - bb[1]
+        return max(1, int(th + 2 * pad_y))
+
+    def try_1col(font_size):
         max_w = max(1, tile_w - 2 * outer)
-
-        tmp = []
-        total_h = 0
-        for j, t in enumerate(toks):
-            chip, cw, ch = draw_chip_fitwidth(draw, t, max_w, font_size=font_size, pad_y=pad_y)
-            tmp.append((t, cw, ch))
-            total_h += ch + (gap if j else 0)
-            if total_h > chip_area_h:
-                return None
-
-        target_h = max(ch for _t, _cw, ch in tmp)
+        target_h = _chip_h(font_size)
+        total_h = len(toks) * target_h + gap * max(0, len(toks) - 1)
+        if total_h > chip_area_h:
+            return None
 
         chips = []
-        total_h = 0
-        for j, (t, _cw, _ch) in enumerate(tmp):
+        for t in toks:
             chip, cw, ch = draw_chip_fitwidth(
                 draw,
                 t,
@@ -597,7 +595,6 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
                 forced_h=target_h,
             )
             chips.append((chip, cw, ch, outer))
-            total_h += ch + (gap if j else 0)
 
         return {
             "mode": "1col",
@@ -608,27 +605,21 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
             "col_stack_h": [total_h, 0],
         }
 
-    def try_2col(font_size, pad_y, gap):
+    def try_2col(font_size):
         col_gap = CHIP_COL_GAP_PX
-        col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
+        col_w = max(1, math.floor((tile_w - 2 * outer - col_gap) / 2))
 
         left_toks = toks[0::2]
         right_toks = toks[1::2]
+        target_h = _chip_h(font_size)
 
         def build_col(col_toks):
-            tmp = []
-            total_h = 0
-            for j, t in enumerate(col_toks):
-                chip, cw, ch = draw_chip_fitwidth(draw, t, col_w, font_size=font_size, pad_y=pad_y)
-                tmp.append((t, cw, ch))
-                total_h += ch + (gap if j else 0)
-                if total_h > chip_area_h:
-                    return None
-
-            target_h = max(ch for _t, _cw, ch in tmp) if tmp else 0
+            total_h = len(col_toks) * target_h + gap * max(0, len(col_toks) - 1)
+            if total_h > chip_area_h:
+                return None
 
             col_items = []
-            for t, _cw, _ch in tmp:
+            for t in col_toks:
                 chip, cw, ch = draw_chip_fitwidth(
                     draw,
                     t,
@@ -662,29 +653,27 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         }
 
     # 1) normal 1-col
-    res = try_1col(base_fs, pad_y_start, gap_start)
+    res = try_1col(base_fs)
     if res is not None:
         return res
 
-    # 2) shrink 1-col
+    # 2) shrink 1-col font only
     for fs in range(base_fs, min_fs - 1, -1):
-        for pad_y in range(pad_y_start, pad_y_min - 1, -max(1, spx(1))):
-            for gap in range(gap_start, gap_min - 1, -max(1, spx(1))):
-                res = try_1col(fs, pad_y, gap)
-                if res is not None:
-                    return res
+        res = try_1col(fs)
+        if res is not None:
+            return res
 
-    # 3) 2-col at mins
-    res2 = try_2col(min_fs, pad_y_min, gap_min)
-    if res2 is not None:
-        return res2
+    # 3) 2-col at current-to-min fonts
+    for fs in range(base_fs, min_fs - 1, -1):
+        res2 = try_2col(fs)
+        if res2 is not None:
+            return res2
 
     # 4) truncate into 2-col and add "+N more" if possible
     col_gap = CHIP_COL_GAP_PX
-    col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
-    gap = gap_min
-    pad_y = pad_y_min
+    col_w = max(1, math.floor((tile_w - 2 * outer - col_gap) / 2))
     fs = min_fs
+    target_h = _chip_h(fs)
 
     cols = [[], []]
     heights = [0, 0]
@@ -694,8 +683,8 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         left_tok = toks[pair_start]
         right_tok = toks[pair_start + 1] if (pair_start + 1) < len(toks) else None
 
-        left_chip, lcw, lch = draw_chip_fitwidth(draw, left_tok, col_w, font_size=fs, pad_y=pad_y)
-        left_add_h = lch + (gap if cols[0] else 0)
+        left_chip, lcw, lch = draw_chip_fitwidth(draw, left_tok, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
+        left_add_h = target_h + (gap if cols[0] else 0)
         if heights[0] + left_add_h > chip_area_h:
             break
         cols[0].append((left_chip, lcw, lch))
@@ -703,8 +692,8 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         placed += 1
 
         if right_tok is not None:
-            right_chip, rcw, rch = draw_chip_fitwidth(draw, right_tok, col_w, font_size=fs, pad_y=pad_y)
-            right_add_h = rch + (gap if cols[1] else 0)
+            right_chip, rcw, rch = draw_chip_fitwidth(draw, right_tok, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
+            right_add_h = target_h + (gap if cols[1] else 0)
             if heights[1] + right_add_h > chip_area_h:
                 break
             cols[1].append((right_chip, rcw, rch))
@@ -714,16 +703,16 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
     remaining = len(toks) - placed
     if remaining > 0:
         more_label = f"+{remaining} more"
-        more_chip, mcw, mch = draw_chip_fitwidth(draw, more_label, col_w, font_size=fs, pad_y=pad_y)
+        more_chip, mcw, mch = draw_chip_fitwidth(draw, more_label, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
 
         preferred = 1 if cols[1] else 0
-        add_h = mch + (gap if cols[preferred] else 0)
+        add_h = target_h + (gap if cols[preferred] else 0)
         if heights[preferred] + add_h <= chip_area_h:
             cols[preferred].append((more_chip, mcw, mch))
             heights[preferred] += add_h
         else:
             alt = 1 - preferred
-            add_h2 = mch + (gap if cols[alt] else 0)
+            add_h2 = target_h + (gap if cols[alt] else 0)
             if heights[alt] + add_h2 <= chip_area_h:
                 cols[alt].append((more_chip, mcw, mch))
                 heights[alt] += add_h2
@@ -758,18 +747,7 @@ def measure_tile_heights(df, tile_ws):
 
         toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
         if toks:
-            chip_area_h = max(1, base_h)
-            plan = {"mode": "none", "stack_h": 0, "col_stack_h": [0, 0]}
-            for _ in range(10):
-                plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i, chip_area_h)
-                planned_chip_stack_h = int(plan.get("stack_h", 0))
-                if planned_chip_stack_h <= 0 and chip_area_h < 8192:
-                    chip_area_h *= 2
-                    continue
-                if planned_chip_stack_h == chip_area_h:
-                    break
-                chip_area_h = max(1, planned_chip_stack_h)
-
+            plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i, chip_area_h=10**9)
             planned_chip_stack_h = int(plan.get("stack_h", 0))
             tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
         else:
@@ -960,10 +938,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 cy += ch + gap
         elif plan.get("mode") == "2col":
             cols_plan = plan.get("cols", [[], []])
-            gap = plan.get("gap", max(1, CHIP_GAP_PX - 3))
+            gap = plan.get("gap", CHIP_GAP_PX)
             outer = plan.get("outer", CHIP_OUTER_MIN_PX)
             col_gap = plan.get("col_gap", CHIP_COL_GAP_PX)
-            col_w = plan.get("col_w", max(1, (tile_w_i - 2 * outer - col_gap) // 2))
+            col_w = plan.get("col_w", max(1, math.floor((tile_w_i - 2 * outer - col_gap) / 2)))
 
             for ci, col_chips in enumerate(cols_plan):
                 stack_h = sum(ch for _, _, ch in col_chips) + gap * max(0, len(col_chips) - 1)
