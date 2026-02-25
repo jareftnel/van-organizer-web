@@ -221,6 +221,21 @@ def extract_pkg_summaries(lines, route_title: str = ""):
     return commercial, total
 
 
+def extract_route_identity(text: str):
+    text = text or ""
+    lines = text.splitlines()
+    head = "\n".join(lines[:40])
+
+    m = STG_RE.search(head) or STG_RE.search(text)
+    rs = m.group(1).upper() if m else None
+
+    m2 = CX_RE.search(head) or CX_RE.search(text)
+    cx = m2.group(0).upper() if m2 else None
+
+    title = f"{rs} ({cx})" if (rs and cx) else (rs or cx or "Route")
+    return rs, cx, title
+
+
 # =========================
 # PARSE ROUTE PAGE (ORDER BY PRINTED INDEX)
 # =========================
@@ -233,16 +248,7 @@ def parse_route_page(text: str):
     """
     text = text or ""
     lines = text.splitlines()
-    head = "\n".join(lines[:40])
-    
-    m = STG_RE.search(head) or STG_RE.search(text)
-    rs = m.group(1).upper() if m else None
-
-    m2 = CX_RE.search(head) or CX_RE.search(text)
-    cx = m2.group(0).upper() if m2 else None
-
-
-    route_title = f"{rs} ({cx})" if rs and cx else (rs or cx or "")
+    rs, cx, route_title = extract_route_identity(text)
 
     decl_bags, decl_over = extract_declared_counts(lines, route_title)
     comm_pkgs, total_pkgs = extract_pkg_summaries(lines, route_title)
@@ -394,6 +400,7 @@ def assign_overflows(bags, overs):
     texts = [[] for _ in bags]
     totals = [0 for _ in bags]
     last_assigned_bag = None
+    used_fallback = False
 
     for zone, count in overs:
         core, L = split_zone_for_index(zone)
@@ -419,6 +426,7 @@ def assign_overflows(bags, overs):
         # Final fallback: if we still couldn’t map it, keep continuity if possible,
         # otherwise dump it to first bag.
         if bi is None:
+            used_fallback = True
             if last_assigned_bag is not None:
                 bi = last_assigned_bag
             elif bags:
@@ -429,7 +437,7 @@ def assign_overflows(bags, overs):
             totals[bi] += int(count)
             last_assigned_bag = bi
 
-    return texts, totals
+    return texts, totals, used_fallback
 
 
 # =========================
@@ -1384,11 +1392,21 @@ def render_summary_pages(
                 parts.append(f"Overflow {m.get('declared_overflow')}→{m.get('computed_overflow')}")
             if m.get("total_mismatch"):
                 parts.append(f"Total {m.get('declared_total')}→{m.get('computed_total')}")
+            if m.get("declared_counts_not_found"):
+                parts.append("DECLARED COUNTS NOT FOUND")
+            if m.get("missing_stg"):
+                parts.append("MISSING STG")
+            if m.get("missing_cx"):
+                parts.append("MISSING CX")
+            if m.get("skipped_no_header"):
+                parts.append("SKIPPED ROUTE (NO HEADER)")
+            if m.get("overflow_fallback_used"):
+                parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             if m.get("tote_missing"):
                 parts.append("NO TOTE DATA")
             metric = " | ".join(parts) if parts else "Mismatch"
 
-            y = _row(route, metric, page_no, y, color=(220, 0, 0))
+            y = _row(route, metric, page_no, y, color=(220, 0, 0), clickable=(page_no > 0))
         y += spx(12)
     else:
         y = _ensure_space(spx(44))
@@ -1856,8 +1874,16 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         _cb(total_routes, done_routes, g_idx, "Processing", f"Route {g_idx}/{total_routes}…")
 
         combined_text = "\n\n".join(page_texts[i] for i in g).strip()
+        rs_guess, cx_guess, title_guess = extract_route_identity(combined_text)
         parsed = parse_route_page(combined_text) if combined_text else None
         if not parsed:
+            mismatches.append({
+                "title": title_guess,
+                "missing_stg": rs_guess is None,
+                "missing_cx": cx_guess is None,
+                "skipped_no_header": True,
+                "output_page": 0,
+            })
             done_routes += 1
             _cb(total_routes, done_routes, g_idx, "Processing", f"Skipped unreadable route {g_idx}/{total_routes}")
             continue
@@ -1891,6 +1917,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         if len(g) > 1:
             combined_routes.append((title, pages_used, bag_count))
 
+        overflow_fallback_used = False
+
         if tote_missing:
             texts, totals = [], []
             df = df_from([], [], [])
@@ -1908,7 +1936,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             )
             tote_img = render_missing_tote_placeholder(title)
         else:
-            texts, totals = assign_overflows(bags, overs)
+            texts, totals, overflow_fallback_used = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
             table_img = render_table(
                 df=df,
@@ -1932,8 +1960,20 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         overflow_mismatch = (decl_over is not None and int(decl_over) != computed_overflow_total)
         total_mismatch = (total_pkgs is not None and int(total_pkgs) != int(sum_plus_overflow))
 
+        declared_counts_not_found = (decl_bags is None or decl_over is None)
+        missing_stg = (rs is None)
+        missing_cx = (cx is None)
+
         mismatch_payload = None
-        if overflow_mismatch or total_mismatch:
+        if (
+            overflow_mismatch
+            or total_mismatch
+            or declared_counts_not_found
+            or missing_stg
+            or missing_cx
+            or overflow_fallback_used
+            or tote_missing
+        ):
             mismatch_payload = {
                 "title": title,
                 "declared_overflow": decl_over,
@@ -1942,11 +1982,13 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 "computed_total": sum_plus_overflow,
                 "overflow_mismatch": overflow_mismatch,
                 "total_mismatch": total_mismatch,
+                "declared_counts_not_found": declared_counts_not_found,
+                "missing_stg": missing_stg,
+                "missing_cx": missing_cx,
+                "overflow_fallback_used": overflow_fallback_used,
             }
 
-        if tote_missing and mismatch_payload is None:
-            mismatch_payload = {"title": title, "tote_missing": True}
-        elif tote_missing:
+        if tote_missing and mismatch_payload is not None:
             mismatch_payload["tote_missing"] = True
 
         available_h = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX

@@ -336,7 +336,7 @@ def generate_bags_xlsx_from_routesheets(
             bags = parsed[4]
             overs = parsed[5]
 
-            texts, totals = assign_overflows(bags, overs)
+            texts, totals, _overflow_fallback_used = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
 
             sheet_name = f"{rs}_{cx}"  # matches builder SHEET_RE
