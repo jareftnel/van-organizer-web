@@ -945,8 +945,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
 
     return img
 
-def render_missing_tote_placeholder(title: str) -> Image.Image:
-    h = spx(220)
+def render_missing_tote_placeholder(title: str, target_h: int | None = None) -> Image.Image:
+    h = max(1, int(target_h)) if target_h is not None else spx(220)
     img = Image.new("RGB", (CONTENT_W_PX, h), "white")
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, CONTENT_W_PX - 1, h - 1], outline=(220, 0, 0), width=spx(4))
@@ -958,7 +958,7 @@ def render_missing_tote_placeholder(title: str) -> Image.Image:
 # =========================
 # TABLE RENDERING
 # =========================
-def render_table(
+def render_table_scaled(
     df,
     title,
     style_label,
@@ -969,10 +969,34 @@ def render_table(
     commercial_pkgs,
     total_pkgs,
     bags,
+    render_scale: float,
 ):
-    cell_h = LAYOUT["table_cell_height"]
-    margin = LAYOUT["table_margin"]
-    banner_h = LAYOUT["banner_height"]
+    render_scale = max(0.05, float(render_scale))
+
+    cell_h = max(1, int(round(LAYOUT["table_cell_height"] * render_scale)))
+    margin = max(1, int(round(LAYOUT["table_margin"] * render_scale)))
+    banner_h = max(1, int(round(LAYOUT["banner_height"] * render_scale)))
+    row_divider_h = max(1, int(round(LAYOUT["row_divider_h"] * render_scale)))
+
+    base_banner_size = spx(40)
+    base_table_size = spx(32)
+    base_summary_size = spx(32)
+    base_date_size = spx(22)
+    base_style_size = spx(22)
+    base_zone_size = spx(16)
+    base_pkgs_size = spx(22)
+
+    font_banner = get_font(max(1, int(round(base_banner_size * render_scale))))
+    font_table = get_font(max(1, int(round(base_table_size * render_scale))))
+    font_summary = get_font(max(1, int(round(base_summary_size * render_scale))))
+    font_date = get_font(max(1, int(round(base_date_size * render_scale))))
+    font_style = get_font(max(1, int(round(base_style_size * render_scale))))
+    font_zone = get_font(max(1, int(round(base_zone_size * render_scale))))
+    font_pkgs = get_font(max(1, int(round(base_pkgs_size * render_scale))))
+
+    def sp(v: float) -> int:
+        return max(1, int(round(spx(v) * render_scale)))
+
     total_rows = len(df) + 2  # summary + rows + bottom totals
     width = CONTENT_W_PX
     height = banner_h + total_rows * cell_h + margin * 2
@@ -990,12 +1014,12 @@ def render_table(
         left = str(date_label)
 
     if left:
-        d.text((spx(12), banner_h // 2), left, anchor="lm", font=FONT_DATE, fill=STYLE["meta_grey"])
+        d.text((sp(12), banner_h // 2), left, anchor="lm", font=font_date, fill=STYLE["meta_grey"])
 
-    d.text((width // 2, banner_h // 2), title, anchor="mm", font=FONT_BANNER, fill="black")
+    d.text((width // 2, banner_h // 2), title, anchor="mm", font=font_banner, fill="black")
 
     if style_label:
-        d.text((width - spx(12), banner_h // 2), str(style_label).upper(), anchor="rm", font=FONT_STYLE_TAG, fill=STYLE["meta_grey"])
+        d.text((width - sp(12), banner_h // 2), str(style_label).upper(), anchor="rm", font=font_style, fill=STYLE["meta_grey"])
 
     x = margin
     y0 = banner_h + margin
@@ -1016,12 +1040,12 @@ def render_table(
             except Exception:
                 return int(len(s) * (getattr(font, "size", 12) * 0.6))
 
-    pad_lr = spx(10)
-    zone_gap = spx(6)
-    pkg_gap = spx(6)
+    pad_lr = sp(10)
+    zone_gap = sp(6)
+    pkg_gap = sp(6)
 
-    min_mid = spx(520)
-    min_side = spx(240)
+    min_mid = sp(520)
+    min_side = sp(240)
     available_w = right - x
     max_side = max(0, (available_w - min_mid) // 2)
 
@@ -1030,7 +1054,7 @@ def render_table(
 
     for df_idx in range(len(df)):
         label = str(df.iat[df_idx, 0] or "")
-        bag_w = _tw(FONT_TABLE, label)
+        bag_w = _tw(font_table, label)
 
         zone_display = ""
         pkg_txt = ""
@@ -1051,8 +1075,8 @@ def render_table(
                 except Exception:
                     pkg_txt = ""
 
-        zone_w = _tw(FONT_ZONE, zone_display) + (zone_gap if zone_display else 0)
-        pkg_w = _tw(FONT_TOTE_PKGS, pkg_txt) + (pkg_gap if pkg_txt else 0)
+        zone_w = _tw(font_zone, zone_display) + (zone_gap if zone_display else 0)
+        pkg_w = _tw(font_pkgs, pkg_txt) + (pkg_gap if pkg_txt else 0)
 
         max_w = max(max_w, zone_w + bag_w + pkg_w + pad_lr * 2)
         if max_w >= max_side:
@@ -1081,10 +1105,10 @@ def render_table(
     # Top summary row
     top = y0
     bot = top + cell_h
-    d.rectangle([x, top, right, bot], outline="black", width=spx(2))
-    d.text((x + spx(10), (top + bot) // 2), f"{bag_count} bags", anchor="lm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
-    d.text((right - spx(10), (top + bot) // 2), f"{declared_overflow} overflow", anchor="rm", font=FONT_SUMMARY, fill=STYLE["royal_blue"])
-    d.line([x, bot, right, bot], fill=STYLE["royal_blue"], width=spx(5))
+    d.rectangle([x, top, right, bot], outline="black", width=sp(2))
+    d.text((x + sp(10), (top + bot) // 2), f"{bag_count} bags", anchor="lm", font=font_summary, fill=STYLE["royal_blue"])
+    d.text((right - sp(10), (top + bot) // 2), f"{declared_overflow} overflow", anchor="rm", font=font_summary, fill=STYLE["royal_blue"])
+    d.line([x, bot, right, bot], fill=STYLE["royal_blue"], width=sp(5))
 
     # Bag rows
     last_zone_for_display = None
@@ -1104,13 +1128,13 @@ def render_table(
             d.rectangle([x, top, right, bot], fill="white")
 
         # then outline on top of fill
-        d.rectangle([x, top, right, bot], outline="black", width=spx(2))
+        d.rectangle([x, top, right, bot], outline="black", width=sp(2))
 
         # divider under each 3-row block
         if r % 3 == 0:
-            h = LAYOUT["row_divider_h"]
+            h = row_divider_h
             div_color = STYLE["divider_teal"] if teal_block else STYLE["divider_grey"]
-            d.rectangle([x + spx(2), bot - h, right - spx(2), bot], fill=div_color)
+            d.rectangle([x + sp(2), bot - h, right - sp(2), bot], fill=div_color)
 
         cx = x
         df_idx = r - 1
@@ -1146,18 +1170,18 @@ def render_table(
                         except Exception:
                             pkg_txt = ""
 
-                start_x = cx + spx(10)
+                start_x = cx + sp(10)
 
                 if zone_display:
-                    d.text((start_x, ym), zone_display, anchor="lm", font=FONT_ZONE, fill=STYLE["meta_grey"])
-                    zb = d.textbbox((0, 0), zone_display, font=FONT_ZONE)
-                    start_x += (zb[2] - zb[0]) + spx(6)
+                    d.text((start_x, ym), zone_display, anchor="lm", font=font_zone, fill=STYLE["meta_grey"])
+                    zb = d.textbbox((0, 0), zone_display, font=font_zone)
+                    start_x += (zb[2] - zb[0]) + sp(6)
 
-                d.text((start_x, ym), label, anchor="lm", font=FONT_TABLE, fill="black")
+                d.text((start_x, ym), label, anchor="lm", font=font_table, fill="black")
 
                 if pkg_txt:
-                    lb = d.textbbox((0, 0), label, font=FONT_TABLE)
-                    d.text((start_x + (lb[2] - lb[0]) + spx(6), ym), pkg_txt, anchor="lm", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
+                    lb = d.textbbox((0, 0), label, font=font_table)
+                    d.text((start_x + (lb[2] - lb[0]) + sp(6), ym), pkg_txt, anchor="lm", font=font_pkgs, fill=STYLE["bright_red"])
 
             # Overflow zones column
             elif c_idx == 1:
@@ -1175,7 +1199,7 @@ def render_table(
                     color = STYLE["purple"] if is_99_tag(tok) else (0, 0, 0)
                     segs.append((prefix + tok, color))
 
-                pad = spx(8)
+                pad = sp(8)
                 max_w = max(0, w - 2 * pad)
 
                 def seg_width(font, s: str) -> int:
@@ -1186,9 +1210,9 @@ def render_table(
                     return sum(seg_width(font, s) for s, _ in segs)
 
                 # Try font sizes from normal down to a minimum
-                start_size = int(getattr(FONT_TABLE, "size", spx(32)))
-                min_size = spx(18)  # floor so it doesn't become microscopic
-                font = FONT_TABLE
+                start_size = int(getattr(font_table, "size", sp(32)))
+                min_size = sp(18)  # floor so it doesn't become microscopic
+                font = font_table
 
                 tw = total_width(font)
                 if tw > max_w:
@@ -1240,25 +1264,52 @@ def render_table(
 
             # Overflow totals column
             else:
-                d.text((cx + w - spx(10), ym), text, anchor="rm", font=FONT_TABLE, fill="black")
+                d.text((cx + w - sp(10), ym), text, anchor="rm", font=font_table, fill="black")
 
             cx += w
 
     # Bottom totals row
     br_top = y0 + (len(df) + 1) * cell_h
     br_bot = br_top + cell_h
-    d.rectangle([x, br_top, right, br_bot], outline="black", width=spx(4))
+    d.rectangle([x, br_top, right, br_bot], outline="black", width=sp(4))
 
     if commercial_pkgs is not None:
-        d.text((x + spx(10), (br_top + br_bot) // 2), f"{int(commercial_pkgs)} Commercial", anchor="lm", font=FONT_TABLE, fill=STYLE["bright_red"])
+        d.text((x + sp(10), (br_top + br_bot) // 2), f"{int(commercial_pkgs)} Commercial", anchor="lm", font=font_table, fill=STYLE["bright_red"])
 
     if total_pkgs is not None:
-        d.text((right - spx(10), (br_top + br_bot) // 2), f"{int(total_pkgs)} Total", anchor="rm", font=FONT_TABLE, fill=STYLE["bright_red"])
+        d.text((right - sp(10), (br_top + br_bot) // 2), f"{int(total_pkgs)} Total", anchor="rm", font=font_table, fill=STYLE["bright_red"])
 
     # Outer border
-    d.rectangle([x, y0, right, y0 + total_rows * cell_h], outline="black", width=spx(2))
+    d.rectangle([x, y0, right, y0 + total_rows * cell_h], outline="black", width=sp(2))
 
     return im
+
+
+def render_table(
+    df,
+    title,
+    style_label,
+    date_label,
+    time_label,
+    bag_count,
+    declared_overflow,
+    commercial_pkgs,
+    total_pkgs,
+    bags,
+):
+    return render_table_scaled(
+        df=df,
+        title=title,
+        style_label=style_label,
+        date_label=date_label,
+        time_label=time_label,
+        bag_count=bag_count,
+        declared_overflow=declared_overflow,
+        commercial_pkgs=commercial_pkgs,
+        total_pkgs=total_pkgs,
+        bags=bags,
+        render_scale=1.0,
+    )
 
 
 # =========================================================
@@ -1922,39 +1973,78 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         overflow_fallback_used = False
         fallback_events = []
 
+        CONTENT_H = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX
+        TOTE_RATIO = 0.40
+        TARGET_TOTE_H = int(round(CONTENT_H * TOTE_RATIO))
+        TARGET_TABLE_H = max(1, CONTENT_H - GAP_PX - TARGET_TOTE_H)
+
+        def _render_table_to_target(df_local):
+            table_local = render_table_scaled(
+                df=df_local,
+                title=title,
+                style_label=style_label,
+                date_label=date_label,
+                time_label=time_label,
+                bag_count=bag_count,
+                declared_overflow=declared_overflow,
+                commercial_pkgs=comm_pkgs,
+                total_pkgs=total_pkgs,
+                bags=bags,
+                render_scale=1.0,
+            )
+
+            if table_local.height <= 0:
+                return table_local
+
+            s = TARGET_TABLE_H / float(table_local.height)
+            table_local = render_table_scaled(
+                df=df_local,
+                title=title,
+                style_label=style_label,
+                date_label=date_label,
+                time_label=time_label,
+                bag_count=bag_count,
+                declared_overflow=declared_overflow,
+                commercial_pkgs=comm_pkgs,
+                total_pkgs=total_pkgs,
+                bags=bags,
+                render_scale=s,
+            )
+            warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+
+            for _ in range(2):
+                if table_local.height <= 0:
+                    break
+                if table_local.height == TARGET_TABLE_H:
+                    break
+                s *= TARGET_TABLE_H / float(table_local.height)
+                table_local = render_table_scaled(
+                    df=df_local,
+                    title=title,
+                    style_label=style_label,
+                    date_label=date_label,
+                    time_label=time_label,
+                    bag_count=bag_count,
+                    declared_overflow=declared_overflow,
+                    commercial_pkgs=comm_pkgs,
+                    total_pkgs=total_pkgs,
+                    bags=bags,
+                    render_scale=s,
+                )
+                warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+
+            return table_local
+
         if tote_missing:
             texts, totals = [], []
             df = df_from([], [], [])
-            table_img = render_table(
-                df=df,
-                title=title,
-                style_label=style_label,
-                date_label=date_label,
-                time_label=time_label,
-                bag_count=bag_count,
-                declared_overflow=declared_overflow,
-                commercial_pkgs=comm_pkgs,
-                total_pkgs=total_pkgs,
-                bags=bags,
-            )
-            tote_img = render_missing_tote_placeholder(title)
+            table_img = _render_table_to_target(df)
+            tote_img = render_missing_tote_placeholder(title, target_h=TARGET_TOTE_H)
         else:
             texts, totals, overflow_fallback_used, fallback_events = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
-            table_img = render_table(
-                df=df,
-                title=title,
-                style_label=style_label,
-                date_label=date_label,
-                time_label=time_label,
-                bag_count=bag_count,
-                declared_overflow=declared_overflow,
-                commercial_pkgs=comm_pkgs,
-                total_pkgs=total_pkgs,
-                bags=bags,
-            )
-            max_tote_h = max(1, (PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX) - table_img.height - GAP_PX)
-            tote_img = draw_tote(df, bags, max_h=max_tote_h)
+            table_img = _render_table_to_target(df)
+            tote_img = draw_tote(df, bags, max_h=TARGET_TOTE_H)
 
             if fallback_events:
                 warn(
@@ -2003,14 +2093,39 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         available_h = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX
         needed_h = table_img.height + GAP_PX + tote_img.height
         if needed_h > available_h and needed_h > 0:
-            scale = available_h / float(needed_h)
-            warn(f"{title}: content too tall for letter page, scaling to {scale:.3f}")
-            new_w_tbl = max(1, int(table_img.width * scale))
-            new_h_tbl = max(1, int(table_img.height * scale))
-            new_w_tote = max(1, int(tote_img.width * scale))
-            new_h_tote = max(1, int(tote_img.height * scale))
-            table_img = table_img.resize((new_w_tbl, new_h_tbl), Image.Resampling.LANCZOS)
-            tote_img = tote_img.resize((new_w_tote, new_h_tote), Image.Resampling.LANCZOS)
+            corrected_target_table_h = max(1, available_h - GAP_PX - tote_img.height)
+            table_natural = render_table_scaled(
+                df=df,
+                title=title,
+                style_label=style_label,
+                date_label=date_label,
+                time_label=time_label,
+                bag_count=bag_count,
+                declared_overflow=declared_overflow,
+                commercial_pkgs=comm_pkgs,
+                total_pkgs=total_pkgs,
+                bags=bags,
+                render_scale=1.0,
+            )
+            s = corrected_target_table_h / float(max(1, table_natural.height))
+            for _ in range(3):
+                table_img = render_table_scaled(
+                    df=df,
+                    title=title,
+                    style_label=style_label,
+                    date_label=date_label,
+                    time_label=time_label,
+                    bag_count=bag_count,
+                    declared_overflow=declared_overflow,
+                    commercial_pkgs=comm_pkgs,
+                    total_pkgs=total_pkgs,
+                    bags=bags,
+                    render_scale=s,
+                )
+                warn(f"{title}: rerender table scale={s:.3f} to hit {corrected_target_table_h}px (got {table_img.height}px)")
+                if table_img.height == corrected_target_table_h or table_img.height <= 0:
+                    break
+                s *= corrected_target_table_h / float(table_img.height)
 
         canvas = Image.new("RGB", (PAGE_W_PX, PAGE_H_PX), "white")
 
