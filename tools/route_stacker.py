@@ -1404,6 +1404,8 @@ def render_summary_pages(
                 parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             if m.get("tote_missing"):
                 parts.append("NO TOTE DATA")
+            if m.get("overflow_fallback"):
+                parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             metric = " | ".join(parts) if parts else "Mismatch"
 
             y = _row(route, metric, page_no, y, color=(220, 0, 0), clickable=(page_no > 0))
@@ -1952,6 +1954,12 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             )
             max_tote_h = max(1, (PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX) - table_img.height - GAP_PX)
             tote_img = draw_tote(df, bags, max_h=max_tote_h)
+
+            if fallback_events:
+                warn(
+                    f"{title}: UNMAPPED OVERFLOW used fallback => "
+                    + ", ".join(f"{e['label_core']}({e['count']})" for e in fallback_events)
+                )
 
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
         computed_overflow_total = int(sum(int(t or 0) for t in totals if str(t).strip() != ""))
