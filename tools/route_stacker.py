@@ -394,6 +394,7 @@ def assign_overflows(bags, overs):
     texts = [[] for _ in bags]
     totals = [0 for _ in bags]
     last_assigned_bag = None
+    fallback_events = []  # records any time we had to "guess"
 
     for zone, count in overs:
         core, L = split_zone_for_index(zone)
@@ -419,6 +420,14 @@ def assign_overflows(bags, overs):
         # Final fallback: if we still couldn’t map it, keep continuity if possible,
         # otherwise dump it to first bag.
         if bi is None:
+            # record this as a real error condition (for summary page)
+            fallback_events.append({
+                "zone": zone,
+                "count": int(count),
+                "label_core": label_core,
+                "reason": "unmapped_overflow_fallback",
+            })
+
             if last_assigned_bag is not None:
                 bi = last_assigned_bag
             elif bags:
@@ -429,7 +438,7 @@ def assign_overflows(bags, overs):
             totals[bi] += int(count)
             last_assigned_bag = bi
 
-    return texts, totals
+    return texts, totals, fallback_events
 
 
 # =========================
@@ -1386,6 +1395,8 @@ def render_summary_pages(
                 parts.append(f"Total {m.get('declared_total')}→{m.get('computed_total')}")
             if m.get("tote_missing"):
                 parts.append("NO TOTE DATA")
+            if m.get("overflow_fallback"):
+                parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             metric = " | ".join(parts) if parts else "Mismatch"
 
             y = _row(route, metric, page_no, y, color=(220, 0, 0))
@@ -1891,6 +1902,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         if len(g) > 1:
             combined_routes.append((title, pages_used, bag_count))
 
+        fallback_events = []
+
         if tote_missing:
             texts, totals = [], []
             df = df_from([], [], [])
@@ -1908,7 +1921,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             )
             tote_img = render_missing_tote_placeholder(title)
         else:
-            texts, totals = assign_overflows(bags, overs)
+            texts, totals, fallback_events = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
             table_img = render_table(
                 df=df,
@@ -1925,6 +1938,12 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             max_tote_h = max(1, (PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX) - table_img.height - GAP_PX)
             tote_img = draw_tote(df, bags, max_h=max_tote_h)
 
+            if fallback_events:
+                warn(
+                    f"{title}: UNMAPPED OVERFLOW used fallback => "
+                    + ", ".join(f"{e['label_core']}({e['count']})" for e in fallback_events)
+                )
+
         bag_pk_total = int(sum(int(b.get("pkgs") or 0) for b in bags))
         computed_overflow_total = int(sum(int(t or 0) for t in totals if str(t).strip() != ""))
         sum_plus_overflow = int(bag_pk_total + computed_overflow_total)
@@ -1933,7 +1952,9 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         total_mismatch = (total_pkgs is not None and int(total_pkgs) != int(sum_plus_overflow))
 
         mismatch_payload = None
-        if overflow_mismatch or total_mismatch:
+        fallback_error = bool(fallback_events)
+
+        if overflow_mismatch or total_mismatch or fallback_error:
             mismatch_payload = {
                 "title": title,
                 "declared_overflow": decl_over,
@@ -1942,6 +1963,8 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 "computed_total": sum_plus_overflow,
                 "overflow_mismatch": overflow_mismatch,
                 "total_mismatch": total_mismatch,
+                "overflow_fallback": fallback_error,
+                "overflow_fallback_events": fallback_events,
             }
 
         if tote_missing and mismatch_payload is None:
