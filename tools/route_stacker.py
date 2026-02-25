@@ -460,6 +460,15 @@ def df_from(bags, texts, totals):
 # =========================
 # CHIP RENDERING
 # =========================
+CHIP_PAD_Y_PX = 4
+CHIP_PAD_X_PX = 6
+CHIP_GAP_PX = 4
+CHIP_RADIUS_PX = 6
+CHIP_OUTER_MIN_PX = 4
+CHIP_OUTER_MAX_PX = 12
+CHIP_COL_GAP_PX = 6
+
+
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_h=None):
     clean = "" if text is None else str(text).strip()
     if clean.lower() == "nan":
@@ -469,8 +478,8 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
 
     if pad_y is None:
-        pad_y = spx(4)  # per-edge (top + bottom); total vertical padding = 2*pad_y
-    pad_x = spx(6)      # per-edge (left + right); total horizontal padding = 2*pad_x
+        pad_y = CHIP_PAD_Y_PX  # per-edge (top + bottom); total vertical padding = 2*pad_y
+    pad_x = CHIP_PAD_X_PX      # per-edge (left + right); total horizontal padding = 2*pad_x
 
     max_w = max(1, int(max_w))
     avail_text_w = max(1, max_w - 2 * pad_x)
@@ -538,9 +547,9 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_
     chip = Image.new("RGBA", (chip_w, chip_h), (0, 0, 0, 0))
     cd = ImageDraw.Draw(chip)
     try:
-        cd.rounded_rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], radius=spx(6), fill=bg_color)
+        cd.rounded_rectangle([0, 0, chip_w - 1, chip_h - 1], radius=CHIP_RADIUS_PX, fill=bg_color)
     except (AttributeError, TypeError):
-        cd.rectangle([0, 0, chip_w - spx(1), chip_h - spx(1)], fill=bg_color)
+        cd.rectangle([0, 0, chip_w - 1, chip_h - 1], fill=bg_color)
 
     cd.text((chip_w // 2, chip_h // 2), fitted, anchor="mm", font=font, fill=txt_color)
     return chip, chip_w, chip_h
@@ -552,15 +561,15 @@ def compute_base_h(tile_w: int) -> int:
 def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
     toks = [t.strip() for t in (toks or []) if t and str(t).strip()]
     if not toks or chip_area_h <= 0:
-        return {"mode": "none", "chips": []}
+        return {"mode": "none", "chips": [], "stack_h": 0, "col_stack_h": [0, 0]}
 
     outer = int(round(tile_w * 0.02))
-    outer = max(spx(4), min(outer, spx(12)))
+    outer = max(CHIP_OUTER_MIN_PX, min(outer, CHIP_OUTER_MAX_PX))
 
     base_fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
     min_fs = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
-    pad_y_start, pad_y_min = spx(4), spx(2)
-    gap_start, gap_min = spx(4), spx(1)
+    pad_y_start, pad_y_min = CHIP_PAD_Y_PX, max(1, CHIP_PAD_Y_PX - 2)
+    gap_start, gap_min = CHIP_GAP_PX, max(1, CHIP_GAP_PX - 3)
 
     def try_1col(font_size, pad_y, gap):
         max_w = max(1, tile_w - 2 * outer)
@@ -590,10 +599,17 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
             chips.append((chip, cw, ch, outer))
             total_h += ch + (gap if j else 0)
 
-        return {"mode": "1col", "chips": chips, "gap": gap, "outer": outer}
+        return {
+            "mode": "1col",
+            "chips": chips,
+            "gap": gap,
+            "outer": outer,
+            "stack_h": total_h,
+            "col_stack_h": [total_h, 0],
+        }
 
     def try_2col(font_size, pad_y, gap):
-        col_gap = spx(6)
+        col_gap = CHIP_COL_GAP_PX
         col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
 
         left_toks = toks[0::2]
@@ -631,6 +647,9 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         if right is None:
             return None
 
+        left_h = sum(ch for _chip, _cw, ch in left) + gap * max(0, len(left) - 1)
+        right_h = sum(ch for _chip, _cw, ch in right) + gap * max(0, len(right) - 1)
+
         return {
             "mode": "2col",
             "cols": [left, right],
@@ -638,6 +657,8 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
             "outer": outer,
             "col_gap": col_gap,
             "col_w": col_w,
+            "stack_h": max(left_h, right_h),
+            "col_stack_h": [left_h, right_h],
         }
 
     # 1) normal 1-col
@@ -659,7 +680,7 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
         return res2
 
     # 4) truncate into 2-col and add "+N more" if possible
-    col_gap = spx(6)
+    col_gap = CHIP_COL_GAP_PX
     col_w = max(1, (tile_w - 2 * outer - col_gap) // 2)
     gap = gap_min
     pad_y = pad_y_min
@@ -707,46 +728,56 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
                 cols[alt].append((more_chip, mcw, mch))
                 heights[alt] += add_h2
 
-    return {"mode": "2col", "cols": cols, "gap": gap, "outer": outer, "col_gap": col_gap, "col_w": col_w}
+    left_h = heights[0]
+    right_h = heights[1]
+    return {
+        "mode": "2col",
+        "cols": cols,
+        "gap": gap,
+        "outer": outer,
+        "col_gap": col_gap,
+        "col_w": col_w,
+        "stack_h": max(left_h, right_h),
+        "col_stack_h": [left_h, right_h],
+    }
 
 
-def measure_tile_heights(df, tile_w):
-    base_h = compute_base_h(tile_w)
+def measure_tile_heights(df, tile_ws):
 
     # MUST match draw_tote() chip placement padding
     top_pad = spx(8)
     bot_pad = spx(10)
-    gap = spx(4)
-
     heights = []
     cache = []
 
     for i in range(len(df)):
+        tile_w_i = int(tile_ws[i]) if i < len(tile_ws) else int(tile_ws[-1])
+        base_h = compute_base_h(tile_w_i)
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
 
         toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
-
-        chips = []
         if toks:
-            stack_h = 0
-            for j, t in enumerate(toks):
-                outer = int(round(tile_w * 0.02))
-                outer = max(spx(4), min(outer, spx(12)))
-                max_w = max(1, tile_w - 2 * outer)
-                chip, cw, ch = draw_chip_fitwidth(_CHIP_D, t, max_w)
-                chips.append((chip, cw, ch, outer))
-                stack_h += ch
-                if j:
-                    stack_h += gap
+            chip_area_h = max(1, base_h)
+            plan = {"mode": "none", "stack_h": 0, "col_stack_h": [0, 0]}
+            for _ in range(10):
+                plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i, chip_area_h)
+                planned_chip_stack_h = int(plan.get("stack_h", 0))
+                if planned_chip_stack_h <= 0 and chip_area_h < 8192:
+                    chip_area_h *= 2
+                    continue
+                if planned_chip_stack_h == chip_area_h:
+                    break
+                chip_area_h = max(1, planned_chip_stack_h)
 
-            tile_h = base_h + top_pad + stack_h + bot_pad
+            planned_chip_stack_h = int(plan.get("stack_h", 0))
+            tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
         else:
             # Minimal height when no chips
             tile_h = base_h + bot_pad
 
         heights.append(tile_h)
-        cache.append(chips)
+        cache.append([])
 
     return heights, cache
 
@@ -790,10 +821,6 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         col_x0.append(x)
         x += w + pad_x
 
-    tile_w = max(col_ws)
-
-    base_h = compute_base_h(tile_w)
-
     # Right-to-left, 3-row fill
     positions = []
     for col in range(cols - 1, -1, -1):
@@ -806,7 +833,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         row_heights = [fixed] * ROWS_GRID
         img_h = fixed * ROWS_GRID + pad_y * (ROWS_GRID - 1)
     else:
-        heights, _cache = measure_tile_heights(df, tile_w)
+        tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
+        heights, _cache = measure_tile_heights(df, tile_ws_for_items)
         row_heights = [0] * ROWS_GRID
         for i, h in enumerate(heights):
             if i >= len(positions):
@@ -832,7 +860,9 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         x0 = col_x0[col]
         y0 = row_y[row]
         tile_h = row_heights[row]
-        x1 = x0 + col_ws[col]
+        tile_w_i = col_ws[col]
+        x1 = x0 + tile_w_i
+        base_h = compute_base_h(tile_w_i)
 
         bg = color_for_bag(df.iat[i, 0])
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
@@ -919,10 +949,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         chip_area_bot = y0 + tile_h - bot_pad
         chip_area_h = max(0, chip_area_bot - chip_area_top)
 
-        plan = plan_overflow_chips(d, toks, tile_w, chip_area_h)
+        plan = plan_overflow_chips(d, toks, tile_w_i, chip_area_h)
         if plan.get("mode") == "1col":
             chips = plan.get("chips", [])
-            gap = plan.get("gap", spx(4))
+            gap = plan.get("gap", CHIP_GAP_PX)
             stack_h = sum(ch for _, _, ch, _ in chips) + gap * max(0, len(chips) - 1)
             cy = chip_area_bot - stack_h
             for chip_img, _cw, ch, margin in chips:
@@ -930,10 +960,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 cy += ch + gap
         elif plan.get("mode") == "2col":
             cols_plan = plan.get("cols", [[], []])
-            gap = plan.get("gap", spx(1))
-            outer = plan.get("outer", spx(4))
-            col_gap = plan.get("col_gap", spx(6))
-            col_w = plan.get("col_w", max(1, (tile_w - 2 * outer - col_gap) // 2))
+            gap = plan.get("gap", max(1, CHIP_GAP_PX - 3))
+            outer = plan.get("outer", CHIP_OUTER_MIN_PX)
+            col_gap = plan.get("col_gap", CHIP_COL_GAP_PX)
+            col_w = plan.get("col_w", max(1, (tile_w_i - 2 * outer - col_gap) // 2))
 
             for ci, col_chips in enumerate(cols_plan):
                 stack_h = sum(ch for _, _, ch in col_chips) + gap * max(0, len(col_chips) - 1)
