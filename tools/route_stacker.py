@@ -1983,7 +1983,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         fallback_events = []
 
         CONTENT_H = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX
-        TOTE_RATIO = 0.40
+        TOTE_RATIO = 0.32
         TARGET_TOTE_H = int(round(CONTENT_H * TOTE_RATIO))
         TARGET_TABLE_H = max(1, CONTENT_H - GAP_PX - TARGET_TOTE_H)
 
