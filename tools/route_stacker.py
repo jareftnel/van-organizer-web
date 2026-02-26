@@ -117,8 +117,8 @@ FONT_BANNER = get_font(spx(40))
 FONT_TABLE = get_font(spx(32))
 FONT_SUMMARY = get_font(spx(32))
 FONT_TOTE_NUM = get_font(spx(40))
-FONT_TOTE_TAG_BASE = get_font(spx(22))
-FONT_TOTE_TAG_MIN = get_font(spx(14))
+FONT_TOTE_TAG_BASE = get_font(spx(26))
+FONT_TOTE_TAG_MIN = get_font(spx(18))
 FONT_TOTE_PKGS = get_font(spx(22))
 FONT_STYLE_TAG = get_font(spx(22))
 FONT_DATE = get_font(spx(22))
@@ -460,7 +460,7 @@ def df_from(bags, texts, totals):
 # =========================
 # CHIP RENDERING
 # =========================
-CHIP_PAD_Y_PX = 4
+CHIP_PAD_Y_PX = 6
 CHIP_PAD_X_PX = 6
 CHIP_GAP_PX = 4
 CHIP_RADIUS_PX = 6
@@ -521,8 +521,8 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_
         return (cut + ell) if cut else ell
 
     if font_size is None:
-        size = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
-        min_size = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
+        size = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(26)))
+        min_size = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(18)))
         chosen = None
         while size >= min_size:
             f = get_font(size)
@@ -567,7 +567,7 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
     outer = CHIP_OUTER_MAX_PX
 
     # Fixed font size (consistency), no shrinking per-tote
-    fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
+    fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(26)))
 
     # Fixed chip height for all chips (consistency)
     pad_y = CHIP_PAD_Y_PX
