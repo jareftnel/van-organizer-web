@@ -841,6 +841,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         tile_w_i = col_ws[col]
         x1 = x0 + tile_w_i
         base_h = compute_base_h(tile_w_i)
+        if max_h is not None:
+            min_chip_area_h = spx(54)
+            # In fixed-height mode, cap the number zone so overflow chips always have room.
+            base_h = min(base_h, max(0, tile_h - spx(8) - spx(10) - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
