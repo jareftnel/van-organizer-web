@@ -1057,9 +1057,11 @@ def render_table_scaled(
     zone_gap = sp(6)
     pkg_gap = sp(6)
 
-    min_mid = sp(520)
-    min_side = sp(240)
     available_w = right - x
+    # Don't scale these with render_scale. The table width is fixed (CONTENT_W_PX),
+    # so scaling the minimums can crush the side columns at larger scales.
+    min_mid = int(available_w * 0.54)   # middle gets ~54% minimum
+    min_side = int(available_w * 0.18)  # each side gets ~18% minimum
     max_side = max(0, (available_w - min_mid) // 2)
 
     max_w = 0
