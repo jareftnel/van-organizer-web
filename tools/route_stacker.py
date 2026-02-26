@@ -560,174 +560,48 @@ def compute_base_h(tile_w: int) -> int:
 
 def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
     toks = [t.strip() for t in (toks or []) if t and str(t).strip()]
-    if not toks or chip_area_h <= 0:
-        return {"mode": "none", "chips": [], "stack_h": 0, "col_stack_h": [0, 0]}
+    if not toks:
+        return {"mode": "none", "chips": [], "stack_h": 0, "outer": 0, "gap": CHIP_GAP_PX}
 
-    outer = int(round(tile_w * 0.02))
-    outer = max(CHIP_OUTER_MIN_PX, min(outer, CHIP_OUTER_MAX_PX))
+    # Consistent outer margin (no dynamic variability)
+    outer = CHIP_OUTER_MAX_PX
 
-    base_fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
-    min_fs = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(14)))
+    # Fixed font size (consistency), no shrinking per-tote
+    fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(22)))
+
+    # Fixed chip height for all chips (consistency)
     pad_y = CHIP_PAD_Y_PX
     gap = CHIP_GAP_PX
 
-    def _chip_h(font_size):
-        f = get_font(int(font_size))
-        bb = draw.textbbox((0, 0), "Ag", font=f)
-        th = bb[3] - bb[1]
-        return max(1, int(th + 2 * pad_y))
+    f = get_font(fs)
+    bb = draw.textbbox((0, 0), "Ag", font=f)
+    th = bb[3] - bb[1]
+    target_h = max(1, int(th + 2 * pad_y))
 
-    def try_1col(font_size):
-        max_w = max(1, tile_w - 2 * outer)
-        target_h = _chip_h(font_size)
-        total_h = len(toks) * target_h + gap * max(0, len(toks) - 1)
-        if total_h > chip_area_h:
-            return None
+    max_w = max(1, tile_w - 2 * outer)
 
-        chips = []
-        for t in toks:
-            chip, cw, ch = draw_chip_fitwidth(
-                draw,
-                t,
-                max_w,
-                font_size=font_size,
-                pad_y=pad_y,
-                forced_h=target_h,
-            )
-            chips.append((chip, cw, ch, outer))
+    chips = []
+    for t in toks:
+        chip, cw, ch = draw_chip_fitwidth(
+            draw,
+            t,
+            max_w,
+            font_size=fs,
+            pad_y=pad_y,
+            forced_h=target_h,
+        )
+        chips.append((chip, cw, ch, outer))
 
-        return {
-            "mode": "1col",
-            "chips": chips,
-            "gap": gap,
-            "outer": outer,
-            "stack_h": total_h,
-            "col_stack_h": [total_h, 0],
-        }
+    stack_h = len(chips) * target_h + gap * max(0, len(chips) - 1)
 
-    def try_2col(font_size):
-        col_gap = CHIP_COL_GAP_PX
-        col_w = max(1, math.floor((tile_w - 2 * outer - col_gap) / 2))
-
-        left_toks = toks[0::2]
-        right_toks = toks[1::2]
-        target_h = _chip_h(font_size)
-
-        def build_col(col_toks):
-            total_h = len(col_toks) * target_h + gap * max(0, len(col_toks) - 1)
-            if total_h > chip_area_h:
-                return None
-
-            col_items = []
-            for t in col_toks:
-                chip, cw, ch = draw_chip_fitwidth(
-                    draw,
-                    t,
-                    col_w,
-                    font_size=font_size,
-                    pad_y=pad_y,
-                    forced_h=target_h,
-                )
-                col_items.append((chip, cw, ch))
-            return col_items
-
-        left = build_col(left_toks)
-        if left is None:
-            return None
-        right = build_col(right_toks)
-        if right is None:
-            return None
-
-        left_h = sum(ch for _chip, _cw, ch in left) + gap * max(0, len(left) - 1)
-        right_h = sum(ch for _chip, _cw, ch in right) + gap * max(0, len(right) - 1)
-
-        return {
-            "mode": "2col",
-            "cols": [left, right],
-            "gap": gap,
-            "outer": outer,
-            "col_gap": col_gap,
-            "col_w": col_w,
-            "stack_h": max(left_h, right_h),
-            "col_stack_h": [left_h, right_h],
-        }
-
-    # 1) normal 1-col
-    res = try_1col(base_fs)
-    if res is not None:
-        return res
-
-    # 2) shrink 1-col font only
-    for fs in range(base_fs, min_fs - 1, -1):
-        res = try_1col(fs)
-        if res is not None:
-            return res
-
-    # 3) 2-col at current-to-min fonts
-    for fs in range(base_fs, min_fs - 1, -1):
-        res2 = try_2col(fs)
-        if res2 is not None:
-            return res2
-
-    # 4) truncate into 2-col and add "+N more" if possible
-    col_gap = CHIP_COL_GAP_PX
-    col_w = max(1, math.floor((tile_w - 2 * outer - col_gap) / 2))
-    fs = min_fs
-    target_h = _chip_h(fs)
-
-    cols = [[], []]
-    heights = [0, 0]
-    placed = 0
-
-    for pair_start in range(0, len(toks), 2):
-        left_tok = toks[pair_start]
-        right_tok = toks[pair_start + 1] if (pair_start + 1) < len(toks) else None
-
-        left_chip, lcw, lch = draw_chip_fitwidth(draw, left_tok, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
-        left_add_h = target_h + (gap if cols[0] else 0)
-        if heights[0] + left_add_h > chip_area_h:
-            break
-        cols[0].append((left_chip, lcw, lch))
-        heights[0] += left_add_h
-        placed += 1
-
-        if right_tok is not None:
-            right_chip, rcw, rch = draw_chip_fitwidth(draw, right_tok, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
-            right_add_h = target_h + (gap if cols[1] else 0)
-            if heights[1] + right_add_h > chip_area_h:
-                break
-            cols[1].append((right_chip, rcw, rch))
-            heights[1] += right_add_h
-            placed += 1
-
-    remaining = len(toks) - placed
-    if remaining > 0:
-        more_label = f"+{remaining} more"
-        more_chip, mcw, mch = draw_chip_fitwidth(draw, more_label, col_w, font_size=fs, pad_y=pad_y, forced_h=target_h)
-
-        preferred = 1 if cols[1] else 0
-        add_h = target_h + (gap if cols[preferred] else 0)
-        if heights[preferred] + add_h <= chip_area_h:
-            cols[preferred].append((more_chip, mcw, mch))
-            heights[preferred] += add_h
-        else:
-            alt = 1 - preferred
-            add_h2 = target_h + (gap if cols[alt] else 0)
-            if heights[alt] + add_h2 <= chip_area_h:
-                cols[alt].append((more_chip, mcw, mch))
-                heights[alt] += add_h2
-
-    left_h = heights[0]
-    right_h = heights[1]
+    # We DO NOT truncate, do not "+N more", do not 2-col.
+    # The tote tiles will grow to fit worst-case instead.
     return {
-        "mode": "2col",
-        "cols": cols,
+        "mode": "1col",
+        "chips": chips,
         "gap": gap,
         "outer": outer,
-        "col_gap": col_gap,
-        "col_w": col_w,
-        "stack_h": max(left_h, right_h),
-        "col_stack_h": [left_h, right_h],
+        "stack_h": stack_h,
     }
 
 
@@ -813,14 +687,12 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
     else:
         tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
         heights, _cache = measure_tile_heights(df, tile_ws_for_items)
-        row_heights = [0] * ROWS_GRID
-        for i, h in enumerate(heights):
-            if i >= len(positions):
-                break
-            _, row = positions[i]
-            row_heights[row] = max(row_heights[row], h)
-        row_heights = [max(1, h) for h in row_heights]
-        img_h = sum(row_heights) + pad_y * (ROWS_GRID - 1)
+
+        # ONE RULE: all tiles match the worst-case tile height
+        max_tile_h = max([1] + [int(h) for h in heights])
+
+        row_heights = [max_tile_h] * ROWS_GRID
+        img_h = max_tile_h * ROWS_GRID + pad_y * (ROWS_GRID - 1)
 
     img = Image.new("RGB", (CONTENT_W_PX, img_h), "white")
     d = ImageDraw.Draw(img)
@@ -1989,9 +1861,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
         fallback_events = []
 
         CONTENT_H = PAGE_H_PX - TOP_MARGIN_PX - BOTTOM_MARGIN_PX
-        TOTE_RATIO = 0.32
-        TARGET_TOTE_H = int(round(CONTENT_H * TOTE_RATIO))
-        TARGET_TABLE_H = max(1, CONTENT_H - GAP_PX - TARGET_TOTE_H)
+        target_table_h = max(1, CONTENT_H - GAP_PX)
 
         def _render_table_to_target(df_local):
             table_local = render_table_scaled(
@@ -2011,7 +1881,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             if table_local.height <= 0:
                 return table_local
 
-            s = TARGET_TABLE_H / float(table_local.height)
+            s = target_table_h / float(table_local.height)
             table_local = render_table_scaled(
                 df=df_local,
                 title=title,
@@ -2025,16 +1895,16 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 bags=bags,
                 render_scale=s,
             )
-            diff = abs(table_local.height - TARGET_TABLE_H)
+            diff = abs(table_local.height - target_table_h)
             if diff > 2 or abs(s - 1.0) > 0.01:
-                warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+                warn(f"{title}: rerender table scale={s:.3f} to hit {target_table_h}px (got {table_local.height}px)")
 
             for _ in range(2):
                 if table_local.height <= 0:
                     break
-                if table_local.height == TARGET_TABLE_H:
+                if table_local.height == target_table_h:
                     break
-                s *= TARGET_TABLE_H / float(table_local.height)
+                s *= target_table_h / float(table_local.height)
                 table_local = render_table_scaled(
                     df=df_local,
                     title=title,
@@ -2048,22 +1918,24 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                     bags=bags,
                     render_scale=s,
                 )
-                diff = abs(table_local.height - TARGET_TABLE_H)
+                diff = abs(table_local.height - target_table_h)
                 if diff > 2 or abs(s - 1.0) > 0.01:
-                    warn(f"{title}: rerender table scale={s:.3f} to hit {TARGET_TABLE_H}px (got {table_local.height}px)")
+                    warn(f"{title}: rerender table scale={s:.3f} to hit {target_table_h}px (got {table_local.height}px)")
 
             return table_local
 
         if tote_missing:
             texts, totals = [], []
             df = df_from([], [], [])
+            tote_img = render_missing_tote_placeholder(title)
+            target_table_h = max(1, CONTENT_H - GAP_PX - tote_img.height)
             table_img = _render_table_to_target(df)
-            tote_img = render_missing_tote_placeholder(title, target_h=TARGET_TOTE_H)
         else:
             texts, totals, overflow_fallback_used, fallback_events = assign_overflows(bags, overs)
             df = df_from(bags, texts, totals)
+            tote_img = draw_tote(df, bags, max_h=None)
+            target_table_h = max(1, CONTENT_H - GAP_PX - tote_img.height)
             table_img = _render_table_to_target(df)
-            tote_img = draw_tote(df, bags, max_h=TARGET_TOTE_H)
 
             if fallback_events:
                 warn(
