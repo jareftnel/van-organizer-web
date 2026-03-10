@@ -78,12 +78,12 @@ LAYOUT = {
 PAIR_MAP = {"A": "T", "B": "U", "C": "W", "D": "X", "E": "Y", "G": "Z"}
 INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 
-ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")
+ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")  # Matches normal zone tags (e.g., A-12.3BC) and 99.* overflow tags (e.g., 99.A1).
 SPLIT_RE = re.compile(r"^(\d+(?:\.\d+)*)?([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 _WS_RE = re.compile(r"\s+")
 HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
-STG_RE = re.compile(r"\bSTG\.([A-Z0-9]+(?:\.[A-Z0-9]+)*\.\d+)\b", re.I)
+STG_RE = re.compile(r"\bSTG\.([A-Z0-9]+(?:\.[A-Z0-9]+)*\.\d+)\b", re.I)  # Captures the code after STG. for staging/route values like STG.ABC.12 or STG.A1.B2.34.
 CX_RE  = re.compile(r"\b(?:CX|TX)\d{1,3}\b", re.I)
 
 
