@@ -1340,8 +1340,6 @@ def render_summary_pages(
                 parts.append("MISSING CX")
             if m.get("skipped_no_header"):
                 parts.append("SKIPPED ROUTE (NO HEADER)")
-            if m.get("overflow_fallback_used"):
-                parts.append("UNMAPPED OVERFLOW (FALLBACK)")
             if m.get("tote_missing"):
                 parts.append("NO TOTE DATA")
             metric = " | ".join(parts) if parts else "Mismatch"
@@ -1961,7 +1959,6 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
             or declared_counts_not_found
             or missing_stg
             or missing_cx
-            or overflow_fallback_used
             or tote_missing
         ):
             mismatch_payload = {
@@ -1975,7 +1972,6 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
                 "declared_counts_not_found": declared_counts_not_found,
                 "missing_stg": missing_stg,
                 "missing_cx": missing_cx,
-                "overflow_fallback_used": overflow_fallback_used,
             }
 
         if tote_missing and mismatch_payload is not None:
