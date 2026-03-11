@@ -555,7 +555,7 @@ def compute_base_h(tile_w: int) -> int:
     return int(tile_w * TOTE_NUM_ZONE_RATIO)
 
 
-def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
+def plan_overflow_chips(draw, toks, tile_w):
     toks = [t.strip() for t in (toks or []) if t and str(t).strip()]
     if not toks:
         return {"mode": "none", "chips": [], "stack_h": 0, "outer": 0, "gap": CHIP_GAP_PX}
@@ -616,7 +616,7 @@ def measure_tile_heights(df, tile_ws):
 
         toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
         if toks:
-            plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i, chip_area_h=10**9)
+            plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
             planned_chip_stack_h = int(plan.get("stack_h", 0))
             tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
         else:
@@ -798,7 +798,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         chip_area_bot = y0 + tile_h - bot_pad
         chip_area_h = max(0, chip_area_bot - chip_area_top)
 
-        plan = plan_overflow_chips(d, toks, tile_w_i, chip_area_h)
+        plan = plan_overflow_chips(d, toks, tile_w_i)
         if plan.get("mode") == "1col":
             chips = plan.get("chips", [])
             gap = plan.get("gap", CHIP_GAP_PX)
