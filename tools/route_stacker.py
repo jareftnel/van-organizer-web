@@ -589,7 +589,7 @@ def plan_overflow_chips(draw, toks, tile_w):
 
     stack_h = len(chips) * target_h + gap * max(0, len(chips) - 1)
 
-    # We DO NOT truncate, do not "+N more", do not 2-col.
+    # We do not use "+N more" or 2-column layout; chips may still truncate as a last resort after shrinking to min size.
     # The tote tiles will grow to fit worst-case instead.
     return {
         "mode": "1col",
