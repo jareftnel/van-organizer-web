@@ -523,8 +523,8 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
         chosen = None
         while size >= min_size:
             f = get_font(size)
-            # fit test after ellipsizing
-            if _text_w(f, _fit_text(f, clean)) <= avail_text_w:
+            # fit test with full text; only truncate later if needed at min size
+            if _text_w(f, clean) <= avail_text_w:
                 chosen = f
                 break
             size -= 1
