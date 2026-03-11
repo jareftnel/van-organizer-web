@@ -1937,7 +1937,7 @@ def build_stacked_pdf_with_summary_grouped(input_pdf: str, output_pdf: str, date
 
             if fallback_events:
                 warn(
-                    f"{title}: UNMAPPED OVERFLOW used fallback => "
+                    f"{title}: Fallback overflow assignment used => "
                     + ", ".join(f"{e['label_core']}({e['count']})" for e in fallback_events)
                 )
 
