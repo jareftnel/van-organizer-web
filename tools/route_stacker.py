@@ -583,7 +583,6 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
             draw,
             t,
             max_w,
-            font_size=fs,
             forced_h=target_h,
         )
         chips.append((chip, cw, ch, outer))
