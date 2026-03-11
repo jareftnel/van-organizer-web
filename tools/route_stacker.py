@@ -464,9 +464,7 @@ CHIP_PAD_Y_PX = 6
 CHIP_PAD_X_PX = 6
 CHIP_GAP_PX = 4
 CHIP_RADIUS_PX = 6
-CHIP_OUTER_MIN_PX = 4
 CHIP_OUTER_MAX_PX = 12
-CHIP_COL_GAP_PX = 6
 
 
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_h=None):
@@ -812,20 +810,6 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             for chip_img, _cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
                 cy += ch + gap
-        elif plan.get("mode") == "2col":
-            cols_plan = plan.get("cols", [[], []])
-            gap = plan.get("gap", CHIP_GAP_PX)
-            outer = plan.get("outer", CHIP_OUTER_MIN_PX)
-            col_gap = plan.get("col_gap", CHIP_COL_GAP_PX)
-            col_w = plan.get("col_w", max(1, math.floor((tile_w_i - 2 * outer - col_gap) / 2)))
-
-            for ci, col_chips in enumerate(cols_plan):
-                stack_h = sum(ch for _, _, ch in col_chips) + gap * max(0, len(col_chips) - 1)
-                cy = chip_area_bot - stack_h
-                cx = x0 + outer + ci * (col_w + col_gap)
-                for chip_img, _cw, ch in col_chips:
-                    img.paste(chip_img, (cx, cy), mask=chip_img)
-                    cy += ch + gap
 
     return img
 
