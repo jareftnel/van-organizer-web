@@ -613,7 +613,7 @@ def measure_tile_heights(df, tile_ws):
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
 
-        toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
+        toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
         if toks:
             plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
             planned_chip_stack_h = int(plan.get("stack_h", 0))
@@ -788,7 +788,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
 
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
-        toks = [t.strip() for t in re.split(r"[;|]+", mid) if t.strip()]
+        toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
 
         top_pad = spx(8)
         bot_pad = spx(10)
@@ -1051,7 +1051,7 @@ def render_table_scaled(
 
             # Overflow zones column
             elif c_idx == 1:
-                toks = [t.strip() for t in re.split(r"[;|]+", text) if t.strip()]
+                toks = [t.strip() for t in re.split(r";+", text) if t.strip()]
                 if not toks:
                     cx += w
                     continue
