@@ -600,33 +600,6 @@ def plan_overflow_chips(draw, toks, tile_w):
     }
 
 
-def measure_tile_heights(df, tile_ws):
-
-    # MUST match draw_tote() chip placement padding
-    top_pad = spx(8)
-    bot_pad = spx(10)
-    heights = []
-
-    for i in range(len(df)):
-        tile_w_i = int(tile_ws[i]) if i < len(tile_ws) else int(tile_ws[-1])
-        base_h = compute_base_h(tile_w_i)
-        cell = df.iat[i, 1]
-        mid = "" if pd.isna(cell) else str(cell)
-
-        toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
-        if toks:
-            plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
-            planned_chip_stack_h = int(plan.get("stack_h", 0))
-            tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
-        else:
-            # Minimal height when no chips
-            tile_h = base_h + bot_pad
-
-        heights.append(tile_h)
-
-    return heights
-
-
 # =========================
 # TOTE RENDERING
 # =========================
@@ -679,7 +652,27 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         img_h = fixed * ROWS_GRID + pad_y * (ROWS_GRID - 1)
     else:
         tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
-        heights = measure_tile_heights(df, tile_ws_for_items)
+
+        # MUST match chip placement padding used when rendering inside each tile
+        top_pad = spx(8)
+        bot_pad = spx(10)
+        heights = []
+        for i in range(n):
+            tile_w_i = int(tile_ws_for_items[i]) if i < len(tile_ws_for_items) else int(tile_ws_for_items[-1])
+            base_h = compute_base_h(tile_w_i)
+            cell = df.iat[i, 1]
+            mid = "" if pd.isna(cell) else str(cell)
+
+            toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
+            if toks:
+                plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
+                planned_chip_stack_h = int(plan.get("stack_h", 0))
+                tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
+            else:
+                # Minimal height when no chips
+                tile_h = base_h + bot_pad
+
+            heights.append(tile_h)
 
         # ONE RULE: all tiles match the worst-case tile height
         max_tile_h = max([1] + [int(h) for h in heights])
