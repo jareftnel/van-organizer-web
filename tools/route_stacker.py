@@ -467,7 +467,7 @@ CHIP_RADIUS_PX = 6
 CHIP_OUTER_MAX_PX = 12
 
 
-def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_h=None):
+def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     clean = "" if text is None else str(text).strip()
     if clean.lower() == "nan":
         clean = ""
@@ -475,8 +475,7 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, pad_y=None, forced_
     txt_color = STYLE["purple"] if is99 else (0, 0, 0)
     bg_color = STYLE["lavender"] if is99 else (245, 245, 245)
 
-    if pad_y is None:
-        pad_y = CHIP_PAD_Y_PX  # per-edge (top + bottom); total vertical padding = 2*pad_y
+    pad_y = CHIP_PAD_Y_PX      # per-edge (top + bottom); total vertical padding = 2*pad_y
     pad_x = CHIP_PAD_X_PX      # per-edge (left + right); total horizontal padding = 2*pad_x
 
     max_w = max(1, int(max_w))
@@ -585,7 +584,6 @@ def plan_overflow_chips(draw, toks, tile_w, chip_area_h):
             t,
             max_w,
             font_size=fs,
-            pad_y=pad_y,
             forced_h=target_h,
         )
         chips.append((chip, cw, ch, outer))
