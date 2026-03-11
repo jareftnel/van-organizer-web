@@ -563,7 +563,7 @@ def plan_overflow_chips(draw, toks, tile_w):
     # Consistent outer margin (no dynamic variability)
     outer = CHIP_OUTER_MAX_PX
 
-    # Fixed font size (consistency), no shrinking per-tote
+    # Use base font metrics to derive a consistent chip height.
     fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(26)))
 
     # Fixed chip height for all chips (consistency)
