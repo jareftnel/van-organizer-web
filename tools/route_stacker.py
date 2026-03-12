@@ -654,7 +654,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
 
         # MUST match chip placement padding used when rendering inside each tile
-        top_pad = spx(10)
+        top_pad = spx(8)
         bot_pad = spx(10)
         heights = []
         for i in range(n):
