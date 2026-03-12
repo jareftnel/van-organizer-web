@@ -758,7 +758,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             )
             d.text((num_x, num_y), num, anchor="mm", font=FONT_TOTE_NUM, fill=num_fill)
 
-        # Top-left zone with white halo
+        # Top-left zone with dark halo
         zdisp = zone_display[i] if i < len(zone_display) else ""
         if zdisp:
             try:
