@@ -745,7 +745,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 anchor="mm",
                 font=FONT_TOTE_NUM,
                 fill=num_fill,
-                stroke_width=spx(3),
+                stroke_width=spx(1),
                 stroke_fill=halo_center,
             )
         except TypeError:
