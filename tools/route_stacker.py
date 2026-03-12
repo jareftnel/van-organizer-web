@@ -758,7 +758,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             )
             d.text((num_x, num_y), num, anchor="mm", font=FONT_TOTE_NUM, fill=num_fill)
 
-        # Top-left zone with dark halo
+        # Top-left zone with white halo
         zdisp = zone_display[i] if i < len(zone_display) else ""
         if zdisp:
             try:
@@ -769,7 +769,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     font=FONT_TOTE_PKGS,
                     fill=(70, 70, 70),
                     stroke_width=spx(1),
-                    stroke_fill=(0, 0, 0),
+                    stroke_fill=(255, 255, 255),
                 )
             except TypeError:
                 bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_PKGS)
