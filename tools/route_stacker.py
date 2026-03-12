@@ -119,6 +119,7 @@ FONT_TOTE_NUM = get_font(spx(40))
 FONT_TOTE_TAG_BASE = get_font(spx(26))
 FONT_TOTE_TAG_MIN = get_font(spx(18))
 FONT_TOTE_PKGS = get_font(spx(22))
+FONT_TOTE_META = get_font(spx(24))
 FONT_STYLE_TAG = get_font(spx(22))
 FONT_DATE = get_font(spx(22))
 FONT_ZONE = get_font(spx(16))
@@ -781,17 +782,17 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     (x0 + spx(6), y0 + spx(4)),
                     zdisp,
                     anchor="la",
-                    font=FONT_TOTE_PKGS,
+                    font=FONT_TOTE_META,
                     fill=zone_fill,
                     stroke_width=spx(1),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
-                bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_PKGS)
+                bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_META)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 pad = spx(1)
                 d.rectangle((x0 + spx(6) - pad, y0 + spx(4) - pad, x0 + spx(6) + tw + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
-                d.text((x0 + spx(6), y0 + spx(4)), zdisp, anchor="la", font=FONT_TOTE_PKGS, fill=zone_fill)
+                d.text((x0 + spx(6), y0 + spx(4)), zdisp, anchor="la", font=FONT_TOTE_META, fill=zone_fill)
 
         # Top-right pkgs with white halo
         binfo = bags[i]
@@ -802,17 +803,17 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     (x1 - spx(6), y0 + spx(4)),
                     pk_txt,
                     anchor="ra",
-                    font=FONT_TOTE_PKGS,
+                    font=FONT_TOTE_META,
                     fill=STYLE["bright_red"],
                     stroke_width=spx(2),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
-                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_PKGS)
+                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_META)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 pad = spx(1)
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
-                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_PKGS, fill=STYLE["bright_red"])
+                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_META, fill=STYLE["bright_red"])
 
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
