@@ -470,7 +470,7 @@ CHIP_OUTER_MAX_PX = 12
 TOTE_NUM_BASE_HEIGHT_RATIO = 0.54
 TOTE_NUM_TO_CHIP_GAP_PX = 6
 TOTE_CHIP_BOTTOM_PAD_PX = 10
-CHIP_STACK_VERTICAL_BIAS = 0.62  # 0.5=centered, 1.0=bottom-aligned
+CHIP_STACK_VERTICAL_BIAS = 0.58  # 0.5=centered, 1.0=bottom-aligned
 
 
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
