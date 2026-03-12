@@ -45,7 +45,6 @@ GAP_IN: float = 0.07
 GAP_PX: int = round(GAP_IN * DPI)
 
 ROWS_GRID = 3  # tote rows
-TOTE_NUM_ZONE_RATIO = 0.55
 
 
 STYLE = {
@@ -466,6 +465,13 @@ CHIP_GAP_PX = 4
 CHIP_RADIUS_PX = 6
 CHIP_OUTER_MAX_PX = 12
 
+# Tote top-section tuning: keep existing structure, but tighten number→chip spacing
+# and avoid a hard bottom-aligned chip stack.
+TOTE_NUM_BASE_HEIGHT_RATIO = 0.54
+TOTE_NUM_TO_CHIP_GAP_PX = 6
+TOTE_CHIP_BOTTOM_PAD_PX = 10
+CHIP_STACK_VERTICAL_BIAS = 0.62  # 0.5=centered, 1.0=bottom-aligned
+
 
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     clean = "" if text is None else str(text).strip()
@@ -552,7 +558,7 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     return chip, chip_w, chip_h
 
 def compute_base_h(tile_w: int) -> int:
-    return int(tile_w * TOTE_NUM_ZONE_RATIO)
+    return int(tile_w * TOTE_NUM_BASE_HEIGHT_RATIO)
 
 
 def plan_overflow_chips(draw, toks, tile_w):
@@ -653,9 +659,9 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
     else:
         tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
 
-        # MUST match chip placement padding used when rendering inside each tile
-        top_pad = spx(8)
-        bot_pad = spx(10)
+        # MUST match chip placement padding used when rendering inside each tile.
+        top_pad = spx(TOTE_NUM_TO_CHIP_GAP_PX)
+        bot_pad = spx(TOTE_CHIP_BOTTOM_PAD_PX)
         heights = []
         for i in range(n):
             tile_w_i = int(tile_ws_for_items[i]) if i < len(tile_ws_for_items) else int(tile_ws_for_items[-1])
@@ -702,7 +708,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         if max_h is not None:
             min_chip_area_h = spx(54)
             # In fixed-height mode, cap the number zone so overflow chips always have room.
-            base_h = min(base_h, max(0, tile_h - spx(8) - spx(10) - min_chip_area_h))
+            base_h = min(base_h, max(0, tile_h - spx(TOTE_NUM_TO_CHIP_GAP_PX) - spx(TOTE_CHIP_BOTTOM_PAD_PX) - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
@@ -783,8 +789,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         mid = "" if pd.isna(cell) else str(cell)
         toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
 
-        top_pad = spx(8)
-        bot_pad = spx(10)
+        top_pad = spx(TOTE_NUM_TO_CHIP_GAP_PX)
+        bot_pad = spx(TOTE_CHIP_BOTTOM_PAD_PX)
         chip_area_top = y0 + base_h + top_pad
         chip_area_bot = y0 + tile_h - bot_pad
         chip_area_h = max(0, chip_area_bot - chip_area_top)
@@ -794,7 +800,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             chips = plan.get("chips", [])
             gap = plan.get("gap", CHIP_GAP_PX)
             stack_h = sum(ch for _, _, ch, _ in chips) + gap * max(0, len(chips) - 1)
-            cy = chip_area_bot - stack_h
+            free_h = max(0, chip_area_h - stack_h)
+            cy = chip_area_top + int(round(free_h * CHIP_STACK_VERTICAL_BIAS))
             for chip_img, _cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
                 cy += ch + gap
