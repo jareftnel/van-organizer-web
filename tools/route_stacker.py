@@ -731,10 +731,9 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         label = df.iat[i, 0]
         num = str(label).split()[-1]
 
-        r, g, b = bg
-        lum = r * 0.299 + g * 0.587 + b * 0.114
-        num_fill = (255, 255, 255) if lum < 140 else (0, 0, 0)
-        halo_center = (0, 0, 0) if lum < 140 else (255, 255, 255)
+        is_black_tote = bg == STYLE["bag_colors"]["black"]
+        num_fill = (255, 255, 255) if is_black_tote else (0, 0, 0)
+        halo_center = (150, 150, 150)
 
         num_x = (x0 + x1) // 2
         num_y = y0 + base_h // 2 + spx(14)  # your “14” vertical center shift
