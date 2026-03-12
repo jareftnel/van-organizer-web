@@ -470,7 +470,6 @@ CHIP_OUTER_MAX_PX = 12
 TOTE_NUM_BASE_HEIGHT_RATIO = 0.54
 TOTE_NUM_TO_CHIP_GAP_PX = 6
 TOTE_CHIP_BOTTOM_PAD_PX = 10
-CHIP_STACK_VERTICAL_BIAS = 0.58  # 0.5=centered, 1.0=bottom-aligned
 
 
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
@@ -559,6 +558,22 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
 
 def compute_base_h(tile_w: int) -> int:
     return int(tile_w * TOTE_NUM_BASE_HEIGHT_RATIO)
+
+
+def compute_chip_stack_y(chip_area_top: int, chip_area_h: int, stack_h: int, chip_count: int) -> int:
+    free_h = max(0, int(chip_area_h) - int(stack_h))
+    if chip_count <= 0:
+        return int(chip_area_top)
+
+    if chip_count == 1:
+        y_offset = free_h // 2 + spx(2)
+    elif chip_count == 2:
+        y_offset = free_h // 2 + spx(4)
+    else:
+        y_offset = free_h - spx(6)
+
+    y_offset = max(0, min(free_h, y_offset))
+    return int(chip_area_top) + y_offset
 
 
 def plan_overflow_chips(draw, toks, tile_w):
@@ -800,8 +815,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             chips = plan.get("chips", [])
             gap = plan.get("gap", CHIP_GAP_PX)
             stack_h = sum(ch for _, _, ch, _ in chips) + gap * max(0, len(chips) - 1)
-            free_h = max(0, chip_area_h - stack_h)
-            cy = chip_area_top + int(round(free_h * CHIP_STACK_VERTICAL_BIAS))
+            cy = compute_chip_stack_y(chip_area_top, chip_area_h, stack_h, len(chips))
             for chip_img, _cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
                 cy += ch + gap
