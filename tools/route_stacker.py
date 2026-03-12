@@ -45,7 +45,6 @@ GAP_IN: float = 0.07
 GAP_PX: int = round(GAP_IN * DPI)
 
 ROWS_GRID = 3  # tote rows
-TOTE_NUM_ZONE_RATIO = 0.55
 
 
 STYLE = {
@@ -126,6 +125,9 @@ FONT_ZONE = get_font(spx(16))
 
 _CHIP_DUMMY_IMG = Image.new("RGB", (spx(10), spx(10)), "white")
 _CHIP_D = ImageDraw.Draw(_CHIP_DUMMY_IMG)
+
+TOTE_CHIP_TOP_PAD = spx(8)
+TOTE_CHIP_BOTTOM_PAD = spx(10)
 
 
 # =========================
@@ -551,8 +553,27 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     cd.text((chip_w // 2, chip_h // 2), fitted, anchor="mm", font=font, fill=txt_color)
     return chip, chip_w, chip_h
 
-def compute_base_h(tile_w: int) -> int:
-    return int(tile_w * TOTE_NUM_ZONE_RATIO)
+def compute_top_section_h(draw: ImageDraw.ImageDraw) -> int:
+    zone_bbox = draw.textbbox((0, 0), "99.9W", font=FONT_TOTE_PKGS)
+    pkg_bbox = draw.textbbox((0, 0), "99", font=FONT_TOTE_PKGS)
+    num_bbox = draw.textbbox((0, 0), "9999", font=FONT_TOTE_NUM)
+
+    top_band_h = max(zone_bbox[3] - zone_bbox[1], pkg_bbox[3] - pkg_bbox[1])
+    tote_num_h = num_bbox[3] - num_bbox[1]
+
+    top_label_y = spx(4)
+    num_center_shift = spx(14)
+    label_to_num_gap = spx(6)
+    chip_gap_below_num = spx(6)
+
+    min_h_for_label_clearance = 2 * (
+        top_label_y + top_band_h + label_to_num_gap + tote_num_h / 2 - num_center_shift
+    )
+    min_h_for_chip_clearance = 2 * (
+        chip_gap_below_num + num_center_shift + tote_num_h / 2 - TOTE_CHIP_TOP_PAD
+    )
+
+    return max(1, int(math.ceil(max(min_h_for_label_clearance, min_h_for_chip_clearance))))
 
 
 def plan_overflow_chips(draw, toks, tile_w):
@@ -645,6 +666,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         for row in range(ROWS_GRID):
             positions.append((col, row))
 
+    top_section_h = compute_top_section_h(_CHIP_D)
+
     if max_h is not None:
         usable = max(1, int(max_h) - pad_y * (ROWS_GRID - 1))
         fixed = max(1, usable // ROWS_GRID)
@@ -653,13 +676,9 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
     else:
         tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
 
-        # MUST match chip placement padding used when rendering inside each tile
-        top_pad = spx(8)
-        bot_pad = spx(10)
         heights = []
         for i in range(n):
             tile_w_i = int(tile_ws_for_items[i]) if i < len(tile_ws_for_items) else int(tile_ws_for_items[-1])
-            base_h = compute_base_h(tile_w_i)
             cell = df.iat[i, 1]
             mid = "" if pd.isna(cell) else str(cell)
 
@@ -667,10 +686,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             if toks:
                 plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
                 planned_chip_stack_h = int(plan.get("stack_h", 0))
-                tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
+                tile_h = top_section_h + TOTE_CHIP_TOP_PAD + planned_chip_stack_h + TOTE_CHIP_BOTTOM_PAD
             else:
                 # Minimal height when no chips
-                tile_h = base_h + bot_pad
+                tile_h = top_section_h + TOTE_CHIP_BOTTOM_PAD
 
             heights.append(tile_h)
 
@@ -698,11 +717,11 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         tile_h = row_heights[row]
         tile_w_i = col_ws[col]
         x1 = x0 + tile_w_i
-        base_h = compute_base_h(tile_w_i)
+        top_h = top_section_h
         if max_h is not None:
             min_chip_area_h = spx(54)
             # In fixed-height mode, cap the number zone so overflow chips always have room.
-            base_h = min(base_h, max(0, tile_h - spx(8) - spx(10) - min_chip_area_h))
+            top_h = min(top_h, max(0, tile_h - TOTE_CHIP_TOP_PAD - TOTE_CHIP_BOTTOM_PAD - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
@@ -716,7 +735,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         halo_center = (0, 0, 0) if lum < 140 else (255, 255, 255)
 
         num_x = (x0 + x1) // 2
-        num_y = y0 + base_h // 2 + spx(14)  # your “14” vertical center shift
+        num_y = y0 + top_h // 2 + spx(14)  # your “14” vertical center shift
 
         try:
             d.text(
@@ -783,11 +802,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         mid = "" if pd.isna(cell) else str(cell)
         toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
 
-        top_pad = spx(8)
-        bot_pad = spx(10)
-        chip_area_top = y0 + base_h + top_pad
-        chip_area_bot = y0 + tile_h - bot_pad
-        chip_area_h = max(0, chip_area_bot - chip_area_top)
+        chip_area_top = y0 + top_h + TOTE_CHIP_TOP_PAD
+        chip_area_bot = y0 + tile_h - TOTE_CHIP_BOTTOM_PAD
 
         plan = plan_overflow_chips(d, toks, tile_w_i)
         if plan.get("mode") == "1col":
