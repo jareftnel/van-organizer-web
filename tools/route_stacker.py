@@ -554,9 +554,9 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     return chip, chip_w, chip_h
 
 def compute_top_section_h(draw: ImageDraw.ImageDraw) -> int:
-    zone_bbox = draw.textbbox((0, 0), "19.2A", font=FONT_TOTE_PKGS)
-    pkg_bbox = draw.textbbox((0, 0), "23", font=FONT_TOTE_PKGS)
-    num_bbox = draw.textbbox((0, 0), "8888", font=FONT_TOTE_NUM)
+    zone_bbox = draw.textbbox((0, 0), "99.9W", font=FONT_TOTE_PKGS)
+    pkg_bbox = draw.textbbox((0, 0), "99", font=FONT_TOTE_PKGS)
+    num_bbox = draw.textbbox((0, 0), "9999", font=FONT_TOTE_NUM)
 
     top_band_h = max(zone_bbox[3] - zone_bbox[1], pkg_bbox[3] - pkg_bbox[1])
     tote_num_h = num_bbox[3] - num_bbox[1]
