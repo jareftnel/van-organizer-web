@@ -768,8 +768,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     anchor="la",
                     font=FONT_TOTE_PKGS,
                     fill=(70, 70, 70),
-                    stroke_width=spx(2),
-                    stroke_fill=(255, 255, 255),
+                    stroke_width=spx(1),
+                    stroke_fill=(0, 0, 0),
                 )
             except TypeError:
                 bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_PKGS)
