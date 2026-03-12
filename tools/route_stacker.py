@@ -741,6 +741,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             base_h = min(base_h, max(0, tile_h - spx(TOTE_NUM_TO_CHIP_GAP_PX) - spx(TOTE_CHIP_BOTTOM_PAD_PX) - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
+        bag_colors = STYLE["bag_colors"]
+        halo_color = (120, 120, 120) if bg == bag_colors["black"] else (255, 255, 255)
         zone_fill = zone_fill_for_bg(bg)
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
 
@@ -774,7 +776,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             )
             d.text((num_x, num_y), num, anchor="mm", font=FONT_TOTE_NUM, fill=num_fill)
 
-        # Top-left zone with white halo
+        # Top-left zone with tote-aware halo
         zdisp = zone_display[i] if i < len(zone_display) else ""
         if zdisp:
             try:
@@ -785,13 +787,13 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     font=FONT_TOTE_META,
                     fill=zone_fill,
                     stroke_width=spx(1),
-                    stroke_fill=(255, 255, 255),
+                    stroke_fill=halo_color,
                 )
             except TypeError:
                 bbox = d.textbbox((0, 0), zdisp, font=FONT_TOTE_META)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 pad = spx(1)
-                d.rectangle((x0 + spx(6) - pad, y0 + spx(4) - pad, x0 + spx(6) + tw + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
+                d.rectangle((x0 + spx(6) - pad, y0 + spx(4) - pad, x0 + spx(6) + tw + pad, y0 + spx(4) + th + pad), fill=halo_color)
                 d.text((x0 + spx(6), y0 + spx(4)), zdisp, anchor="la", font=FONT_TOTE_META, fill=zone_fill)
 
         # Top-right pkgs with white halo
