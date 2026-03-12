@@ -717,13 +717,13 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         if bg == bag_colors["yellow"]:
             return (70, 70, 70)
         if bg == bag_colors["green"]:
-            return (75, 75, 75)
+            return (72, 72, 72)
         if bg == bag_colors["navy"]:
-            return (190, 190, 190)
+            return (88, 88, 88)
         if bg == bag_colors["orange"]:
-            return (185, 185, 185)
+            return (86, 86, 86)
         if bg == bag_colors["black"]:
-            return (220, 220, 220)
+            return (108, 108, 108)
         return (70, 70, 70)
 
     for i in range(n):
