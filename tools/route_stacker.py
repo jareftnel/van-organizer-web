@@ -783,7 +783,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 anchor="la",
                 font=FONT_TOTE_META,
                 fill=zone_fill,
-                stroke_width=1,
+                stroke_width=spx(1),
                 stroke_fill=(0, 0, 0),
             )
 
