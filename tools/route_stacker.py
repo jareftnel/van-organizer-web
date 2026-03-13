@@ -716,15 +716,15 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
     def zone_fill_for_bg(bg):
         bag_colors = STYLE["bag_colors"]
         if bg == bag_colors["yellow"]:
-            return (65, 65, 65)
+            return (68, 68, 68)
         if bg == bag_colors["green"]:
             return (72, 72, 72)
         if bg == bag_colors["orange"]:
-            return (85, 85, 85)
+            return (82, 82, 82)
         if bg == bag_colors["navy"]:
-            return (100, 100, 100)
+            return (96, 96, 96)
         if bg == bag_colors["black"]:
-            return (110, 110, 110)
+            return (104, 104, 104)
         return (70, 70, 70)
 
     for i in range(n):
