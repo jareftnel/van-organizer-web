@@ -765,7 +765,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             zb = d.textbbox((0, 0), zdisp, font=FONT_TOTE_META)
             ztw, zth = zb[2] - zb[0], zb[3] - zb[1]
             zp_x = spx(6)
-            zp_y = spx(2)
+            zp_y = spx(3)
             pill_x0 = x0 + spx(5)
             pill_y0 = y0 + spx(4)
             pill_x1 = pill_x0 + ztw + (2 * zp_x)
@@ -781,16 +781,16 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 d.rounded_rectangle(
                     [pill_x0, pill_y0, pill_x1, pill_y1],
                     radius=outer_r,
-                    fill=(58, 58, 58),
+                    fill=(60, 60, 60),
                 )
                 d.rounded_rectangle(
                     [inner_x0, inner_y0, inner_x1, inner_y1],
                     radius=inner_r,
-                    fill=(24, 24, 24),
+                    fill=(20, 20, 20),
                 )
             except AttributeError:
-                d.rectangle([pill_x0, pill_y0, pill_x1, pill_y1], fill=(58, 58, 58))
-                d.rectangle([inner_x0, inner_y0, inner_x1, inner_y1], fill=(24, 24, 24))
+                d.rectangle([pill_x0, pill_y0, pill_x1, pill_y1], fill=(60, 60, 60))
+                d.rectangle([inner_x0, inner_y0, inner_x1, inner_y1], fill=(20, 20, 20))
             d.text(
                 (pill_x0 + zp_x, pill_y0 + zp_y),
                 zdisp,
