@@ -764,25 +764,38 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         if zdisp:
             zb = d.textbbox((0, 0), zdisp, font=FONT_TOTE_META)
             ztw, zth = zb[2] - zb[0], zb[3] - zb[1]
-            zp_x = spx(4)
+            zp_x = spx(6)
             zp_y = spx(2)
-            pill_x0 = x0 + spx(6)
+            pill_x0 = x0 + spx(5)
             pill_y0 = y0 + spx(4)
             pill_x1 = pill_x0 + ztw + (2 * zp_x)
             pill_y1 = pill_y0 + zth + (2 * zp_y)
+            outer_r = max(spx(1), (pill_y1 - pill_y0) // 2)
+            inner_inset = spx(1)
+            inner_x0 = pill_x0 + inner_inset
+            inner_y0 = pill_y0 + inner_inset
+            inner_x1 = pill_x1 - inner_inset
+            inner_y1 = pill_y1 - inner_inset
+            inner_r = max(spx(1), (inner_y1 - inner_y0) // 2)
             try:
                 d.rounded_rectangle(
                     [pill_x0, pill_y0, pill_x1, pill_y1],
-                    radius=spx(4),
-                    fill=(245, 245, 245),
+                    radius=outer_r,
+                    fill=(58, 58, 58),
+                )
+                d.rounded_rectangle(
+                    [inner_x0, inner_y0, inner_x1, inner_y1],
+                    radius=inner_r,
+                    fill=(24, 24, 24),
                 )
             except AttributeError:
-                d.rectangle([pill_x0, pill_y0, pill_x1, pill_y1], fill=(245, 245, 245))
+                d.rectangle([pill_x0, pill_y0, pill_x1, pill_y1], fill=(58, 58, 58))
+                d.rectangle([inner_x0, inner_y0, inner_x1, inner_y1], fill=(24, 24, 24))
             d.text(
                 (pill_x0 + zp_x, pill_y0 + zp_y),
                 zdisp,
                 font=FONT_TOTE_META,
-                fill=(0, 0, 0),
+                fill=STYLE["meta_grey"],
             )
 
         # Top-right pkgs with white halo
