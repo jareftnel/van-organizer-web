@@ -649,7 +649,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
     n = len(df)
     if n == 0:
         warn("draw_tote(): empty df (no tote rows). Rendering MISSING TOTE DATA placeholder.")
-        return render_missing_tote_placeholder("")
+        return render_missing_tote_placeholder("MISSING TOTE DATA")
 
     def fmt_zone(sz):
         if not sz:
