@@ -728,7 +728,8 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         row_y[r] = row_y[r - 1] + row_heights[r - 1] + pad_y
 
     def color_for_bag(label):
-        base = str(label).split()[0].lower()
+        parts = str(label).split()
+        base = parts[0].lower() if parts else ""
         return STYLE["bag_colors"].get(base, (200, 200, 200))
 
     for i in range(n):
