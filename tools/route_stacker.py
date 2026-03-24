@@ -698,7 +698,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         bot_pad = spx(TOTE_CHIP_BOTTOM_PAD_PX)
         heights = []
         for i in range(n):
-            tile_w_i = int(tile_ws_for_items[i]) if i < len(tile_ws_for_items) else int(tile_ws_for_items[-1])
+            tile_w_i = int(tile_ws_for_items[i])
             base_h = compute_base_h(tile_w_i)
             cell = df.iat[i, 1]
             mid = "" if pd.isna(cell) else str(cell)
