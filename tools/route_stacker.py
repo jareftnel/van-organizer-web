@@ -77,12 +77,12 @@ LAYOUT = {
 PAIR_MAP = {"A": "T", "B": "U", "C": "W", "D": "X", "E": "Y", "G": "Z"}
 INVERSE_PAIR = {v: k for k, v in PAIR_MAP.items()}
 
-ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")  # Matches normal zone tags (e.g., A-12.3BC) and 99.* overflow tags (e.g., 99.A1).
+ZONE_RE = re.compile(r"^(?:[A-Z]-[0-9.]*[A-Z]+|99\.[A-Z0-9]+)$")  # Normal zone tags (A-12.3BC) and overflow 99.* tags (99.A1).
 SPLIT_RE = re.compile(r"^(\d+(?:\.\d+)*)?([A-Z]+)$")
 TIME_RE = re.compile(r"\b(\d{1,2}:\d{2}\s*(?:AM|PM))\b", re.I)
 _WS_RE = re.compile(r"\s+")
 HEADER_RE = re.compile(r"\bsort\s+zone\s+(?:bag\s+)?pkgs?\b", re.I)
-STG_RE = re.compile(r"\bSTG\.([A-Z0-9]+(?:\.[A-Z0-9]+)*\.\d+)\b", re.I)  # Captures the code after STG. for staging/route values like STG.ABC.12 or STG.A1.B2.34.
+STG_RE = re.compile(r"\bSTG\.([A-Z0-9]+(?:\.[A-Z0-9]+)*\.\d+)\b", re.I)  # Route/staging code after STG. (e.g., STG.ABC.12, STG.A1.B2.34).
 CX_RE  = re.compile(r"\b(?:CX|TX)\d{1,3}\b", re.I)
 
 
@@ -115,11 +115,11 @@ def get_font(size: int):
 FONT_BANNER = get_font(spx(40))
 FONT_TABLE = get_font(spx(32))
 FONT_SUMMARY = get_font(spx(32))
-FONT_TOTE_NUM = get_font(spx(40))
-FONT_TOTE_TAG_BASE = get_font(spx(26))
-FONT_TOTE_TAG_MIN = get_font(spx(18))
-FONT_TOTE_PKGS = get_font(spx(22))
-FONT_TOTE_META = get_font(spx(24))
+FONT_TOTE_NUMBER = get_font(spx(40))
+FONT_TOTE_CHIP_BASE = get_font(spx(26))
+FONT_TOTE_CHIP_MIN = get_font(spx(18))
+FONT_TOTE_PLACEHOLDER = get_font(spx(22))
+FONT_TOTE_CORNER_META = get_font(spx(24))
 FONT_STYLE_TAG = get_font(spx(22))
 FONT_DATE = get_font(spx(22))
 FONT_ZONE = get_font(spx(16))
@@ -473,6 +473,25 @@ TOTE_NUM_TO_CHIP_GAP_PX = 6
 TOTE_CHIP_BOTTOM_PAD_PX = 10
 
 
+def zone_fill_for_bg(bg):
+    bag_colors = STYLE["bag_colors"]
+    if bg == bag_colors["yellow"]:
+        return (73, 73, 73)
+    if bg == bag_colors["green"]:
+        return (72, 72, 72)
+    if bg == bag_colors["orange"]:
+        return (81, 81, 81)
+    if bg == bag_colors["navy"]:
+        return (87, 87, 87)
+    if bg == bag_colors["black"]:
+        return (82, 82, 82)
+    return (70, 70, 70)
+
+
+def zone_halo_for_bg(_bg):
+    return (0, 0, 0)
+
+
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
     clean = "" if text is None else str(text).strip()
     if clean.lower() == "nan":
@@ -524,8 +543,8 @@ def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
         return (cut + ell) if cut else ell
 
     if font_size is None:
-        size = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(26)))
-        min_size = int(getattr(FONT_TOTE_TAG_MIN, "size", spx(18)))
+        size = int(getattr(FONT_TOTE_CHIP_BASE, "size", spx(26)))
+        min_size = int(getattr(FONT_TOTE_CHIP_MIN, "size", spx(18)))
         chosen = None
         while size >= min_size:
             f = get_font(size)
@@ -586,7 +605,7 @@ def plan_overflow_chips(draw, toks, tile_w):
     outer = CHIP_OUTER_MAX_PX
 
     # Use base font metrics to derive a consistent chip height.
-    fs = int(getattr(FONT_TOTE_TAG_BASE, "size", spx(26)))
+    fs = int(getattr(FONT_TOTE_CHIP_BASE, "size", spx(26)))
 
     # Fixed chip height for all chips (consistency)
     pad_y = CHIP_PAD_Y_PX
@@ -713,20 +732,6 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         base = str(label).split()[0].lower()
         return STYLE["bag_colors"].get(base, (200, 200, 200))
 
-    def zone_fill_for_bg(bg):
-        bag_colors = STYLE["bag_colors"]
-        if bg == bag_colors["yellow"]:
-            return (73, 73, 73)
-        if bg == bag_colors["green"]:
-            return (72, 72, 72)
-        if bg == bag_colors["orange"]:
-            return (81, 81, 81)
-        if bg == bag_colors["navy"]:
-            return (87, 87, 87)
-        if bg == bag_colors["black"]:
-            return (82, 82, 82)
-        return (70, 70, 70)
-
     for i in range(n):
         col, row = positions[i]
         x0 = col_x0[col]
@@ -759,20 +764,20 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 (num_x, num_y),
                 num,
                 anchor="mm",
-                font=FONT_TOTE_NUM,
+                font=FONT_TOTE_NUMBER,
                 fill=num_fill,
                 stroke_width=spx(1),
                 stroke_fill=halo_center,
             )
         except TypeError:
-            bbox = d.textbbox((0, 0), num, font=FONT_TOTE_NUM)
+            bbox = d.textbbox((0, 0), num, font=FONT_TOTE_NUMBER)
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
             pad = spx(3)
             d.rectangle(
                 (num_x - tw // 2 - pad, num_y - th // 2 - pad, num_x + tw // 2 + pad, num_y + th // 2 + pad),
                 fill=halo_center,
             )
-            d.text((num_x, num_y), num, anchor="mm", font=FONT_TOTE_NUM, fill=num_fill)
+            d.text((num_x, num_y), num, anchor="mm", font=FONT_TOTE_NUMBER, fill=num_fill)
 
         # Top-left zone label
         zdisp = zone_display[i] if i < len(zone_display) else ""
@@ -781,10 +786,10 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 (x0 + spx(6), y0 + spx(4)),
                 zdisp,
                 anchor="la",
-                font=FONT_TOTE_META,
+                font=FONT_TOTE_CORNER_META,
                 fill=zone_fill,
                 stroke_width=spx(1),
-                stroke_fill=(0, 0, 0),
+                stroke_fill=zone_halo_for_bg(bg),
             )
 
         # Top-right pkgs with white halo
@@ -796,17 +801,17 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     (x1 - spx(6), y0 + spx(4)),
                     pk_txt,
                     anchor="ra",
-                    font=FONT_TOTE_META,
+                    font=FONT_TOTE_CORNER_META,
                     fill=STYLE["bright_red"],
                     stroke_width=spx(2),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
-                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_META)
+                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_CORNER_META)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 pad = spx(1)
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
-                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_META, fill=STYLE["bright_red"])
+                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_CORNER_META, fill=STYLE["bright_red"])
 
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
@@ -836,7 +841,7 @@ def render_missing_tote_placeholder(title: str, target_h: int | None = None) -> 
     img = Image.new("RGB", (CONTENT_W_PX, h), "white")
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, CONTENT_W_PX - 1, h - 1], outline=(220, 0, 0), width=spx(4))
-    d.text((CONTENT_W_PX // 2, h // 2), "MISSING TOTE DATA", anchor="mm", font=FONT_TOTE_PKGS, fill=(220, 0, 0))
+    d.text((CONTENT_W_PX // 2, h // 2), "MISSING TOTE DATA", anchor="mm", font=FONT_TOTE_PLACEHOLDER, fill=(220, 0, 0))
     d.text((CONTENT_W_PX // 2, h // 2 + dy), str(title), anchor="mm", font=get_font(spx(18)), fill=(80, 80, 80))
     return img
 
