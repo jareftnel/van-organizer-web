@@ -715,7 +715,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             heights.append(tile_h)
 
         # ONE RULE: all tiles match the worst-case tile height
-        max_tile_h = max([1] + [int(h) for h in heights])
+        max_tile_h = max(1, max(int(h) for h in heights))
 
         row_heights = [max_tile_h] * ROWS_GRID
         img_h = max_tile_h * ROWS_GRID + pad_y * (ROWS_GRID - 1)
