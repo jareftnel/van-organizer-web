@@ -658,13 +658,16 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
 
     zone_display = []
     last = None
+    last_fmt = ""
+    
     for b in bags:
         sz = b.get("sort_zone")
         if sz:
             last = sz
+            last_fmt = fmt_zone(sz)
             zone_display.append(fmt_zone(sz))
         else:
-            zone_display.append(fmt_zone(last) if last else "")
+            zone_display.append(last_fmt)
 
     cols = max(1, math.ceil(n / ROWS_GRID))
     pad_x, pad_y = spx(6), spx(8)
