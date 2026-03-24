@@ -713,6 +713,20 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         base = str(label).split()[0].lower()
         return STYLE["bag_colors"].get(base, (200, 200, 200))
 
+    def zone_fill_for_bg(bg):
+        bag_colors = STYLE["bag_colors"]
+        if bg == bag_colors["yellow"]:
+            return (68, 68, 68)
+        if bg == bag_colors["green"]:
+            return (72, 72, 72)
+        if bg == bag_colors["orange"]:
+            return (82, 82, 82)
+        if bg == bag_colors["navy"]:
+            return (96, 96, 96)
+        if bg == bag_colors["black"]:
+            return (104, 104, 104)
+        return (70, 70, 70)
+
     for i in range(n):
         col, row = positions[i]
         x0 = col_x0[col]
@@ -727,6 +741,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             base_h = min(base_h, max(0, tile_h - spx(TOTE_NUM_TO_CHIP_GAP_PX) - spx(TOTE_CHIP_BOTTOM_PAD_PX) - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
+        zone_fill = zone_fill_for_bg(bg)
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
 
         label = df.iat[i, 0]
@@ -762,27 +777,14 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         # Top-left zone label
         zdisp = zone_display[i] if i < len(zone_display) else ""
         if zdisp:
-            zb = d.textbbox((0, 0), zdisp, font=FONT_TOTE_META)
-            ztw, zth = zb[2] - zb[0], zb[3] - zb[1]
-            zp_x = spx(4)
-            zp_y = spx(2)
-            pill_x0 = x0 + spx(6)
-            pill_y0 = y0 + spx(4)
-            pill_x1 = pill_x0 + ztw + (2 * zp_x)
-            pill_y1 = pill_y0 + zth + (2 * zp_y)
-            try:
-                d.rounded_rectangle(
-                    [pill_x0, pill_y0, pill_x1, pill_y1],
-                    radius=spx(4),
-                    fill=(245, 245, 245),
-                )
-            except AttributeError:
-                d.rectangle([pill_x0, pill_y0, pill_x1, pill_y1], fill=(245, 245, 245))
             d.text(
-                (pill_x0 + zp_x, pill_y0 + zp_y),
+                (x0 + spx(6), y0 + spx(4)),
                 zdisp,
+                anchor="la",
                 font=FONT_TOTE_META,
-                fill=(0, 0, 0),
+                fill=zone_fill,
+                stroke_width=spx(1),
+                stroke_fill=(0, 0, 0),
             )
 
         # Top-right pkgs with white halo
