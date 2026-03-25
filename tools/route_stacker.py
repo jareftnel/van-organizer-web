@@ -476,51 +476,51 @@ TOTE_CHIP_BOTTOM_PAD_PX = 10
 def zone_text_kwargs_for_bg(bg):
     bag_colors = STYLE["bag_colors"]
 
-    # Yellow — very light background
+    # Yellow — already good, just soften stroke slightly
     if bg == bag_colors["yellow"]:
         return {
             "fill": (73, 73, 73),
             "stroke_width": spx(1),
-            "stroke_fill": (245, 245, 245),
+            "stroke_fill": (238, 238, 238),
         }
 
-    # Green — light-mid background
+    # Green — similar to yellow, slightly quieter stroke
     if bg == bag_colors["green"]:
         return {
             "fill": (72, 72, 72),
             "stroke_width": spx(1),
-            "stroke_fill": (245, 245, 245),
+            "stroke_fill": (236, 236, 236),
         }
 
-    # Orange — high chroma → stabilize with soft halo
+    # Orange — keep very close to current, it is in a good place
     if bg == bag_colors["orange"]:
         return {
             "fill": (80, 80, 80),
             "stroke_width": spx(1),
-            "stroke_fill": (245, 245, 245),
+            "stroke_fill": (244, 244, 244),
         }
 
-    # Navy — dark saturated → lighter text + halo
+    # Navy — this is the weakest current color; increase separation a bit
     if bg == bag_colors["navy"]:
         return {
-            "fill": (96, 96, 96),
-            "stroke_width": spx(1),
-            "stroke_fill": (245, 245, 245),
-        }
-
-    # Black — darkest → brightest gray + halo
-    if bg == bag_colors["black"]:
-        return {
-            "fill": (118, 118, 118),
+            "fill": (104, 104, 104),
             "stroke_width": spx(1),
             "stroke_fill": (250, 250, 250),
+        }
+
+    # Black — still strong, but soften slightly so it does not feel over-emphasized
+    if bg == bag_colors["black"]:
+        return {
+            "fill": (110, 110, 110),
+            "stroke_width": spx(1),
+            "stroke_fill": (244, 244, 244),
         }
 
     # Fallback
     return {
         "fill": STYLE["meta_grey"],
         "stroke_width": spx(1),
-        "stroke_fill": (245, 245, 245),
+        "stroke_fill": (240, 240, 240),
     }
 
 
