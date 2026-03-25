@@ -476,16 +476,20 @@ TOTE_CHIP_BOTTOM_PAD_PX = 10
 def zone_text_kwargs_for_bg(bg):
     bag_colors = STYLE["bag_colors"]
 
-    # Yellow — very light background → darker neutral gray, no stroke
+    # Yellow — very light background
     if bg == bag_colors["yellow"]:
         return {
             "fill": (73, 73, 73),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
         }
 
-    # Green — light-mid background → slightly adjusted gray
+    # Green — light-mid background
     if bg == bag_colors["green"]:
         return {
             "fill": (72, 72, 72),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
         }
 
     # Orange — high chroma → stabilize with soft halo
@@ -515,6 +519,8 @@ def zone_text_kwargs_for_bg(bg):
     # Fallback
     return {
         "fill": STYLE["meta_grey"],
+        "stroke_width": spx(1),
+        "stroke_fill": (245, 245, 245),
     }
 
 
