@@ -473,23 +473,55 @@ TOTE_NUM_TO_CHIP_GAP_PX = 6
 TOTE_CHIP_BOTTOM_PAD_PX = 10
 
 
-def zone_fill_for_bg(bg):
+def zone_text_kwargs_for_bg(bg):
     bag_colors = STYLE["bag_colors"]
+
+    # Yellow — very light background
     if bg == bag_colors["yellow"]:
-        return (73, 73, 73)
+        return {
+            "fill": (73, 73, 73),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
+        }
+
+    # Green — light-mid background
     if bg == bag_colors["green"]:
-        return (72, 72, 72)
+        return {
+            "fill": (72, 72, 72),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
+        }
+
+    # Orange — high chroma → stabilize with soft halo
     if bg == bag_colors["orange"]:
-        return (81, 81, 81)
+        return {
+            "fill": (80, 80, 80),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
+        }
+
+    # Navy — dark saturated → lighter text + halo
     if bg == bag_colors["navy"]:
-        return (87, 87, 87)
+        return {
+            "fill": (96, 96, 96),
+            "stroke_width": spx(1),
+            "stroke_fill": (245, 245, 245),
+        }
+
+    # Black — darkest → brightest gray + halo
     if bg == bag_colors["black"]:
-        return (82, 82, 82)
-    return (70, 70, 70)
+        return {
+            "fill": (118, 118, 118),
+            "stroke_width": spx(1),
+            "stroke_fill": (250, 250, 250),
+        }
 
-
-def zone_halo_for_bg(_bg):
-    return (0, 0, 0)
+    # Fallback
+    return {
+        "fill": STYLE["meta_grey"],
+        "stroke_width": spx(1),
+        "stroke_fill": (245, 245, 245),
+    }
 
 
 def draw_chip_fitwidth(draw, text, max_w, *, font_size=None, forced_h=None):
@@ -746,7 +778,6 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
             base_h = min(base_h, max(0, tile_h - spx(TOTE_NUM_TO_CHIP_GAP_PX) - spx(TOTE_CHIP_BOTTOM_PAD_PX) - min_chip_area_h))
 
         bg = color_for_bag(df.iat[i, 0])
-        zone_fill = zone_fill_for_bg(bg)
         d.rectangle([x0, y0, x1, y0 + tile_h], fill=bg, outline="black", width=spx(2))
 
         label = df.iat[i, 0]
@@ -787,9 +818,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 zdisp,
                 anchor="la",
                 font=FONT_TOTE_CORNER_META,
-                fill=zone_fill,
-                stroke_width=spx(1),
-                stroke_fill=zone_halo_for_bg(bg),
+                **zone_text_kwargs_for_bg(bg),
             )
 
         # Top-right pkgs with white halo
