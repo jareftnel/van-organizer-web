@@ -476,7 +476,7 @@ TOTE_CHIP_BOTTOM_PAD_PX = 10
 def zone_text_kwargs_for_bg(_bg):
     return {
         "fill": (92, 92, 92),
-        "stroke_width": spx(1),
+        "stroke_width": spx(2),
         "stroke_fill": (244, 244, 244),
     }
 
