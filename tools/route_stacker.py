@@ -95,21 +95,23 @@ BAG_COLORS_ALLOWED = {"Yellow", "Green", "Orange", "Black", "Navy"}
 # =========================
 # FONTS
 # =========================
-_FONT_CACHE: dict[int, ImageFont.FreeTypeFont] = {}
+_FONT_CACHE: dict[tuple[int, tuple[str, ...] | None], ImageFont.FreeTypeFont] = {}
 
-def get_font(size: int):
+def get_font(size: int, preferred_names: tuple[str, ...] | None = None):
     size = int(size)
-    if size in _FONT_CACHE:
-        return _FONT_CACHE[size]
-    for name in ("DejaVuSansCondensed-Bold.ttf", "DejaVuSans-Bold.ttf"):
+    cache_key = (size, preferred_names)
+    if cache_key in _FONT_CACHE:
+        return _FONT_CACHE[cache_key]
+    candidates = preferred_names or ("DejaVuSansCondensed-Bold.ttf", "DejaVuSans-Bold.ttf")
+    for name in candidates:
         try:
             f = ImageFont.truetype(name, size)
-            _FONT_CACHE[size] = f
+            _FONT_CACHE[cache_key] = f
             return f
         except Exception:
             continue
     f = ImageFont.load_default()
-    _FONT_CACHE[size] = f
+    _FONT_CACHE[cache_key] = f
     return f
 
 FONT_BANNER = get_font(spx(40))
@@ -119,7 +121,19 @@ FONT_TOTE_NUMBER = get_font(spx(40))
 FONT_TOTE_CHIP_BASE = get_font(spx(26))
 FONT_TOTE_CHIP_MIN = get_font(spx(18))
 FONT_TOTE_PLACEHOLDER = get_font(spx(22))
-FONT_TOTE_CORNER_META = get_font(spx(24))
+# Tote corner text prefers Inter SemiBold for cleaner numerals and safely falls back to DejaVu when unavailable.
+FONT_TOTE_CORNER = get_font(
+    spx(24),
+    preferred_names=(
+        "Inter-SemiBold.otf",
+        "Inter-SemiBold.ttf",
+        "Inter SemiBold",
+        "/usr/share/fonts/opentype/inter/Inter-SemiBold.otf",
+        "/usr/share/fonts/truetype/inter/Inter-SemiBold.ttf",
+        "DejaVuSansCondensed-Bold.ttf",
+        "DejaVuSans-Bold.ttf",
+    ),
+)
 FONT_STYLE_TAG = get_font(spx(22))
 FONT_DATE = get_font(spx(22))
 FONT_ZONE = get_font(spx(16))
@@ -774,7 +788,7 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 (x0 + spx(6), y0 + spx(4)),
                 zdisp,
                 anchor="la",
-                font=FONT_TOTE_CORNER_META,
+                font=FONT_TOTE_CORNER,
                 **zone_text_kwargs_for_bg(bg),
             )
 
@@ -787,17 +801,17 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                     (x1 - spx(6), y0 + spx(4)),
                     pk_txt,
                     anchor="ra",
-                    font=FONT_TOTE_CORNER_META,
+                    font=FONT_TOTE_CORNER,
                     fill=STYLE["bright_red"],
                     stroke_width=spx(2),
                     stroke_fill=(255, 255, 255),
                 )
             except TypeError:
-                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_CORNER_META)
+                bbox = d.textbbox((0, 0), pk_txt, font=FONT_TOTE_CORNER)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
                 pad = spx(1)
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
-                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_CORNER_META, fill=STYLE["bright_red"])
+                d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_CORNER, fill=STYLE["bright_red"])
 
         cell = df.iat[i, 1]
         mid = "" if pd.isna(cell) else str(cell)
