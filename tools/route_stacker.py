@@ -181,7 +181,7 @@ def infer_style_label(text: str) -> str:
     t = (text or "").lower()
 
     if "on-road experience" in t or "on road experience" in t:
-        return "Standard: On-Road Experience (Driver)"
+        return "Standard: On-Road Experience"
 
     if "nursery" in t:
         for lvl in (3, 2, 1):
