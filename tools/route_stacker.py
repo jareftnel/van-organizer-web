@@ -688,28 +688,32 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
         for row in range(ROWS_GRID):
             positions.append((col, row))
 
+    tile_ws_for_items = [int(col_ws[col]) for col, _row in positions[:n]]
+    overflow_plans = []
+    for i in range(n):
+        tile_w_i = tile_ws_for_items[i]
+        cell = df.iat[i, 1]
+        mid = "" if pd.isna(cell) else str(cell)
+        toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
+        overflow_plans.append(plan_overflow_chips(_CHIP_D, toks, tile_w_i))
+
     if max_h is not None:
         usable = max(1, int(max_h) - pad_y * (ROWS_GRID - 1))
         fixed = max(1, usable // ROWS_GRID)
         row_heights = [fixed] * ROWS_GRID
         img_h = fixed * ROWS_GRID + pad_y * (ROWS_GRID - 1)
     else:
-        tile_ws_for_items = [col_ws[col] for col, _row in positions[:n]]
-
         # MUST match chip placement padding used when rendering inside each tile.
         top_pad = spx(TOTE_NUM_TO_CHIP_GAP_PX)
         bot_pad = spx(TOTE_CHIP_BOTTOM_PAD_PX)
         heights = []
         for i in range(n):
-            tile_w_i = int(tile_ws_for_items[i])
+            tile_w_i = tile_ws_for_items[i]
             base_h = compute_base_h(tile_w_i)
-            cell = df.iat[i, 1]
-            mid = "" if pd.isna(cell) else str(cell)
+            plan = overflow_plans[i]
+            planned_chip_stack_h = int(plan.get("stack_h", 0))
 
-            toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
-            if toks:
-                plan = plan_overflow_chips(_CHIP_D, toks, tile_w_i)
-                planned_chip_stack_h = int(plan.get("stack_h", 0))
+            if planned_chip_stack_h > 0:
                 tile_h = base_h + top_pad + planned_chip_stack_h + bot_pad
             else:
                 # Minimal height when no chips
@@ -813,21 +817,17 @@ def draw_tote(df: pd.DataFrame, bags: list[dict[str, Any]], max_h: int | None = 
                 d.rectangle((x1 - spx(6) - tw - pad, y0 + spx(4) - pad, x1 - spx(6) + pad, y0 + spx(4) + th + pad), fill=(255, 255, 255))
                 d.text((x1 - spx(6), y0 + spx(4)), pk_txt, anchor="ra", font=FONT_TOTE_CORNER, fill=STYLE["bright_red"])
 
-        cell = df.iat[i, 1]
-        mid = "" if pd.isna(cell) else str(cell)
-        toks = [t.strip() for t in re.split(r";+", mid) if t.strip()]
-
         top_pad = spx(TOTE_NUM_TO_CHIP_GAP_PX)
         bot_pad = spx(TOTE_CHIP_BOTTOM_PAD_PX)
         chip_area_top = y0 + base_h + top_pad
         chip_area_bot = y0 + tile_h - bot_pad
         chip_area_h = max(0, chip_area_bot - chip_area_top)
 
-        plan = plan_overflow_chips(d, toks, tile_w_i)
+        plan = overflow_plans[i]
         if plan.get("mode") == "1col":
             chips = plan.get("chips", [])
             gap = plan.get("gap", CHIP_GAP_PX)
-            stack_h = sum(ch for _, _, ch, _ in chips) + gap * max(0, len(chips) - 1)
+            stack_h = int(plan.get("stack_h", 0))
             cy = compute_chip_stack_y(chip_area_top, chip_area_h, stack_h, len(chips))
             for chip_img, _cw, ch, margin in chips:
                 img.paste(chip_img, (x0 + margin, cy), mask=chip_img)
